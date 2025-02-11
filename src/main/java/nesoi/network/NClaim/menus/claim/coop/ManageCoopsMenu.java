@@ -120,8 +120,7 @@ public class ManageCoopsMenu extends Menu {
 
                 @Override
                 public void onClick(Player p, ClickType clickType) {
-                    Player onlinePlayer = Bukkit.getPlayer(coopPlayer.getUniqueId());
-                    new ManageCoopPlayerMenu(p, onlinePlayer, chunk);
+                    new ManageCoopPlayerMenu(p, coopPlayer, chunk);
                 }
             });
         }

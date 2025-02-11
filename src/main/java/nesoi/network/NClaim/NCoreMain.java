@@ -66,7 +66,7 @@ public final class NCoreMain extends JavaPlugin implements Listener {
         //UPDATE CHECK
         if(config.getBoolean("check_for_updates")) {
             //SPIGOT RESOURCE ID
-            int resourceId = 0;
+            int resourceId = 122527;
             new UpdateChecker(this, resourceId).getVersion(version -> {
                 if (this.getDescription().getVersion().equals(version)) {
                     log("&8[&6NClaim&8] &aPlugin is up-to-date.");

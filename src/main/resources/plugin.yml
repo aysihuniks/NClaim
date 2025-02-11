@@ -1,5 +1,5 @@
 name: NClaim
-version: '1.0'
+version: ${project.version}
 main: nesoi.network.NClaim.NCoreMain
 api-version: '1.19'
 author: aysihuniks
