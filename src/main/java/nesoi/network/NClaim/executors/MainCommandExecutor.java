@@ -47,7 +47,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
                 getPlayerBalance(player);
                 break;
             default:
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.wrong-usage"));
                 break;
         }
 
@@ -55,7 +55,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
     }
 
     public void getPlayerBalance(Player p) {
-        String moneyData = NCoreMain.inst().config.getString("money-data");
+        String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
         double playerBalance = 0.0;
         if (moneyData.equals("Vault")) {
             playerBalance = economy.getBalance(p);
@@ -63,10 +63,10 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
             PlayerDataManager playerDataManager = NCoreMain.pdCache.get(p);
             playerBalance = playerDataManager.getBalance();
         } else {
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.setup-your-config-file"));
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.setup-your-config-file"));
         }
 
-        p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.player-balance", List.of(playerBalance)));
+        p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.player-balance", playerBalance));
     }
 
     public void sendAboutMessage(Player player) {
@@ -89,7 +89,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
     public void sendHelpCommands(Player player) {
 
         if (!player.hasPermission("nclaim.help")){
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-permission"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.dont-have-permission"));
             return;
         }
 
@@ -141,6 +141,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
              */
             if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("change")) {
                 suggestions.add("money-data");
+                suggestions.add("lang");
                 return suggestions;
             }
             /*
@@ -149,6 +150,14 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
             if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("change") && args[2].equalsIgnoreCase("money-data")) {
                 suggestions.add("Vault");
                 suggestions.add("PlayerData");
+                return suggestions;
+            }
+            /*
+             * /nclaim admin change lang
+             */
+            if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("change") && args[2].equalsIgnoreCase("lang")) {
+                suggestions.add("en-US");
+                suggestions.add("tr-TR");
                 return suggestions;
             }
             /*
@@ -165,6 +174,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
                 if (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove")) {
                     suggestions.add("balance");
                     suggestions.add("claim-expiration-date");
+                    suggestions.add("blacklisted-world");
                 }
                 return suggestions;
             }
@@ -173,14 +183,14 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
              */
             if (args.length == 4 && args[0].equalsIgnoreCase("admin") &&
                     (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove")) &&
-                    (args[2].equalsIgnoreCase("balance"))) {
+                    args[2].equalsIgnoreCase("balance")) {
                 suggestions.add("<amount>");
                 return suggestions;
             }
 
             if (args.length == 5 && args[0].equalsIgnoreCase("admin") &&
                     (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove")) &&
-                    (args[2].equalsIgnoreCase("balance"))) {
+                    args[2].equalsIgnoreCase("balance")) {
                 return null;
             }
             /*
@@ -210,6 +220,16 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
                 suggestions.add("<minute(s)>");
                 return suggestions;
             }
+            /*
+             * /nclaim admin remove blacklisted-world
+             */
+            if (args.length == 4 && args[0].equalsIgnoreCase("admin") &&
+                    args[1].equalsIgnoreCase("remove") &&
+                    args[2].equalsIgnoreCase("blacklisted-world")) {
+
+                List<String> blacklistedWorlds = NCoreMain.inst().configManager.getStringList("blacklisted-worlds");
+                return new ArrayList<>(blacklistedWorlds);
+            }
         } else {
             if (args.length == 1) {
                 suggestions.add("balance");
@@ -222,4 +242,5 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
 
         return suggestions;
     }
+
 }

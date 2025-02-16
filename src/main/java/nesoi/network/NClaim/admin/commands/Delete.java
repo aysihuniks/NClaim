@@ -12,12 +12,12 @@ public class Delete {
 
     public void execute(Player player, String[] args) {
         if (args.length < 3) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.wrong-usage"));
             return;
         }
 
         if (!player.hasPermission("nclaim.delete") || !player.hasPermission("nclaim.admin")) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-a-permission"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.dont-have-a-permission"));
             return;
         }
 
@@ -41,7 +41,7 @@ public class Delete {
         }
 
          else {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.enter-a-valid-data"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.enter-a-valid-data"));
         }
 
     }

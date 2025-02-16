@@ -7,6 +7,8 @@ import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlaceholderManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
 import nesoi.network.NClaim.systems.claim.ClaimManager;
+import nesoi.network.NClaim.utils.ConfigManager;
+import nesoi.network.NClaim.utils.LangManager;
 import nesoi.network.NClaim.utils.UpdateChecker;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -39,8 +41,9 @@ public final class NCoreMain extends JavaPlugin implements Listener {
 
     public static HashMap<Player, PlayerDataManager> pdCache = new HashMap<>();
     public ClaimDataManager claimDataManager;
+    public LangManager langManager;
+    public ConfigManager configManager;
     public Config config;
-    public Messages messages;
 
     @Override
     public void onEnable() {
@@ -64,7 +67,7 @@ public final class NCoreMain extends JavaPlugin implements Listener {
         new AdminCommandExecutor();
 
         //UPDATE CHECK
-        if(config.getBoolean("check_for_updates")) {
+        if(configManager.getBoolean("check_for_updates", true)) {
             //SPIGOT RESOURCE ID
             int resourceId = 122527;
             new UpdateChecker(this, resourceId).getVersion(version -> {
@@ -114,14 +117,15 @@ public final class NCoreMain extends JavaPlugin implements Listener {
 
     }
 
-    // DIPNOTE: elle değişilmeyenleri config.set yapmana gerek yok.
     public void updateVariables() {
         if(claimDataManager != null) {
             claimDataManager.saveAllChanges();
         }
         claimDataManager = new ClaimDataManager();
-        config = new Config();
-        messages = new Messages();
+        config = new Config(this).updateConfig();
+        configManager = new ConfigManager(config.get());
+        langManager = new LangManager(this, configManager.getString("lang_file", "en-US")).updateLanguage();
+
     }
 
     @Override

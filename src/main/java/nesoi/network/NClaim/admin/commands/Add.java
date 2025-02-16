@@ -3,9 +3,13 @@ package nesoi.network.NClaim.admin.commands;
 import nesoi.network.NClaim.NCoreMain;
 import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
+import nesoi.network.NClaim.utils.ConfigManager;
+import nesoi.network.NClaim.utils.LangManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static nesoi.network.NClaim.NCoreMain.economy;
@@ -14,81 +18,90 @@ import static nesoi.network.NClaim.NCoreMain.economy;
 public class Add {
 
     public void execute(Player player, String[] args) {
-        if (args.length < 5) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
-            return;
-        }
+        LangManager langManager = NCoreMain.inst().langManager;
 
-        if (!player.hasPermission("nclaim.add") || !player.hasPermission("nclaim.admin")) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-a-permission"));
+        if (!player.hasPermission("nclaim.add") && !player.hasPermission("nclaim.admin")) {
+            player.sendMessage(langManager.getMsg("messages.dont-have-a-permission"));
             return;
         }
 
         String value = args[2];
-        int amount;
-        try {
-            amount = Integer.parseInt(args[3]);
-        } catch (NumberFormatException e) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.enter-a-valid-number"));
-            return;
-        }
 
-        Player target = Bukkit.getPlayerExact(args[4]);
-        if (target == null) {
-            target = player;
-        }
-
-        if (value.equalsIgnoreCase("balance")) {
-            if (amount <= 0) {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.enter-a-valid-number"));
+        if (value.equalsIgnoreCase("blacklisted-world")) {
+            if (args.length < 4) {  // blacklisted-world için 4 argüman yeterli
+                player.sendMessage(langManager.getMsg("messages.wrong-usage"));
                 return;
             }
 
-            String moneyData = NCoreMain.inst().config.getString("money-data");
+            String worldName = args[3];
+            ConfigManager configManager = NCoreMain.inst().configManager;
+
+            List<String> blacklistedWorlds = configManager.getStringList("blacklisted-worlds");
+            if (blacklistedWorlds == null) {
+                blacklistedWorlds = new ArrayList<>();
+            }
+
+            if (blacklistedWorlds.contains(worldName)) {
+                player.sendMessage(langManager.getMsg("messages.world-already-blacklisted", worldName));
+                return;
+            }
+
+            blacklistedWorlds.add(worldName);
+            configManager.set("blacklisted-worlds", blacklistedWorlds);
+            configManager.saveConfig();
+
+            player.sendMessage(langManager.getMsg("messages.world-blacklisted-successfully", worldName));
+            return;
+        }
+
+        if (value.equalsIgnoreCase("balance")) {
+            if (args.length < 5) { // balance için 5 argüman gerekli
+                player.sendMessage(langManager.getMsg("messages.wrong-usage"));
+                return;
+            }
+
+            int amount;
+            try {
+                amount = Integer.parseInt(args[3]);
+            } catch (NumberFormatException e) {
+                player.sendMessage(langManager.getMsg("messages.enter-a-valid-number"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayerExact(args[4]);
+            if (target == null) {
+                target = player;
+            }
+
+            if (amount <= 0) {
+                player.sendMessage(langManager.getMsg("messages.enter-a-valid-number"));
+                return;
+            }
+
+            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
 
             if (moneyData.equals("Vault")) {
                 economy.depositPlayer(target, amount);
                 double newBalance = economy.getBalance(target);
 
-                target.sendMessage(NCoreMain.inst().config.getLoadedString("messages.balance-added-to-target", List.of(amount, newBalance)));
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.balance-added-successfully", List.of(amount, target.getName())));
+                target.sendMessage(langManager.getMsg("messages.balance-added-to-target", amount, newBalance));
+                player.sendMessage(langManager.getMsg("messages.balance-added-successfully", amount, target.getName()));
             } else if (moneyData.equals("PlayerData")) {
                 PlayerDataManager playerDataManager = NCoreMain.pdCache.get(target);
                 double currentValue = playerDataManager.getBalance();
                 playerDataManager.setBalance(currentValue + amount);
                 double newValue = playerDataManager.getBalance();
 
-                target.sendMessage(NCoreMain.inst().config.getLoadedString("messages.balance-added-to-target", List.of(amount, newValue)));
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.balance-added-successfully", List.of(amount,target.getName())));
+                target.sendMessage(langManager.getMsg("messages.balance-added-to-target", amount, newValue));
+                player.sendMessage(langManager.getMsg("messages.balance-added-successfully", amount, target.getName()));
             } else {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.setup-your-config-file"));
+                player.sendMessage(langManager.getMsg("messages.setup-your-config-file"));
             }
 
-        } else if (value.equalsIgnoreCase("claim-expiration-date")) {
-            if (args.length < 6) {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
-                return;
-            }
-
-            int days = 0, hours = 0, minutes = 0;
-
-            try {
-                days = Integer.parseInt(args[3]);
-                hours = Integer.parseInt(args[4]);
-                minutes = Integer.parseInt(args[5]);
-            } catch (NumberFormatException e) {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.invalid-number-format"));
-                return;
-            }
-
-            Chunk chunk = player.getLocation().getChunk();
-            ClaimDataManager claimDataManager = NCoreMain.inst().claimDataManager;
-            claimDataManager.extendExpirationDate(player, chunk, days, hours, minutes);
-
-        } else {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.enter-a-valid-data"));
+            return;
         }
 
+        player.sendMessage(langManager.getMsg("messages.enter-a-valid-data"));
     }
 
 }

@@ -32,7 +32,7 @@ public class ClaimManager implements Listener {
         long lastMessageTime = messageCooldown.getOrDefault(playerUUID, 0L);
 
         if (currentTime - lastMessageTime >= 15000) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-permission"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.dont-have-permission"));
             messageCooldown.put(playerUUID, currentTime);
             return true;
         }
@@ -54,12 +54,12 @@ public class ClaimManager implements Listener {
         if (ownerID != null) {
 
             if (ownerID.equals(player.getUniqueId().toString()) || cDM.isCoopMember(toChunk, player.getUniqueId())) {
-                sendActionBar(player, config.getLoadedString("action-bar.our-chunk"));
+                sendActionBar(player, NCoreMain.inst().langManager.getMsg("action-bar.our-chunk"));
             } else {
-                sendActionBar(player, config.getLoadedString("action-bar.claimed-chunk"));
+                sendActionBar(player, NCoreMain.inst().langManager.getMsg("action-bar.claimed-chunk"));
             }
         } else {
-            sendActionBar(player, config.getLoadedString("action-bar.unclaimed-chunk"));
+            sendActionBar(player, NCoreMain.inst().langManager.getMsg("action-bar.unclaimed-chunk"));
         }
 
     }

@@ -22,7 +22,7 @@ public class AdminCommandExecutor implements CommandExecutor {
         }
 
         if (args.length == 1) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.wrong-usage"));
             return true;
         }
 
@@ -50,7 +50,7 @@ public class AdminCommandExecutor implements CommandExecutor {
                 sendAdminCommands(player);
                 break;
             default:
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.wrong-usage"));
                 break;
         }
 
@@ -60,7 +60,7 @@ public class AdminCommandExecutor implements CommandExecutor {
     public void sendAdminCommands(Player player) {
 
         if (!player.hasPermission("nclaim.admin")) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-a-permission"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.dont-have-a-permission"));
             return;
         }
 
@@ -76,7 +76,7 @@ public class AdminCommandExecutor implements CommandExecutor {
                 " {YELLOW}/nclaim admin chunkinfo {GRAY}- {WHITE}Show current chunk info (x, z) (for dev).",
                 " {YELLOW}/nclaim admin help/? {GRAY}- {WHITE}Show this help message.",
                 ""
-        ).map(HexUtil::parse).toList(); //dene
+        ).map(HexUtil::parse).toList();
 
         for (String messages : helpMessages) {
             player.sendMessage(messages);

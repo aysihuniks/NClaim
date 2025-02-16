@@ -2,20 +2,16 @@ package nesoi.network.NClaim.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.j2objc.annotations.Property;
 import de.tr7zw.nbtapi.NBT;
-import de.tr7zw.nbtapi.NBTGameProfile;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.UUID;
 
 public class HeadManager {

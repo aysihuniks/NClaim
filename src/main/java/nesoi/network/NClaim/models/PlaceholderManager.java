@@ -48,14 +48,14 @@ public class PlaceholderManager extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String params) {
 
         if (params.equals("player_balance")) {
-            String moneyData = NCoreMain.inst().config.getString("money-data");
+            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
             if (moneyData.equals("Vault")) {
                 return String.valueOf(economy.getBalance(player));
             } else if (moneyData.equals("PlayerData")) {
                 PlayerDataManager playerDataManager = NCoreMain.pdCache.get(player);
                 return String.valueOf(playerDataManager.getBalance());
             } else {
-                return NCoreMain.inst().config.getLoadedString("messages.setup-your-config-file");
+                return NCoreMain.inst().langManager.getMsg("messages.setup-your-config-file");
             }
 
         }
@@ -70,14 +70,14 @@ public class PlaceholderManager extends PlaceholderExpansion {
             Config config = NCoreMain.inst().config;
 
             return switch (data) {
-                case "string" -> config.getString(path);
-                case "int" -> String.valueOf(config.getInt(path));
-                case "boolean" -> String.valueOf(config.getBoolean(path));
+                case "string" -> NCoreMain.inst().configManager.getString(path, "Null");
+                case "int" -> String.valueOf(NCoreMain.inst().configManager.getInt(path, 0));
+                case "boolean" -> String.valueOf(NCoreMain.inst().configManager.getBoolean(path, false));
                 case "list" -> {
                     if (parts.length < 4) yield null;
                     try {
                         int index = Integer.parseInt(parts[3]);
-                        List<String> list = config.getListedStrings(path);
+                        List<String> list = NCoreMain.inst().configManager.getStringList(path);
                         if (list == null || list.isEmpty()) yield "List Not Found";
                         if (index < 0 || index >= list.size()) yield "Invalid Index";
                         yield list.get(index);

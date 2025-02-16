@@ -28,7 +28,7 @@ public class MainMenu extends Menu {
                         .name("{BROWN}Buy a Claim")
                         .lore(List.of(
                                 "",
-                                "{GRAY}If you have enough money ({WHITE}" + NCoreMain.inst().config.getInt("claim-buy-price") + "${GRAY}), ",
+                                "{GRAY}If you have enough money ({WHITE}" + NCoreMain.inst().configManager.getInt("claim-buy-price", 1500) + "${GRAY}), ",
                                 "{GRAY}you can buy a {WHITE}new Claim{GRAY}!",
                                 "",
                                 "{YELLOW}Click to purchase a Claim."))

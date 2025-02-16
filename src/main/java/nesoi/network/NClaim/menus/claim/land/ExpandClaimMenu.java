@@ -118,7 +118,7 @@ public class ExpandClaimMenu extends Menu {
                 public void onClick(Player p, ClickType clickType) {
                     if (NCoreMain.isInCooldown(p, 3000)) {
                         if (NCoreMain.shouldSendMessage(p, 5000)) {
-                            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.cooldown"));
+                            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.cooldown"));
                         }
                         return;
                     }
@@ -127,7 +127,7 @@ public class ExpandClaimMenu extends Menu {
                         expandClaim(p, slot);
                         new ExpandClaimMenu(p, centerChunk);
                     } else {
-                        p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.chunk-already-claimed"));
+                        p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
                     }
                 }
             });

@@ -6,12 +6,12 @@ import de.oliver.fancyholograms.api.hologram.Hologram;
 import nesoi.network.NClaim.Config;
 import nesoi.network.NClaim.NCoreMain;
 import nesoi.network.NClaim.menus.ConfirmMenu;
+import nesoi.network.NClaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.nandayo.DAPI.DAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,13 +48,13 @@ public class ClaimDataManager {
         int chunkZ = p.getLocation().getChunk().getZ();
         World world = p.getLocation().getWorld();
 
-        if (getPlayerClaimCount(playerDataManager) >= NCoreMain.inst().config.getInt("max-claim-count")) {
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.reached-max-claim-count"));
+        if (getPlayerClaimCount(playerDataManager) >= NCoreMain.inst().configManager.getInt("max-claim-count", 3)) {
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.reached-max-claim-count"));
             return;
         }
 
         if (getClaimOwner(p.getLocation().getChunk()) != null) {
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.chunk-already-claimed"));
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
             return;
         }
 
@@ -62,8 +62,8 @@ public class ClaimDataManager {
             return;
         }
 
-        if (NCoreMain.inst().config.getListedStrings("blacklisted-worlds").contains(world.getName())) {
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.you-are-in-blacklisted-world"));
+        if (NCoreMain.inst().configManager.getStringList("blacklisted-worlds").contains(world.getName())) {
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.you-are-in-blacklisted-world"));
             return;
         }
 
@@ -80,7 +80,7 @@ public class ClaimDataManager {
             }
         };
 
-        new ConfirmMenu(p, "Buy a Claim", Arrays.asList("", "{GRAY}If you approve this action,", "{WHITE}" + NCoreMain.inst().config.getInt("claim-buy-price") + "$ will be {WHITE}removed {GRAY}from", "{GRAY}your {WHITE}balance {GRAY}and you will", "{GRAY}buy a {WHITE}new claim{GRAY}."), onFinish);
+        new ConfirmMenu(p, "Buy a Claim", Arrays.asList("", "{GRAY}If you approve this action,", "{WHITE}" + NCoreMain.inst().configManager.getInt("claim-buy-price", 1500) + "$ will be {WHITE}removed {GRAY}from", "{GRAY}your {WHITE}balance {GRAY}and you will", "{GRAY}buy a {WHITE}new claim{GRAY}."), onFinish);
     }
 
     private int getPlayerClaimCount(PlayerDataManager playerDataManager) {
@@ -120,13 +120,13 @@ public class ClaimDataManager {
 
             Player player = playerDataManager.getPlayer();
 
-            String moneyData = NCoreMain.inst().config.getString("money-data");
-            int claimBuyPrice = NCoreMain.inst().config.getInt("claim-buy-price");
+            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
+            int claimBuyPrice = NCoreMain.inst().configManager.getInt("claim-buy-price", 1500);
 
             if (moneyData.equals("Vault")) {
                 double playerBalance = economy.getBalance(player);
                 if (playerBalance < claimBuyPrice) {
-                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-insufficient-balance", List.of(playerBalance, claimBuyPrice)));
+                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-insufficient-balance", playerBalance, claimBuyPrice));
                     return;
                 } else {
                     economy.withdrawPlayer(player, claimBuyPrice);
@@ -134,7 +134,7 @@ public class ClaimDataManager {
             } else if (moneyData.equals("PlayerData")) {
                 double playerBalance = playerDataManager.getBalance();
                 if (playerBalance < claimBuyPrice) {
-                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-insufficient-balance", List.of(playerBalance, claimBuyPrice)));
+                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-insufficient-balance", playerBalance, claimBuyPrice));
                     return;
                 } else {
                     playerDataManager.setBalance(playerBalance - claimBuyPrice);
@@ -153,14 +153,13 @@ public class ClaimDataManager {
             int z = chunkZ;
             UUID uuid = playerDataManager.getPlayer().getUniqueId();
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
-            dateFormat.setTimeZone(TimeZone.getTimeZone(NCoreMain.inst().config.getString("time-zone")));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             String formattedDate = dateFormat.format(new Date());
 
             String claimPath = "chunks_claimed." + x + "_" + z;
             claimsConfig.set(claimPath + ".created-at", formattedDate);
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, NCoreMain.inst().config.getInt("claim-end-day"));
+            calendar.add(Calendar.DAY_OF_YEAR, NCoreMain.inst().configManager.getInt("claim-end-day", 7));
             String expirationDate = dateFormat.format(calendar.getTime());
             claimsConfig.set(claimPath + ".expired-at", expirationDate);
 
@@ -183,7 +182,7 @@ public class ClaimDataManager {
             HologramCreator hologramManager = new HologramCreator();
             hologramManager.createClaimHologram(player, hologramLocation);
 
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-successfully-bought"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-successfully-bought"));
         } catch (Exception e) {
             NCoreMain.inst().getLogger().severe("(Method: addClaim - Catch) Some error occurred! Contact with us: @aysihuniks " + e.getMessage());
         }
@@ -263,7 +262,7 @@ public class ClaimDataManager {
         int centerZ = chunkZ * 16 + 8;
 
         Bukkit.getOnlinePlayers().forEach(player ->
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-expired", List.of(centerX, centerZ)))
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-expired", centerX, centerZ))
         );
     }
 
@@ -272,7 +271,7 @@ public class ClaimDataManager {
         Chunk chunk = p.getLocation().getChunk();
         HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
         if (isUnClaimed(chunk)) {
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-not-found"));
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-not-found"));
             return;
         }
 
@@ -292,7 +291,7 @@ public class ClaimDataManager {
             bedrockLocation.getBlock().setType(Material.AIR);
         }
 
-        p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-removed"));
+        p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-removed"));
 
         claimsConfig.set("chunks_claimed." + claimKey, null);
         saveClaimsData();
@@ -322,11 +321,11 @@ public class ClaimDataManager {
             String expiredAtString = claimsConfig.getString("chunks_claimed." + claimKey + ".expired-at");
 
             if (expiredAtString == null) {
-                Bukkit.getLogger().warning(NCoreMain.inst().config.getLoadedString("messages.claim-not-found"));
+                Bukkit.getLogger().warning(NCoreMain.inst().langManager.getMsg("messages.claim-not-found"));
                 return;
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             Date expirationDate = dateFormat.parse(expiredAtString);
 
             Calendar calendar = Calendar.getInstance();
@@ -340,7 +339,7 @@ public class ClaimDataManager {
 
             String newExpirationDateString = dateFormat.format(newExpirationDate);
             claimsConfig.set("chunks_claimed." + claimKey + ".expired-at", newExpirationDateString);
-            p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.expiration-date-successfully-extended", List.of(days, hours, minutes)));
+            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.expiration-date-successfully-extended", List.of(days, hours, minutes)));
 
             saveClaimsData();
 
@@ -356,11 +355,11 @@ public class ClaimDataManager {
             String expiredAtString = claimsConfig.getString("chunks_claimed." + claimKey + ".expired-at");
 
             if (isUnClaimed(chunk)) {
-                p.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-not-found"));
+                p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-not-found"));
                 return;
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             Date expirationDate = dateFormat.parse(expiredAtString);
 
             Calendar calendar = Calendar.getInstance();
@@ -396,7 +395,7 @@ public class ClaimDataManager {
 
             if (expiredAt != null) {
                 try {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                     Date expirationDate = dateFormat.parse(expiredAt);
                     Date currentDate = new Date();
 
@@ -485,7 +484,7 @@ public class ClaimDataManager {
         }
 
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             Date expirationDate = dateFormat.parse(expiredAt);
             Date currentDate = new Date();
 
@@ -544,20 +543,20 @@ public class ClaimDataManager {
 
     public void addLandToClaim(Chunk mainChunk, Chunk newLand, PlayerDataManager playerDataManager) {
         Player player = playerDataManager.getPlayer();
-        int newLandBalance = NCoreMain.inst().config.getInt("claim-each-land-price");
-        String moneyData = NCoreMain.inst().config.getString("money-data");
+        int newLandBalance = NCoreMain.inst().configManager.getInt("claim-each-land-price", 2000);
+        String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
 
         if (!isUnClaimed(newLand)) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.chunk-already-claimed"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
             return;
         }
 
-        int requiredBalance = NCoreMain.inst().config.getInt("claim-each-land-price");
+        int requiredBalance = NCoreMain.inst().configManager.getInt("claim-each-land-price", 2000);
 
         if (moneyData.equals("Vault")) {
             double playerBalance = economy.getBalance(player);
             if (playerBalance < newLandBalance) {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.land-insufficient-balance", List.of(playerBalance, requiredBalance)));
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.land-insufficient-balance", playerBalance, requiredBalance));
                 return;
             } else {
                 economy.withdrawPlayer(player, newLandBalance);
@@ -565,7 +564,7 @@ public class ClaimDataManager {
         } else if (moneyData.equals("PlayerData")) {
             double playerBalance = playerDataManager.getBalance();
             if (playerBalance < newLandBalance) {
-                player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.land-insufficient-balance", List.of(playerBalance, requiredBalance)));
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.land-insufficient-balance", playerBalance, requiredBalance));
                 return;
             } else {
                 playerDataManager.setBalance(playerBalance - newLandBalance);
@@ -581,7 +580,7 @@ public class ClaimDataManager {
             lands.add(newLandKey);
             claimsConfig.set("chunks_claimed." + mainChunkKey + ".lands", lands);
             saveClaimsData();
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.claim-expanded"));
+            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-expanded"));
         }
     }
 
@@ -679,24 +678,25 @@ public class ClaimDataManager {
     public void addCoopPlayer(Player owner, Player coopPlayer, Chunk chunk) {
         String ownerID = getClaimOwner(chunk);
         Config config = NCoreMain.inst().config;
+        LangManager langManager = NCoreMain.inst().langManager;
 
         if (ownerID == null) {
-            owner.sendMessage(config.getLoadedString("messages.claim-not-found"));
+            owner.sendMessage(langManager.getMsg("messages.claim-not-found"));
             return;
         }
 
         if (coopPlayer == null) {
-            owner.sendMessage(config.getLoadedString("messages.player-not-found"));
+            owner.sendMessage(langManager.getMsg("messages.player-not-found"));
             return;
         }
 
         if (!owner.getUniqueId().toString().equals(ownerID)) {
-            owner.sendMessage(config.getLoadedString("messages.claim-is-not-yours"));
+            owner.sendMessage(langManager.getMsg("messages.claim-is-not-yours"));
             return;
         }
 
         if (owner.getUniqueId().equals(coopPlayer.getUniqueId())) {
-            owner.sendMessage(config.getLoadedString("messages.cannot-add-yourself"));
+            owner.sendMessage(langManager.getMsg("messages.cannot-add-yourself"));
             return;
         }
 
@@ -704,22 +704,21 @@ public class ClaimDataManager {
         String coopPath = claimPath + ".coops";
 
         if (claimsConfig.contains(coopPath + "." + coopPlayer.getUniqueId())) {
-            owner.sendMessage(config.getLoadedString("messages.coop-player-already-added", List.of(coopPlayer.getName())));
+            owner.sendMessage(langManager.getMsg("messages.coop-player-already-added", coopPlayer.getName()));
             return;
         }
 
         ConfigurationSection coopSection = claimsConfig.getConfigurationSection(coopPath);
         int currentCoopCount = (coopSection != null) ? coopSection.getKeys(false).size() : 0;
 
-        int maxCoopPlayers = config.getInt("max-coop-limit");
+        int maxCoopPlayers = NCoreMain.inst().configManager.getInt("max-coop-limit", 7);
         if (currentCoopCount >= maxCoopPlayers) {
-            owner.sendMessage(config.getLoadedString("messages.coop-limit-reached", List.of(String.valueOf(maxCoopPlayers))));
+            owner.sendMessage(langManager.getMsg("messages.coop-limit-reached", String.valueOf(maxCoopPlayers)));
             return;
         }
 
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(NCoreMain.inst().config.getString("date-format"));
-        dateFormat.setTimeZone(TimeZone.getTimeZone(NCoreMain.inst().config.getString("time-zone")));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         String formattedDate = dateFormat.format(new Date());
 
         claimsConfig.set(coopPath + "." + coopPlayer.getUniqueId() + ".joined-at", formattedDate);
@@ -733,21 +732,22 @@ public class ClaimDataManager {
         claimsConfig.set(coopPath + "." + coopPlayer.getUniqueId() + ".permissions.can-interact-with-buttons-doors-pressure-plates", false);
         saveClaimsData();
 
-        owner.sendMessage(config.getLoadedString("messages.coop-player-successfully-added", List.of(coopPlayer.getName())));
-        coopPlayer.sendMessage(config.getLoadedString("messages.you-been-added-to-claim", List.of(owner.getName())));
+        owner.sendMessage(langManager.getMsg("messages.coop-player-successfully-added", coopPlayer.getName()));
+        coopPlayer.sendMessage(langManager.getMsg("messages.you-been-added-to-claim", owner.getName()));
     }
 
     public void kickCoopPlayer(Player owner, Player coopPlayer, Chunk chunk) {
         String ownerID = getClaimOwner(chunk);
         Config config = NCoreMain.inst().config;
+        LangManager langManager = NCoreMain.inst().langManager;
 
         if (ownerID == null) {
-            owner.sendMessage(config.getLoadedString("messages.claim-not-found"));
+            owner.sendMessage(langManager.getMsg("messages.claim-not-found"));
             return;
         }
 
         if (!owner.getUniqueId().toString().equals(ownerID)) {
-            owner.sendMessage(config.getLoadedString("messages.claim-is-not-yourself"));
+            owner.sendMessage(langManager.getMsg("messages.claim-is-not-yourself"));
             return;
         }
 
@@ -757,9 +757,9 @@ public class ClaimDataManager {
         if (claimsConfig.contains(coopPath)) {
             claimsConfig.set(coopPath, null);
             saveClaimsData();
-            owner.sendMessage(config.getLoadedString("messages.coop-player-successfully-kicked", List.of(coopPlayer.getName())));
+            owner.sendMessage(langManager.getMsg("messages.coop-player-successfully-kicked", coopPlayer.getName()));
         } else {
-            owner.sendMessage(config.getLoadedString("messages.coop-player-already-not-in-coop", List.of(coopPlayer.getName())));
+            owner.sendMessage(langManager.getMsg("messages.coop-player-already-not-in-coop", coopPlayer.getName()));
         }
     }
 

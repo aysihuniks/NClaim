@@ -1,0 +1,72 @@
+# WARNING!
+# %0, %1, %2... are placeholders and can be removed if not needed.
+
+messages:
+
+  dont-have-permission: "%p {RED}Error: You don’t have permission to do that!"
+  cooldown: "%p {RED}Error: Please wait a moment before trying again."
+  enter-a-valid-data: "%p {RED}Error: Enter a valid data."
+  player-not-found: "%p {RED}Error: Player not found."
+  need-to-rejoin: "%p {RED}Error: Try rejoining the server."
+  insufficient-balance: "%p {RED}Error: Insufficient balance."
+  reached-max-claim-count: "%p {RED}Error: You have reached the maximum claim count."
+  you-are-in-blacklisted-world: "%p {RED}Error: You can't do this because you're in a blacklisted world."
+  setup-your-config-file: "%p {RED}Error: Invalid value in config file. Please reinstall the default config and try again."
+
+  claim-insufficient-balance: "%p {RED}Error: You need {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ to buy a claim."
+  claim-successfully-bought: "%p {GREEN}Success: You successfully bought the claim."
+  claim-not-found: "%p {RED}Error: Claim not found."
+  claim-is-not-yours: "%p {RED}Error: This claim is not yours."
+  claim-expired: "%p {PURPLE}Reminder: {WHITE}Claim time expired and was removed {GRAY}({RED}%0{WHITE}, {RED}%1{GRAY})."
+
+  cannot-add-yourself: "%p {RED}Error: You cannot add yourself."
+  coop-player-successfully-added: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been added to your claim."
+  coop-player-successfully-kicked: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been removed from the co-op list."
+  coop-player-already-not-in-coop: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}is already not in the co-op list."
+  you-been-added-to-claim: "%p {GREEN}Success: You have been added to %0's claim."
+  coop-limit-reached: "%p {RED}Error: You can only have up to {DARKRED}%0 {RED}co-op players!"
+
+  claim-expanded: "%p {GREEN}Success: New land added to your claim."
+  chunk-already-claimed: "%p {RED}Error: This chunk is already claimed!"
+  land-insufficient-balance: "%p {RED}Error: You need {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ to expand your claim."
+
+  wrong-usage: "%p {RED}Error: Need help? Use /nclaim <help/?> to see all available commands."
+  enter-a-valid-number: "%p {RED}Error: Please enter a valid number."
+
+  reload: "%p {GREEN}Success: Configuration files have been successfully reloaded."
+
+  chunk-info: "%p {PURPLE}Reminder: {WHITE}You are currently in chunk: X = {GRAY}%0 {WHITE}, Z = {GRAY}%1."
+
+  balance-added-to-target: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}added to your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
+  balance-added-successfully: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been added to %1's balance."
+  balance-removed-to-target: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
+  balance-removed-successfully: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from {DARKGREEN}%1's {GREEN}balance."
+
+  expiration-date-successfully-extended: "%p {GREEN}Success: Expiration date extended by {DARKGREEN}%0 days{GREEN}, {DARKGREEN}%1 hours{GREEN}, {DARKGREEN}%2 minutes{GREEN}."
+  expiration-date-successfully-subtracted: "%p {GREEN}Success: Expiration date reduced by {DARKGREEN}%0 days{GREEN}, {DARKGREEN}%1 hours{GREEN}, {DARKGREEN}%2 minutes{GREEN}."
+  invalid-number-format: "%p {RED}Error: Invalid number format for days, hours, or minutes."
+
+  claim-removed: "%p {GREEN}Success: The claim in the chunk you were in has been deleted."
+
+  nothing-has-changed: "%p {RED}Error: No changes made because the value is the same."
+  value-already-set: "%p {RED}Error: Money data is already set to {DARKRED}%0{RED}."
+  money-data-changed: "%p {GREEN}Success: Money data changed to {DARKGREEN}%0{GREEN}."
+  invalid-data: "%p {RED}Error: {DARKGREEN}%0 {RED}is an invalid data."
+
+  lang-changed: "%p {GREEN}Success: Language has been successfully changed to {DARKGREEN}%0{GREEN}."
+  invalid-lang: "%p {RED}Error: Invalid language code: %0. Please choose a valid language (e.g., 'en' or 'tr')."
+
+  player-balance: "%p {PURPLE}Reminder: {WHITE}You have {GRAY}%0{WHITE}$ in your balance."
+
+  world-already-blacklisted: "%p {RED}Error: {DARKRED}%0 {RED}world is already in the blacklist."
+  world-blacklisted-successfully: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}world has been successfully blacklisted."
+  world-not-in-blacklist: "%p {RED}Error: {DARKRED}%0 {RED}world is not in the blacklist."
+  world-removed-from-blacklist: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}world has been removed from the blacklist!"
+
+action-bar:
+  unclaimed-chunk: "{GRAY}This chunk is unclaimed."
+  claimed-chunk: "{PURPLE}Caution! You've entered another player's territory."
+  our-chunk: "{DARKGREEN}Welcome back! This is your territory."
+
+# DO NOT CHANGE!
+lang_version: "{version}"

@@ -1,47 +1,60 @@
 package nesoi.network.NClaim.admin.commands;
 
 import nesoi.network.NClaim.NCoreMain;
+import nesoi.network.NClaim.utils.LangManager;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class Change {
 
     public void execute(Player player, String[] args) {
-
+        LangManager langManager = NCoreMain.inst().langManager;
         if (args.length < 4) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.wrong-usage"));
+            player.sendMessage(langManager.getMsg("messages.wrong-usage"));
             return;
         }
-
-        // /nclaim admin change money-data PlayerData
 
         if (!player.hasPermission("nclaim.admin") || !player.hasPermission("nclaim.change")) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.dont-have-a-permission"));
+            player.sendMessage(langManager.getMsg("messages.dont-have-a-permission"));
             return;
         }
 
-        String moneySource = args[3];
-        String moneyData = NCoreMain.inst().config.getString("money-data");
+        String action = args[2];
+        String value = args[3];
 
-        if (moneySource.equalsIgnoreCase(moneyData)) {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.value-already-set", List.of(moneySource)));
-            return;
+        if (action.equalsIgnoreCase("money-data")) {
+            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
+
+            if (value.equalsIgnoreCase(moneyData)) {
+                player.sendMessage(langManager.getMsg("messages.value-already-set", value));
+                return;
+            }
+
+            if (value.equalsIgnoreCase("PlayerData")) {
+                NCoreMain.inst().configManager.set("money-data", "PlayerData");
+                player.sendMessage(langManager.getMsg("messages.money-data-changed", "PlayerData"));
+            }
+            else if (value.equalsIgnoreCase("Vault")) {
+                NCoreMain.inst().configManager.set("money-data", "Vault");
+                player.sendMessage(langManager.getMsg("messages.money-data-changed", "Vault"));
+            }
+            else {
+                player.sendMessage(langManager.getMsg("messages.invalid-data", value));
+            }
         }
 
-        if (moneySource.equalsIgnoreCase("PlayerData")) {
-            NCoreMain.inst().config.setString("money-data", "PlayerData");
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.money-data-changed", List.of("PlayerData")));
-        }
-
-        else if (moneySource.equalsIgnoreCase("Vault")) {
-            NCoreMain.inst().config.setString("money-data", "Vault");
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.money-data-changed", List.of("Vault")));
+        else if (action.equalsIgnoreCase("lang")) {
+            if (value.equalsIgnoreCase("tr-TR") || value.equalsIgnoreCase("en-US")) {
+                NCoreMain.inst().configManager.set("lang_file", value);
+                NCoreMain.inst().configManager.saveConfig();
+                NCoreMain.inst().updateVariables();
+                player.sendMessage(langManager.getMsg("messages.lang-changed", value));
+            } else {
+                player.sendMessage(langManager.getMsg("messages.invalid-lang", value));
+            }
         }
 
         else {
-            player.sendMessage(NCoreMain.inst().config.getLoadedString("messages.invalid-data", List.of(moneySource)));
+            player.sendMessage(langManager.getMsg("messages.invalid-data", action));
         }
-
     }
 }
