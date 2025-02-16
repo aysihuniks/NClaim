@@ -1,0 +1,71 @@
+# Uyarı!
+# %0, %1, %2... gibi yer tutucular vardır ve isteğinize göre mesajlardan kaldırılabilir.
+
+messages:
+  dont-have-permission: "%p {RED}Hata: Bunu yapma izniniz yok!"
+  cooldown: "%p {RED}Hata: Tekrar denemeden önce lütfen biraz bekleyin."
+  enter-a-valid-data: "%p {RED}Hata: Geçerli bir veri girin."
+  player-not-found: "%p {RED}Hata: Oyuncu bulunamadı."
+  need-to-rejoin: "%p {RED}Hata: Lütfen sunucuya tekrar katılmayı deneyin."
+  insufficient-balance: "%p {RED}Hata: Yetersiz bakiye."
+  reached-max-claim-count: "%p {RED}Hata: Maksimum claim sayısına ulaştınız."
+  you-are-in-blacklisted-world: "%p {RED}Hata: Kara listeye alınmış bir dünyada olduğunuz için bunu yapamazsınız."
+  setup-your-config-file: "%p {RED}Hata: Yapılandırma dosyasında geçersiz bir değer var, lütfen varsayılan ayarları geri yükleyip tekrar deneyin."
+
+  claim-insufficient-balance: "%p {RED}Hata: Claim satın almak için {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ bakiyeye ihtiyacınız var."
+  claim-successfully-bought: "%p {GREEN}Başarılı: Claim başarıyla satın alındı."
+  claim-not-found: "%p {RED}Hata: Claim bulunamadı."
+  claim-is-not-yours: "%p {RED}Hata: Bu claim size ait değil."
+  claim-expired: "%p {PURPLE}Bilgilendirme: {WHITE}Claim süresi doldu ve kaldırıldı {GRAY}({RED}%0{WHITE}, {RED}%1{GRAY})"
+
+  cannot-add-yourself: "%p {RED}Hata: Kendinizi ekleyemezsiniz."
+  coop-player-successfully-added: "%p {GREEN}Başarılı: {DARKGREEN}%0{GREEN}, claim'inize ortak olarak eklendi."
+  coop-player-successfully-kicked: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}ortak oyuncular listesinden kaldırıldı."
+  coop-player-already-not-in-coop: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}zaten ortak oyuncular listesinde değil."
+  you-been-added-to-claim: "%p {GREEN}Başarılı: {DARKGREEN}%0{GREEN} tarafından claim'e eklendiniz."
+  coop-limit-reached: "%p {RED}Hata: En fazla {DARKRED}%0 {RED}ortak oyuncunuz olabilir!"
+
+  claim-expanded: "%p {GREEN}Başarılı: Claim'inize yeni bir alan eklendi."
+  chunk-already-claimed: "%p {RED}Hata: Bu chunk zaten başkası tarafından alınmış!"
+  land-insufficient-balance: "%p {RED}Hata: Claim'inizi genişletmek için {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ bakiyeye ihtiyacınız var."
+
+  wrong-usage: "%p {RED}Hata: Yardıma mı ihtiyacınız var? /nclaim <help/?> yazarak tüm komutları görebilirsiniz."
+  enter-a-valid-number: "%p {RED}Hata: Lütfen geçerli bir sayı girin."
+
+  reload: "%p {GREEN}Başarılı: Yapılandırma dosyaları başarıyla yeniden yüklendi."
+
+  chunk-info: "%p {PURPLE}Bilgilendirme: {WHITE}Şu anda bulunduğunuz chunk: X = {GRAY}%0 {WHITE}, Z = {GRAY}%1"
+
+  balance-added-to-target: "%p {GREEN}Başarılılı: {DARKGREEN}%0${GREEN} yöneticiler tarafından bakiyenize eklendi. {GRAY}({GREEN}Toplam bakiye: {DARKGREEN}%1${GRAY})"
+  balance-added-successfully: "%p {GREEN}Başarılılı: {DARKGREEN}%0${GREEN}, %1 adlı oyuncunun bakiyesine eklendi."
+  balance-removed-to-target: "%p {GREEN}Başarılılı: {DARKGREEN}%0${GREEN}, yöneticiler tarafından bakiyenizden düşüldü. {GRAY}({GREEN}Toplam bakiye: {DARKGREEN}%1${GRAY})"
+  balance-removed-successfully: "%p {GREEN}Başarılılı: {DARKGREEN}%0${GREEN}, %1 adlı oyuncunun bakiyesinden düşüldü."
+
+  expiration-date-successfully-extended: "%p {GREEN}Başarılı: Claim süresi {DARKGREEN}%0 gün{GREEN}, {DARKGREEN}%1 saat{GREEN}, {DARKGREEN}%2 dakika{GREEN} uzatıldı."
+  expiration-date-successfully-subtracted: "%p {GREEN}Başarılı: Claim süresi {DARKGREEN}%0 gün{GREEN}, {DARKGREEN}%1 saat{GREEN}, {DARKGREEN}%2 dakika{GREEN} azaltıldı."
+  invalid-number-format: "%p {RED}Hata: Gün, saat veya dakika için geçersiz sayı formatı girdiniz."
+
+  claim-removed: "%p {GREEN}Başarılı: Bulunduğunuz chunk'taki claim silindi."
+
+  player-balance: "%p {PURPLE}Bilgilendirme: {WHITE}Bakiyeniz: {GRAY}%0{WHITE}$"
+
+  nothing-has-changed: "%p {RED}Hata: Değer zaten aynı olduğu için hiçbir değişiklik yapılmadı."
+  value-already-set: "%p {RED}Hata: Para verisi zaten {DARKRED}%0{RED} olarak ayarlanmış."
+  money-data-changed: "%p {GREEN}Başarılı: Para verisi {DARKGREEN}%0{GREEN} olarak değiştirildi."
+  invalid-data: "%p {RED}Hata: {DARKGREEN}%0 {RED}geçersiz veri."
+
+  lang-changed: "%p {GREEN}Başarılı: Dil başarıyla {DARKGREEN}%0{GREEN} olarak değiştirildi."
+  invalid-lang: "%p {RED}Hata: Geçersiz dil kodu: %0. Lütfen geçerli bir dil seçin (örneğin, 'en' veya 'tr')."
+
+  world-already-blacklisted: "%p {RED}Hata: {DARKRED}%0 {RED}dünyası zaten kara listeye alınmış."
+  world-blacklisted-successfully: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}dünyası başarıyla kara listeye alındı."
+  world-not-in-blacklist: "%p {RED}Hata: {DARKRED}%0 {RED}dünyası kara listede değil."
+  world-removed-from-blacklist: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}dünyası kara listeden kaldırıldı!"
+
+action-bar:
+  unclaimed-chunk: "{GRAY}Bu chunk sahipsiz."
+  claimed-chunk: "{PURPLE}Dikkat! Başka bir oyuncunun alanına girdiniz."
+  our-chunk: "{DARKGREEN}Tekrar hoş geldiniz! Burası sizin alanınız."
+
+# DEĞİŞTİRME!
+lang_version: "{version}"
