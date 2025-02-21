@@ -72,4 +72,5 @@ public class PlayerDataManager {
     public void setBalance(double amount) {
         this.balance = amount;
     }
+
 }

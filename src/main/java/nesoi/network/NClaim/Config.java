@@ -76,7 +76,7 @@ public class Config {
         if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
-        String date = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
+        String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());
         File backupFile = new File(backupDir, "config_" + date + ".yml");
         try {
             config.save(backupFile);

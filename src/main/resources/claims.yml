@@ -20,3 +20,5 @@ chunks_claimed:
         joined-at: DATE
         permissions:
           can-break-spawners: false
+    settings:
+      claim-pvp: false

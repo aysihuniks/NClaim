@@ -4,6 +4,7 @@ import nesoi.network.NClaim.NCoreMain;
 import nesoi.network.NClaim.menus.claim.ClaimMenu;
 import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
+import nesoi.network.NClaim.utils.ChunkBorderManager;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -123,11 +124,17 @@ public class ExpandClaimMenu extends Menu {
                         return;
                     }
 
-                    if (!claimDataManager.isChunkClaimedByAnotherPlayer(newChunk, playerUUID)) {
-                        expandClaim(p, slot);
-                        new ExpandClaimMenu(p, centerChunk);
-                    } else {
-                        p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
+                    if (clickType.isLeftClick()) {
+                        if (!claimDataManager.isChunkClaimedByAnotherPlayer(newChunk, playerUUID)) {
+                            expandClaim(p, slot);
+                            new ExpandClaimMenu(p, centerChunk);
+                        } else {
+                            p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
+                        }
+                    } else if (clickType.isRightClick()) {
+                        p.closeInventory();
+                        ChunkBorderManager chunkBorderManager = new ChunkBorderManager();
+                        chunkBorderManager.showChunkBorder(p, newChunk);
                     }
                 }
             });

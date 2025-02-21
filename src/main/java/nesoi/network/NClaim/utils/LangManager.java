@@ -19,7 +19,7 @@ public class LangManager {
 
     private final NCoreMain plugin;
 
-    private final List<String> languages = Arrays.asList("en-US","tr-TR","zh-CN");
+    private final List<String> languages = Arrays.asList("en-US","tr-TR");
     private final String defaultLang = "en-US";
     private FileConfiguration DEFAULT_CONFIG = null;
 
@@ -158,7 +158,7 @@ public class LangManager {
         if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
-        String date = new SimpleDateFormat("dd-MM-yyyy HH:mm").format(new Date());
+        String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());
         File backupFile = new File(backupDir, "lang_" + selectedLang + "_" + date + ".yml");
         try {
             config.save(backupFile);

@@ -12,6 +12,7 @@ messages:
   reached-max-claim-count: "%p {RED}Error: You have reached the maximum claim count."
   you-are-in-blacklisted-world: "%p {RED}Error: You can't do this because you're in a blacklisted world."
   setup-your-config-file: "%p {RED}Error: Invalid value in config file. Please reinstall the default config and try again."
+  pvp-not-allowed-in-claim: "%p {RED}Error: PvP not allowed in this claim."
 
   claim-insufficient-balance: "%p {RED}Error: You need {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ to buy a claim."
   claim-successfully-bought: "%p {GREEN}Success: You successfully bought the claim."
@@ -64,9 +65,8 @@ messages:
   world-removed-from-blacklist: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}world has been removed from the blacklist!"
 
 action-bar:
-  unclaimed-chunk: "{GRAY}This chunk is unclaimed."
-  claimed-chunk: "{PURPLE}Caution! You've entered another player's territory."
-  our-chunk: "{DARKGREEN}Welcome back! This is your territory."
+  unclaimed-chunk: "{GRAY}Unclaimed"
+  claimed-chunk: "{PURPLE}%0 {GRAY}- %1" # %0 claim owner, %1 pvp status (true || false)
 
 # DO NOT CHANGE!
 lang_version: "{version}"

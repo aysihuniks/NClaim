@@ -140,16 +140,7 @@ public class MainCommandExecutor implements CommandExecutor, TabCompleter {
              * /nclaim admin change
              */
             if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("change")) {
-                suggestions.add("money-data");
                 suggestions.add("lang");
-                return suggestions;
-            }
-            /*
-             * /nclaim admin change money-data
-             */
-            if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("change") && args[2].equalsIgnoreCase("money-data")) {
-                suggestions.add("Vault");
-                suggestions.add("PlayerData");
                 return suggestions;
             }
             /*

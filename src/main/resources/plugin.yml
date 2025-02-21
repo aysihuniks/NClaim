@@ -30,5 +30,5 @@ permissions:
     nclaim.help:
       default: op
 
-depend: [PlaceholderAPI, NBTAPI, FancyHolograms]
-softdepend: [Vault]
+depend: [PlaceholderAPI]
+softdepend: [Vault, FancyHolograms, DecentHolograms, NBTAPI]

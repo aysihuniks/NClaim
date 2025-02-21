@@ -1,6 +1,7 @@
 package nesoi.network.NClaim.admin.commands;
 
 import nesoi.network.NClaim.NCoreMain;
+import nesoi.network.NClaim.enums.Balance;
 import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
 import nesoi.network.NClaim.utils.ConfigManager;
@@ -28,7 +29,7 @@ public class Add {
         String value = args[2];
 
         if (value.equalsIgnoreCase("blacklisted-world")) {
-            if (args.length < 4) {  // blacklisted-world için 4 argüman yeterli
+            if (args.length < 4) {
                 player.sendMessage(langManager.getMsg("messages.wrong-usage"));
                 return;
             }
@@ -55,7 +56,7 @@ public class Add {
         }
 
         if (value.equalsIgnoreCase("balance")) {
-            if (args.length < 5) { // balance için 5 argüman gerekli
+            if (args.length < 5) {
                 player.sendMessage(langManager.getMsg("messages.wrong-usage"));
                 return;
             }
@@ -78,15 +79,13 @@ public class Add {
                 return;
             }
 
-            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
-
-            if (moneyData.equals("Vault")) {
+            if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
                 economy.depositPlayer(target, amount);
                 double newBalance = economy.getBalance(target);
 
                 target.sendMessage(langManager.getMsg("messages.balance-added-to-target", amount, newBalance));
                 player.sendMessage(langManager.getMsg("messages.balance-added-successfully", amount, target.getName()));
-            } else if (moneyData.equals("PlayerData")) {
+            } else {
                 PlayerDataManager playerDataManager = NCoreMain.pdCache.get(target);
                 double currentValue = playerDataManager.getBalance();
                 playerDataManager.setBalance(currentValue + amount);
@@ -94,8 +93,6 @@ public class Add {
 
                 target.sendMessage(langManager.getMsg("messages.balance-added-to-target", amount, newValue));
                 player.sendMessage(langManager.getMsg("messages.balance-added-successfully", amount, target.getName()));
-            } else {
-                player.sendMessage(langManager.getMsg("messages.setup-your-config-file"));
             }
 
             return;

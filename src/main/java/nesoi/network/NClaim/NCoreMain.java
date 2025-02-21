@@ -1,5 +1,6 @@
 package nesoi.network.NClaim;
 
+import nesoi.network.NClaim.enums.Balance;
 import nesoi.network.NClaim.executors.AdminCommandExecutor;
 import nesoi.network.NClaim.executors.MainCommandExecutor;
 import nesoi.network.NClaim.integrations.Metrics;
@@ -8,6 +9,8 @@ import nesoi.network.NClaim.models.PlaceholderManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
 import nesoi.network.NClaim.systems.claim.ClaimManager;
 import nesoi.network.NClaim.utils.ConfigManager;
+import nesoi.network.NClaim.enums.Holo;
+import nesoi.network.NClaim.utils.HeadManager;
 import nesoi.network.NClaim.utils.LangManager;
 import nesoi.network.NClaim.utils.UpdateChecker;
 import net.md_5.bungee.api.ChatMessageType;
@@ -25,12 +28,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.nandayo.DAPI.DAPI;
 import org.nandayo.DAPI.HexUtil;
+import org.nandayo.DAPI.Util;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.nandayo.DAPI.HexUtil.parse;
-import static org.nandayo.DAPI.Util.log;
 
 public final class NCoreMain extends JavaPlugin implements Listener {
 
@@ -45,15 +48,22 @@ public final class NCoreMain extends JavaPlugin implements Listener {
     public ConfigManager configManager;
     public Config config;
 
+    public Holo hologramSystem;
+    public Balance balanceSystem;
+
+
     @Override
     public void onEnable() {
         instance = this;
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(this, this);
         pm.registerEvents(new ClaimManager(), this);
+        pm.registerEvents(new HeadManager(), this);
 
         getCommand("nclaim").setExecutor(new MainCommandExecutor());
         if (!getDataFolder().exists()) getDataFolder().mkdirs();
+
+
 
         //UPDATE VALUES
         Bukkit.getOnlinePlayers().forEach(this::loadCache);
@@ -64,6 +74,24 @@ public final class NCoreMain extends JavaPlugin implements Listener {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderManager(this).register();
         }
+
+        Util.PREFIX = "&8[<#fa8443>NClaim&8]&r ";
+
+        if(Bukkit.getPluginManager().getPlugin("DecentHolograms") != null) {
+            hologramSystem = Holo.DECENT_HOLOGRAM;
+        }else if(Bukkit.getPluginManager().getPlugin("FancyHolograms") != null) {
+            hologramSystem = Holo.FANCY_HOLOGRAM;
+        }else {
+            Util.log("&cYou need the use &4FancyHolograms &cor &4DecentHologram &cfor using this plugin.");
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
+            balanceSystem = Balance.VAULT;
+        } else {
+            balanceSystem = Balance.PLAYERDATA;
+        }
+
         new AdminCommandExecutor();
 
         //UPDATE CHECK
@@ -72,9 +100,9 @@ public final class NCoreMain extends JavaPlugin implements Listener {
             int resourceId = 122527;
             new UpdateChecker(this, resourceId).getVersion(version -> {
                 if (this.getDescription().getVersion().equals(version)) {
-                    log("&8[&6NClaim&8] &aPlugin is up-to-date.");
+                    Util.log("&aPlugin is up-to-date.");
                 } else {
-                    log("&8[&6NClaim&8] &fThere is a new version update. (&e" + version + "&f)");
+                    Util.log("&fThere is a new version update. (&e" + version + "&f)");
                 }
             });
         }

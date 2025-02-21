@@ -4,8 +4,7 @@ package nesoi.network.NClaim.menus.claim;
 import nesoi.network.NClaim.NCoreMain;
 import nesoi.network.NClaim.menus.claim.coop.ManageCoopsMenu;
 import nesoi.network.NClaim.menus.claim.land.ExpandClaimMenu;
-import nesoi.network.NClaim.models.ClaimDataManager;
-import org.bukkit.Bukkit;
+import nesoi.network.NClaim.utils.ChunkBorderManager;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,18 +14,17 @@ import org.nandayo.DAPI.GUIManager.Button;
 import org.nandayo.DAPI.GUIManager.Menu;
 import org.nandayo.DAPI.ItemCreator;
 
-import java.util.Objects;
-import java.util.UUID;
 
 import static nesoi.network.NClaim.utils.HeadManager.getPlayerHead;
 
 public class ClaimMenu extends Menu {
 
     public ClaimMenu(Player p, Chunk chunk) {
-        ClaimDataManager claimDataManager = NCoreMain.inst().claimDataManager;
-
         this.setSize(9*3);
         this.setTitle("NClaim - Manage Claim");
+
+        ChunkBorderManager chunkBorderManager = new ChunkBorderManager();
+        chunkBorderManager.closeChunkBorder(p);
 
         this.addButton(new Button(11) {
             @Override
@@ -76,33 +74,27 @@ public class ClaimMenu extends Menu {
 
 
         this.addButton(new Button(15) {
-
-            final String ownerID = claimDataManager.getClaimOwner(chunk);
-            final String ownerName = (ownerID != null) ? Objects.requireNonNull(Bukkit.getServer().getPlayer(UUID.fromString(ownerID))).getName() : "{RED}Unclaimed";
-
-            final String createdDate = claimDataManager.getCreatedDate(chunk);
-            final int coopCount = claimDataManager.getCoopCount(chunk);
-
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.BEDROCK)
-
-                        .name("{BROWN}Claim Infos")
+                return ItemCreator.of(Material.END_CRYSTAL)
+                        .name("{BROWN}Manage Claim Settings")
                         .lore(
                                 "",
-                                "{WHITE}Claim Owner: {GRAY}" + ownerName,
-                                "{WHITE}Claim Created Date: {GRAY}" + createdDate,
-                                "{WHITE}Coop Member Counts: {GRAY}" + coopCount,
-                                " "
+                                "{WHITE}Manage your claim's {GRAY}settings.",
+                                "{WHITE}Easily {GRAY}adjust {WHITE}permissions for everyone.",
+                                "",
+                                "{YELLOW}Click to manage claim settings."
                         )
+
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-
+            public void onClick(Player player, ClickType clickType) {
+                new ClaimSettingsMenu(p, chunk);
             }
         });
+
         displayTo(p);
     }
 }

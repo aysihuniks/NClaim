@@ -2,8 +2,10 @@ package nesoi.network.NClaim.menus.claim;
 
 import nesoi.network.NClaim.NCoreMain;
 import nesoi.network.NClaim.models.ClaimDataManager;
+import nesoi.network.NClaim.utils.ChunkBorderManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.C;
 import org.nandayo.DAPI.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -17,6 +19,8 @@ public class MainMenu extends Menu {
     public MainMenu(Player p){
         this.createInventory(9*3, "NClaim - General");
         setup();
+        ChunkBorderManager chunkBorderManager = new ChunkBorderManager();
+        chunkBorderManager.closeChunkBorder(p);
         displayTo(p);
     }
 

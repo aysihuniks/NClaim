@@ -1,6 +1,7 @@
 package nesoi.network.NClaim.admin.commands;
 
 import nesoi.network.NClaim.NCoreMain;
+import nesoi.network.NClaim.enums.Balance;
 import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
 import nesoi.network.NClaim.utils.ConfigManager;
@@ -75,8 +76,7 @@ public class Remove {
                 return;
             }
 
-            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
-            if (moneyData.equals("Vault")) {
+            if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
                 double currentValue = economy.getBalance(target);
                 double withdrawAmount = Math.min(currentValue, amount);
                 economy.withdrawPlayer(target, withdrawAmount);
@@ -84,17 +84,14 @@ public class Remove {
 
                 target.sendMessage(langManager.getMsg("messages.balance-removed-to-target", amount, newBalance));
                 player.sendMessage(langManager.getMsg("messages.balance-removed-successfully", amount, target.getName()));
-            } else if (moneyData.equals("PlayerData")) {
+            } else {
                 PlayerDataManager playerDataManager = NCoreMain.pdCache.get(target);
                 double currentValue = playerDataManager.getBalance();
-
                 double newBalance = Math.max(0, currentValue - amount);
                 playerDataManager.setBalance(newBalance);
 
                 target.sendMessage(langManager.getMsg("messages.balance-removed-to-target", amount, newBalance));
                 player.sendMessage(langManager.getMsg("messages.balance-removed-successfully", amount, target.getName()));
-            } else {
-                player.sendMessage(langManager.getMsg("messages.setup-your-config-file"));
             }
             return;
         }

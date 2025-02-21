@@ -67,8 +67,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
             String data = parts[1];
             String path = parts[2];
 
-            Config config = NCoreMain.inst().config;
-
             return switch (data) {
                 case "string" -> NCoreMain.inst().configManager.getString(path, "Null");
                 case "int" -> String.valueOf(NCoreMain.inst().configManager.getInt(path, 0));
@@ -92,8 +90,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
         if (params.startsWith("expiration_") || params.startsWith("owner_")) {
             String[] parts = params.split("_");
             if (parts.length < 3) return null;
-
-            // %nclaim_expiration_x_z%
 
             int chunkX = Integer.parseInt(parts[1]);
             int chunkZ = Integer.parseInt(parts[2]);

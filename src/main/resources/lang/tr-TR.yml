@@ -11,6 +11,7 @@ messages:
   reached-max-claim-count: "%p {RED}Hata: Maksimum claim sayısına ulaştınız."
   you-are-in-blacklisted-world: "%p {RED}Hata: Kara listeye alınmış bir dünyada olduğunuz için bunu yapamazsınız."
   setup-your-config-file: "%p {RED}Hata: Yapılandırma dosyasında geçersiz bir değer var, lütfen varsayılan ayarları geri yükleyip tekrar deneyin."
+  pvp-not-allowed-in-claim: "%p {RED}Hata: Bu claimde pvp kapalıdır."
 
   claim-insufficient-balance: "%p {RED}Hata: Claim satın almak için {DARKRED}%0{RED}$/{DARKRED}%1{RED}$ bakiyeye ihtiyacınız var."
   claim-successfully-bought: "%p {GREEN}Başarılı: Claim başarıyla satın alındı."
@@ -63,9 +64,8 @@ messages:
   world-removed-from-blacklist: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}dünyası kara listeden kaldırıldı!"
 
 action-bar:
-  unclaimed-chunk: "{GRAY}Bu chunk sahipsiz."
-  claimed-chunk: "{PURPLE}Dikkat! Başka bir oyuncunun alanına girdiniz."
-  our-chunk: "{DARKGREEN}Tekrar hoş geldiniz! Burası sizin alanınız."
+  unclaimed-chunk: "{GRAY}Sahipsiz"
+  claimed-chunk: "{PURPLE}%0 {GRAY}- %1" # %0 claim sahibi, %1 ise pvp değeri (true || false)
 
 # DEĞİŞTİRME!
 lang_version: "{version}"

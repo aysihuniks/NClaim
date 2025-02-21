@@ -7,49 +7,67 @@ import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.UUID;
 
-public class HeadManager {
+public class HeadManager implements Listener {
+
+
+    public static HashMap<Player, String> textureMap = new HashMap<>();
+
+    public static String offlinePlayerTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ==";
 
     public static ItemStack getPlayerHead(OfflinePlayer player) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        String[] textureData = getFromName(player.getName()); // Fetch the texture data
 
-        if (textureData != null) {
-            String texture = textureData[0];
+        if (!isNBTAPILoaded()) {
+            return head;
+        }
 
-            if (isVersionAtLeast("1.20.5")) {
-                NBT.modifyComponents(head, nbt -> {
-                    ReadWriteNBT profileNbt = nbt.getOrCreateCompound("minecraft:profile");
-                    profileNbt.setUUID("id", UUID.randomUUID());
-                    ReadWriteNBT propertiesNbt = profileNbt.getCompoundList("properties").addCompound();
-                    propertiesNbt.setString("name", "textures");
-                    propertiesNbt.setString("value", texture);
-                });
-            } else {
-                NBT.modify(head, nbt -> {
-                    ReadWriteNBT skullOwnerCompound = nbt.getOrCreateCompound("SkullOwner");
+        String texture = textureMap.get(player);
 
-                    skullOwnerCompound.setUUID("Id", UUID.randomUUID());
-                    skullOwnerCompound.getOrCreateCompound("Properties")
-                            .getCompoundList("textures")
-                            .addCompound()
-                            .setString("Value", texture);
-                });
-            }
+        if (isVersionAtLeast("1.20.5")) {
+            NBT.modifyComponents(head, nbt -> {
+                ReadWriteNBT profileNbt = nbt.getOrCreateCompound("minecraft:profile");
+                profileNbt.setUUID("id", UUID.randomUUID());
+                ReadWriteNBT propertiesNbt = profileNbt.getCompoundList("properties").addCompound();
+                propertiesNbt.setString("name", "textures");
+                propertiesNbt.setString("value", (texture != null) ? texture : offlinePlayerTexture);
+            });
+        } else {
+            NBT.modify(head, nbt -> {
+                ReadWriteNBT skullOwnerCompound = nbt.getOrCreateCompound("SkullOwner");
+                skullOwnerCompound.setUUID("Id", UUID.randomUUID());
+                skullOwnerCompound.getOrCreateCompound("Properties")
+                        .getCompoundList("textures")
+                        .addCompound()
+                        .setString("Value", (texture != null) ? texture : offlinePlayerTexture);
+            });
         }
 
         return head;
     }
 
+    @EventHandler
+    public void onJoinEvent(PlayerJoinEvent e) {
+        textureMap.put(e.getPlayer(), getFromName(e.getPlayer().getName()));
+    }
+    @EventHandler
+    public void onQuitEvent(PlayerQuitEvent e) {
+        textureMap.remove(e.getPlayer());
+    }
 
-
-    public static String[] getFromName(String name) {
+    public static String getFromName(String name) {
         try {
             URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
@@ -59,14 +77,15 @@ public class HeadManager {
             InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
             JsonObject textureProperty = new JsonParser().parse(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
             String texture = textureProperty.get("value").getAsString();
-            String signature = textureProperty.get("signature").getAsString();
 
-            return new String[] {texture, signature};
+            return texture;
         } catch (IOException e) {
-            System.err.println("Could not get skin data from session servers!");
-            e.printStackTrace();
             return null;
         }
+    }
+
+    public static boolean isNBTAPILoaded() {
+        return Bukkit.getPluginManager().getPlugin("NBTAPI") != null;
     }
 
     public static boolean isVersionAtLeast(String compareVersion) {

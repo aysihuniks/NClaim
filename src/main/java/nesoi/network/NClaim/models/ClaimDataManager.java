@@ -3,15 +3,21 @@ package nesoi.network.NClaim.models;
 import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.hologram.Hologram;
+import eu.decentsoftware.holograms.api.DHAPI;
 import nesoi.network.NClaim.Config;
 import nesoi.network.NClaim.NCoreMain;
+import nesoi.network.NClaim.enums.Balance;
+import nesoi.network.NClaim.enums.Holo;
 import nesoi.network.NClaim.menus.ConfirmMenu;
+import nesoi.network.NClaim.utils.HoloManager;
 import nesoi.network.NClaim.utils.LangManager;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,27 +125,28 @@ public class ClaimDataManager {
             }
 
             Player player = playerDataManager.getPlayer();
-
-            String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
             int claimBuyPrice = NCoreMain.inst().configManager.getInt("claim-buy-price", 1500);
 
-            if (moneyData.equals("Vault")) {
-                double playerBalance = economy.getBalance(player);
-                if (playerBalance < claimBuyPrice) {
-                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-insufficient-balance", playerBalance, claimBuyPrice));
-                    return;
-                } else {
-                    economy.withdrawPlayer(player, claimBuyPrice);
-                }
-            } else if (moneyData.equals("PlayerData")) {
-                double playerBalance = playerDataManager.getBalance();
-                if (playerBalance < claimBuyPrice) {
-                    playerDataManager.getPlayer().sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-insufficient-balance", playerBalance, claimBuyPrice));
-                    return;
-                } else {
-                    playerDataManager.setBalance(playerBalance - claimBuyPrice);
-                }
+            double playerBalance;
+
+            if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
+                playerBalance = economy.getBalance(player);
+            } else {
+                playerBalance = playerDataManager.getBalance();
             }
+
+            if (playerBalance < claimBuyPrice) {
+                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-insufficient-balance", playerBalance, claimBuyPrice));
+                return;
+            }
+
+            if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
+                economy.withdrawPlayer(player, claimBuyPrice);
+            } else {
+                playerDataManager.setBalance(playerBalance - claimBuyPrice);
+            }
+
+
 
             Location location = player.getLocation();
             location.getBlock().setType(Material.BEDROCK);
@@ -164,6 +171,14 @@ public class ClaimDataManager {
             claimsConfig.set(claimPath + ".expired-at", expirationDate);
 
             claimsConfig.set(claimPath + ".owner", uuid.toString());
+
+            claimsConfig.set(claimPath + "." + "settings.claim-pvp", false);
+            claimsConfig.set(claimPath + "." + "settings.tnt-damage", true);
+            claimsConfig.set(claimPath + "." + "settings.creeper-pvp", true);
+            claimsConfig.set(claimPath + "." + "settings.mob-attacking", false);
+            claimsConfig.set(claimPath + "." + "settings.monsters-spawning", true);
+            claimsConfig.set(claimPath + "." + "settings.animals-spawning", true);
+            claimsConfig.set(claimPath + "." + "settings.villager-interacting", false);
             claimsConfig.set(claimPath + ".coops", null);
 
             saveClaimsData();
@@ -176,10 +191,16 @@ public class ClaimDataManager {
 
             double centerX = location.getBlockX() + 0.5;
             double centerZ = location.getBlockZ() + 0.5;
-            double bedrockY = location.getBlockY() + 1.3;
+            double bedrockY;
+            if (NCoreMain.inst().hologramSystem == Holo.FANCY_HOLOGRAM) {
+                bedrockY = location.getBlockY() + 1.3;
+            } else {
+                bedrockY = location.getBlockY() + 2.7;
+            }
+
             Location hologramLocation = new Location(location.getWorld(), centerX, bedrockY, centerZ);
 
-            HologramCreator hologramManager = new HologramCreator();
+            HoloManager hologramManager = new HoloManager();
             hologramManager.createClaimHologram(player, hologramLocation);
 
             player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-successfully-bought"));
@@ -236,7 +257,6 @@ public class ClaimDataManager {
 
 
     public void removeClaim(String claimKey) {
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
         Location bedrockLocation = getBedrockLocation(claimKey);
         if (bedrockLocation != null) {
             bedrockLocation.getBlock().setType(Material.AIR);
@@ -253,10 +273,17 @@ public class ClaimDataManager {
 
         String fixedClaimKey = "claim_" + chunkX + "_" + chunkZ;
 
-        Hologram hologram = manager.getHologram(fixedClaimKey).orElse(null);
-        if (hologram != null) {
-            manager.removeHologram(hologram);
+        if (NCoreMain.inst().hologramSystem == Holo.FANCY_HOLOGRAM) {
+            HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+            Hologram hologram = manager.getHologram(fixedClaimKey).orElse(null);
+            if (hologram != null)
+                manager.removeHologram(hologram);
+        } else if (NCoreMain.inst().hologramSystem == Holo.DECENT_HOLOGRAM) {
+            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(fixedClaimKey);
+            if (hologram != null)
+                hologram.delete();
         }
+
 
         int centerX = chunkX * 16 + 8;
         int centerZ = chunkZ * 16 + 8;
@@ -269,21 +296,25 @@ public class ClaimDataManager {
 
     public void removeClaim(Player p) {
         Chunk chunk = p.getLocation().getChunk();
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
         if (isUnClaimed(chunk)) {
             p.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-not-found"));
             return;
         }
-
 
         int chunkX = p.getLocation().getChunk().getX();
         int chunkZ = p.getLocation().getChunk().getZ();
         String claimKey = chunkX + "_" + chunkZ;
         String fixedClaimKey = "claim_" + chunkX + "_" + chunkZ;
 
-        Hologram hologram = manager.getHologram(fixedClaimKey).orElse(null);
-        if (hologram != null) {
-            manager.removeHologram(hologram);
+        if (NCoreMain.inst().hologramSystem == Holo.FANCY_HOLOGRAM) {
+            HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+            Hologram hologram = manager.getHologram(fixedClaimKey).orElse(null);
+            if (hologram != null)
+                manager.removeHologram(hologram);
+        } else if (NCoreMain.inst().hologramSystem == Holo.DECENT_HOLOGRAM) {
+            eu.decentsoftware.holograms.api.holograms.Hologram hologram = DHAPI.getHologram(fixedClaimKey);
+            if (hologram != null)
+                hologram.delete();
         }
 
         Location bedrockLocation = getBedrockLocation(claimKey);
@@ -295,10 +326,6 @@ public class ClaimDataManager {
 
         claimsConfig.set("chunks_claimed." + claimKey, null);
         saveClaimsData();
-
-
-
-
     }
 
     public String getClaimCoords(String claimKey) {
@@ -544,7 +571,6 @@ public class ClaimDataManager {
     public void addLandToClaim(Chunk mainChunk, Chunk newLand, PlayerDataManager playerDataManager) {
         Player player = playerDataManager.getPlayer();
         int newLandBalance = NCoreMain.inst().configManager.getInt("claim-each-land-price", 2000);
-        String moneyData = NCoreMain.inst().configManager.getString("money-data", "PlayerData");
 
         if (!isUnClaimed(newLand)) {
             player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.chunk-already-claimed"));
@@ -553,7 +579,8 @@ public class ClaimDataManager {
 
         int requiredBalance = NCoreMain.inst().configManager.getInt("claim-each-land-price", 2000);
 
-        if (moneyData.equals("Vault")) {
+
+        if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
             double playerBalance = economy.getBalance(player);
             if (playerBalance < newLandBalance) {
                 player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.land-insufficient-balance", playerBalance, requiredBalance));
@@ -561,7 +588,7 @@ public class ClaimDataManager {
             } else {
                 economy.withdrawPlayer(player, newLandBalance);
             }
-        } else if (moneyData.equals("PlayerData")) {
+        } else {
             double playerBalance = playerDataManager.getBalance();
             if (playerBalance < newLandBalance) {
                 player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.land-insufficient-balance", playerBalance, requiredBalance));
@@ -583,7 +610,6 @@ public class ClaimDataManager {
             player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.claim-expanded"));
         }
     }
-
 
     public boolean isUnClaimed(Chunk chunk) {
         String ownerID = getClaimOwner(chunk);
@@ -611,11 +637,6 @@ public class ClaimDataManager {
                     .orElse(null);
         }
         return null;
-    }
-
-    public String getCreatedDate(Chunk chunk) {
-        String path = "chunks_claimed." + chunk.getX() + "_" + chunk.getZ() + ".created-at";
-        return claimsConfig.getString(path, "Unknown");
     }
 
     public String getCoopJoinedDate(String claimKey, UUID playerUUID) {
@@ -796,14 +817,31 @@ public class ClaimDataManager {
         return claimsConfig.getBoolean(coopPath, false);
     }
 
-    public int getCoopCount(Chunk chunk) {
-        String path = "chunks_claimed." + chunk.getX() + "_" + chunk.getZ() + ".coops";
-        ConfigurationSection coopSection = claimsConfig.getConfigurationSection(path);
-        if (coopSection == null) {
-            return 0;
+    /* Settings */
+    public Boolean isClaimSettingEnabled(Chunk chunk, String setting, boolean defaultValue) {
+        String chunkKey = chunk.getX() + "_" + chunk.getZ();
+
+        if (claimsConfig.contains("chunks_claimed." + chunkKey + ".settings." + setting)) {
+            return claimsConfig.getBoolean("chunks_claimed." + chunkKey + ".settings." + setting);
         }
-        Set<String> coops = coopSection.getKeys(false);
-        return coops.size();
+
+        for (String mainClaimKey : claimsConfig.getConfigurationSection("chunks_claimed").getKeys(false)) {
+            List<String> lands = claimsConfig.getStringList("chunks_claimed." + mainClaimKey + ".lands");
+            if (lands.contains(chunkKey) && claimsConfig.contains("chunks_claimed." + mainClaimKey + ".settings." + setting)) {
+                return claimsConfig.getBoolean("chunks_claimed." + mainClaimKey + ".settings." + setting);
+            }
+        }
+
+        return defaultValue;
+    }
+
+    public void toggleClaimSetting(Chunk chunk, String setting) {
+        String chunkKey = chunk.getX() + "_" + chunk.getZ();
+
+        boolean currentValue = claimsConfig.getBoolean("chunks_claimed." + chunkKey + ".settings." + setting, false);
+        claimsConfig.set("chunks_claimed." + chunkKey + ".settings." + setting, !currentValue);
+
+        saveClaimsData();
     }
 
     /* Default */

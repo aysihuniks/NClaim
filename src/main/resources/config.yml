@@ -17,7 +17,6 @@ blacklisted-worlds:
 # date-format: Date and time format.
 # time-zone: Time zone.
 max-claim-count: 3
-money-data: PlayerData
 claim-buy-price: 1500
 claim-each-land-price: 2000
 max-coop-limit: 3
