@@ -34,7 +34,7 @@ public class ExpandClaimMenu extends Menu {
                 return ItemCreator.of(Material.TINTED_GLASS).name(" ").get();
             }
         });
-        this.createInventory(9 * 5, "Expand Your Claim");
+        this.createInventory(9 * 5, "NClaim - Expand Claim");
 
         loadClaimedChunks();
         setupMenu(p);
@@ -133,7 +133,7 @@ public class ExpandClaimMenu extends Menu {
                         }
                     } else if (clickType.isRightClick()) {
                         p.closeInventory();
-                        ChunkBorderManager chunkBorderManager = new ChunkBorderManager();
+                        ChunkBorderManager chunkBorderManager = NCoreMain.inst().chunkBorderManager;
                         chunkBorderManager.showChunkBorder(p, newChunk);
                     }
                 }

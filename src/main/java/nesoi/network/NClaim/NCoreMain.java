@@ -8,11 +8,8 @@ import nesoi.network.NClaim.models.ClaimDataManager;
 import nesoi.network.NClaim.models.PlaceholderManager;
 import nesoi.network.NClaim.models.PlayerDataManager;
 import nesoi.network.NClaim.systems.claim.ClaimManager;
-import nesoi.network.NClaim.utils.ConfigManager;
+import nesoi.network.NClaim.utils.*;
 import nesoi.network.NClaim.enums.Holo;
-import nesoi.network.NClaim.utils.HeadManager;
-import nesoi.network.NClaim.utils.LangManager;
-import nesoi.network.NClaim.utils.UpdateChecker;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
@@ -44,6 +41,7 @@ public final class NCoreMain extends JavaPlugin implements Listener {
 
     public static HashMap<Player, PlayerDataManager> pdCache = new HashMap<>();
     public ClaimDataManager claimDataManager;
+    public ChunkBorderManager chunkBorderManager;
     public LangManager langManager;
     public ConfigManager configManager;
     public Config config;
@@ -152,6 +150,7 @@ public final class NCoreMain extends JavaPlugin implements Listener {
         claimDataManager = new ClaimDataManager();
         config = new Config(this).updateConfig();
         configManager = new ConfigManager(config.get());
+        chunkBorderManager = new ChunkBorderManager();
         langManager = new LangManager(this, configManager.getString("lang_file", "en-US")).updateLanguage();
 
     }

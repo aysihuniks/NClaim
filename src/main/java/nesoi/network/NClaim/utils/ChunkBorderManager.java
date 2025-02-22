@@ -1,10 +1,7 @@
 package nesoi.network.NClaim.utils;
 
 import nesoi.network.NClaim.NCoreMain;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -27,7 +24,7 @@ public class ChunkBorderManager {
             public void run() {
                 if (counter <= 0) {
                     closeChunkBorder(player);
-                    return;
+
                 }
 
                 counter--;
@@ -42,9 +39,12 @@ public class ChunkBorderManager {
     public void closeChunkBorder(Player player) {
         UUID playerId = player.getUniqueId();
         if (activeBorders.containsKey(playerId)) {
-            activeBorders.get(playerId).cancel();
+            BukkitRunnable task = activeBorders.get(playerId);
+            task.cancel();
             activeBorders.remove(playerId);
+
         }
+
     }
 
     private void drawChunkBorder(Player player, Chunk chunk) {
@@ -71,3 +71,4 @@ public class ChunkBorderManager {
         world.spawnParticle(Particle.COMPOSTER, new Location(world, x + 0.5, y + 0.1, z + 0.5), 1, 0, 0, 0, 0);
     }
 }
+//pup

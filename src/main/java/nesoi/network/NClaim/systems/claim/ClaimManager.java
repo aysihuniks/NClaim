@@ -18,10 +18,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static nesoi.network.NClaim.NCoreMain.sendActionBar;
 
@@ -72,18 +69,46 @@ public class ClaimManager implements Listener {
         if (event.getEntity() instanceof Creeper) {
             if (!cDM.isClaimSettingEnabled(chunk, "creeper-damage", true)) {
                 event.setCancelled(true);
+            } else {
+                List<Block> affectedBlocks = event.blockList();
+                Iterator<Block> iterator = affectedBlocks.iterator();
+
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+                    Chunk blockChunk = block.getChunk();
+
+                    if (!cDM.isUnClaimed(chunk)) {
+                        continue;
+                    }
+
+                    if (!cDM.isUnClaimed(blockChunk)) {
+                        iterator.remove();
+                    }
+                }
             }
         }
         if (event.getEntity() instanceof TNTPrimed) {
             if (!cDM.isClaimSettingEnabled(chunk, "tnt-damage", true)) {
                 event.setCancelled(true);
-            }
-            event.blockList().removeIf(block -> {
-                Chunk blockChunk = block.getChunk();
-                return !cDM.isUnClaimed(blockChunk);
-            });
+            } else {
+                List<Block> affectedBlocks = event.blockList();
+                Iterator<Block> iterator = affectedBlocks.iterator();
 
+                while (iterator.hasNext()) {
+                    Block block = iterator.next();
+                    Chunk blockChunk = block.getChunk();
+
+                    if (!cDM.isUnClaimed(chunk)) {
+                        continue;
+                    }
+
+                    if (!cDM.isUnClaimed(blockChunk)) {
+                        iterator.remove();
+                    }
+                }
+            }
         }
+
     }
 
     @EventHandler

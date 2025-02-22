@@ -23,7 +23,7 @@ public class ClaimMenu extends Menu {
         this.setSize(9*3);
         this.setTitle("NClaim - Manage Claim");
 
-        ChunkBorderManager chunkBorderManager = new ChunkBorderManager();
+        ChunkBorderManager chunkBorderManager = NCoreMain.inst().chunkBorderManager;
         chunkBorderManager.closeChunkBorder(p);
 
         this.addButton(new Button(11) {
