@@ -1,0 +1,73 @@
+package nesoi.network.NClaim.utils;
+
+import nesoi.network.NClaim.NCoreMain;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+
+public class ConfigManager {
+
+    private YamlConfiguration config;
+
+    public ConfigManager(FileConfiguration config) {
+        this.config = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+    }
+
+    /*
+     * SETTER
+     */
+    public void set(String key, Object value) {
+        config.set(key, value);
+    }
+
+    /*
+     * GETTERS
+     */
+    public Object get(String key, Object defaultValue) {
+        return config.get(key, defaultValue);
+    }
+
+    public String getString(String key, String defaultValue) {
+        Object value = config.get(key);
+        return (value != null) ? value.toString() : defaultValue;
+    }
+
+    public int getInt(String key, int defaultValue) {
+        return config.getInt(key, defaultValue);
+    }
+
+    public long getLong(String key, long defaultValue) {
+        return config.getLong(key, defaultValue);
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return config.getBoolean(key, defaultValue);
+    }
+
+    public ConfigurationSection getConfigurationSection(String key) {
+        return config.getConfigurationSection(key);
+    }
+
+    public List<String> getStringList(String key) {
+        return config.getStringList(key);
+    }
+
+
+    /*
+     * SAVE
+     */
+
+
+    public void saveConfig() {
+        try {
+            config.save(new File(NCoreMain.inst().getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

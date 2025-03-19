@@ -1,0 +1,46 @@
+name: NClaim
+version: ${project.version}
+main: nesoi.network.NClaim.NCoreMain
+api-version: '1.16'
+author: aysihuniks
+commands:
+  nclaim:
+    aliases: nclaim
+    usage: /nclaim <help/?>
+permissions:
+  nclaim.admin:
+    default: op
+    children:
+      nclaim.reload: true
+      nclaim.add: true
+      nclaim.remove: true
+      nclaim.delete: true
+      nclaim.chunkinfo: true
+      nclaim.help: true
+      nclaim.bypass.max-claim-count.: true
+      nclaim.bypass.claim-buy-price: true
+      nclaim.bypass.land-buy-price: true
+      nclaim.bypass.*: true
+    nclaim.reload:
+      default: op
+    nclaim.add:
+      default: op
+    nclaim.remove:
+      default: op
+    nclaim.delete:
+      default: op
+    nclaim.chunkinfo:
+      default: op
+    nclaim.help:
+      default: op
+    nclaim.bypass.max-claim-count.:
+      default: op
+    nclaim.bypass.claim-buy-price:
+      default: op
+    nclaim.bypass.land-buy-price:
+      default: op
+    nclaim.bypass.*:
+      default: op
+
+depend: [PlaceholderAPI, DecentHolograms]
+softdepend: [Vault, NBTAPI]
