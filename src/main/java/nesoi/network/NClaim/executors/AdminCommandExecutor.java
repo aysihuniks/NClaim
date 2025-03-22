@@ -44,7 +44,11 @@ public class AdminCommandExecutor implements CommandExecutor {
                 new Change().execute(player, args);
                 break;
             case "menu":
-                new AdminMenu(player);
+                if (player.hasPermission("nclaim.adminmenu") || player.hasPermission("nclaim.admin")) {
+                    new AdminMenu(player);
+                } else {
+                    player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-permission"));
+                }
                 break;
             case "help":
             case "?":

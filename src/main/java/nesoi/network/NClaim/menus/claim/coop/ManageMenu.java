@@ -85,7 +85,7 @@ public class ManageMenu extends Menu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.ARROW)
-                        .name("{ORANGE}Go Back")
+                        .name("{YELLOW}Go Back")
                         .get();
             }
 

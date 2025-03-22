@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class AnvilManager {
@@ -31,7 +31,7 @@ public class AnvilManager {
                 .itemLeft(new ItemStack(Material.PAPER))
                 .itemOutput(new ItemStack(Material.NAME_TAG))
                 .interactableSlots(AnvilGUI.Slot.OUTPUT)
-                .onClick((slot, stateSnapshot) -> List.of(
+                .onClick((slot, stateSnapshot) -> Arrays.asList(
                         AnvilGUI.ResponseAction.run(() -> {
                             onFinish.accept(stateSnapshot.getText());
                         })))

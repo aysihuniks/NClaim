@@ -86,7 +86,7 @@ public class ManageTimeMenu extends Menu {
         addButton(new Button(45) {
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.ARROW).name("{BROWN}Go Back").get();
+                return ItemCreator.of(Material.ARROW).name("{YELLOW}Go Back").get();
             }
 
             @Override

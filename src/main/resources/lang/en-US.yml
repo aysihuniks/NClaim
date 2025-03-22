@@ -23,7 +23,6 @@ messages:
     not-in-blacklist: "%p {RED}Error: {DARKRED}%0 {RED}named world is not in the blacklist."
     enter-a-number: "%p {RED}Error: Please enter a valid number."
 
-
   success:
     claim-received: "%p {GREEN}Success: You successfully received the claim."
     coop-added: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been added to your claim."
