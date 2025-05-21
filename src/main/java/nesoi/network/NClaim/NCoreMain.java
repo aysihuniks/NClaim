@@ -202,6 +202,10 @@ public final class NCoreMain extends JavaPlugin implements Listener {
         }
     }
 
+    public Economy getEconomy() {
+        return economy;
+    }
+
     // GM
 
     static public boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {

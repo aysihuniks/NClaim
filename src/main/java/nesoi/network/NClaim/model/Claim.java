@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import nesoi.network.NClaim.Config;
 import nesoi.network.NClaim.NCoreMain;
+import nesoi.network.NClaim.enums.Balance;
 import nesoi.network.NClaim.utils.HoloManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -87,12 +89,24 @@ public class Claim {
             return;
         }
 
-        if (!user.getPlayer().hasPermission("nclaim.bypass.*") || !user.getPlayer().hasPermission("nclaim.bypass.claim-buy-price")) {
-            if (user.getBalance() >= NCoreMain.inst().config.getClaimBuyPrice()) {
-                user.setBalance(user.getBalance() - NCoreMain.inst().config.getClaimBuyPrice());
-            } else {
-                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
-                return;
+        double claimPrice = NCoreMain.inst().config.getClaimBuyPrice();
+
+        if (!user.getPlayer().hasPermission("nclaim.bypass.*") && !user.getPlayer().hasPermission("nclaim.bypass.claim-buy-price")) {
+            if (NCoreMain.inst().balanceSystem == Balance.PLAYERDATA) {
+                if (user.getBalance() >= claimPrice) {
+                    user.setBalance(user.getBalance() - claimPrice);
+                } else {
+                    player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
+                    return;
+                }
+            } else if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
+                Economy econ = NCoreMain.inst().getEconomy();
+                if (econ != null && econ.has(player, claimPrice)) {
+                    econ.withdrawPlayer(player, claimPrice);
+                } else {
+                    player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
+                    return;
+                }
             }
         }
 
@@ -224,13 +238,24 @@ public class Claim {
         if (getChunk().equals(chunk)) return;
 
         User user = User.getUser(player.getUniqueId());
+        double landPrice = NCoreMain.inst().config.getEachLandBuyPrice();
 
         if (!user.getPlayer().hasPermission("nclaim.bypass.*") || !user.getPlayer().hasPermission("nclaim.bypass.land-buy-price")) {
-            if (user.getBalance() >= NCoreMain.inst().config.getEachLandBuyPrice()) {
-                user.setBalance(user.getBalance() - NCoreMain.inst().config.getEachLandBuyPrice());
-            } else {
-                player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
-                return;
+            if (NCoreMain.inst().balanceSystem == Balance.PLAYERDATA) {
+                if (user.getBalance() >= landPrice) {
+                    user.setBalance(user.getBalance() - landPrice);
+                } else {
+                    player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
+                    return;
+                }
+            }else if (NCoreMain.inst().balanceSystem == Balance.VAULT) {
+                Economy econ = NCoreMain.inst().getEconomy();
+                if (econ != null && econ.has(player, landPrice)) {
+                    econ.withdrawPlayer(player, landPrice);
+                } else {
+                    player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-money"));
+                    return;
+                }
             }
         }
 
