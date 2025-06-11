@@ -1,0 +1,53 @@
+# WARNING!
+# %0, %1, %2... are placeholders and can be removed if not needed.
+
+messages:
+
+  error:
+    not-enough-permission: "%p {RED}Error: You don't have permission to do that!"
+    cooldown: "%p {RED}Error: Please wait a moment before trying again."
+    wrong-usage: "%p {RED}Error: Need help? Use /nclaim <help/?> to see all available commands."
+    no-player: "%p {RED}Error: Player is offline or not found."
+    not-enough-money: "%p {RED}Error: You don't have enough money to do that."
+    reached-max-claim-count: "%p {RED}Error: You have reached the maximum claim count."
+    in-blacklisted-world: "%p {RED}Error: You can't do that in the blacklisted world."
+    pvp-not-allowed: "%p {RED}Error: PvP not allowed in this claim."
+    not-found: "%p {RED}Error: What you are looking for was not found."
+    claim-not-yours: "%p {RED}Error: This claim is not yours."
+    cant-add-yourself: "%p {RED}Error: You cannot add yourself."
+    coop-limit-reached: "%p {RED}Error: You can only have up to {DARKRED}%0 {RED}co-op players!"
+    player-already-coop: "%p {RED}Error: Player already in the coop list."
+    already-claimed: "%p {RED}Error: This chunk is already claimed!"
+    invalid-lang: "%p {RED}Error: Invalid language code: %0. Please choose a valid language (e.g., 'en' or 'tr')."
+    already-blacklisted: "%p {RED}Error: {DARKRED}%0 {RED}named world is already in the blacklist."
+    not-in-blacklist: "%p {RED}Error: {DARKRED}%0 {RED}named world is not in the blacklist."
+    enter-a-number: "%p {RED}Error: Please enter a valid number."
+
+  success:
+    claim-received: "%p {GREEN}Success: You successfully received the claim."
+    coop-added: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been added to your claim."
+    coop-kicked: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been removed from the co-op list."
+    player-added-to-claim: "%p {GREEN}Success: You have been added to %0's claim."
+    claim-expanded: "%p {GREEN}Success: New land added to your claim."
+    reload: "%p {GREEN}Success: Configuration files have been successfully reloaded."
+    target-balance-added: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}added to your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
+    player-balance-added: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been added to %1's balance."
+    target-balance-removed: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
+    player-balance-removed: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from {DARKGREEN}%1's {GREEN}balance."
+    expiration-date-changed: "%p {GREEN}Success: Expiration date extended/subtracted by {DARKGREEN}%0 days{GREEN}, {DARKGREEN}%1 hours{GREEN}, {DARKGREEN}%2 minutes{GREEN}."
+    claim-removed: "%p {GREEN}Success: The claim in the chunk you were in has been deleted."
+    lang-changed: "%p {GREEN}Success: Language has been successfully changed to {DARKGREEN}%0{GREEN}."
+    blacklisted: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}named world has been successfully blacklisted."
+    removed-from-blacklist: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}named world has been removed from the blacklist!"
+
+  reminder:
+    claim-expired: "%p {PURPLE}Reminder: {WHITE}Claim time expired and was removed {GRAY}({RED}%0{WHITE}, {RED}%1{GRAY})."
+    player-not-in-coop: "%p {PURPLE}Reminder: {RED}%0 {WHITE}is already not in the co-op list."
+    player-balance: "%p {PURPLE}Reminder: {WHITE}You have {GRAY}%0{WHITE}$ in your balance."
+
+action-bar:
+  unclaimed-chunk: "{GRAY}Unclaimed"
+  claimed-chunk: "{PURPLE}%0 {GRAY}- %1"
+
+# DO NOT CHANGE!
+lang_version: "{version}"
