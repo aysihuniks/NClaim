@@ -1,8 +1,14 @@
-package nesoi.network.NClaim.menus.claim.coop;
+package nesoi.aysihuniks.nclaim.ui.claim.coop;
 
-import nesoi.network.NClaim.menus.ConfirmMenu;
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.model.CoopPermission;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.enums.PermissionCategory;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -10,175 +16,327 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.Menu;
-import org.nandayo.DAPI.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.MenuType;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-import static nesoi.network.NClaim.utils.HeadManager.getPlayerHead;
-import static org.nandayo.DAPI.HexUtil.parse;
-
-public class PermissionMenu extends Menu {
-
+public class CoopPermissionsMenu extends BaseMenu {
+    private final @NotNull OfflinePlayer coopPlayer;
     private final @NotNull Claim claim;
-    private final @NotNull OfflinePlayer targetPlayer;
     private final boolean admin;
+    private final @Nullable PermissionCategory currentCategory;
 
-    public PermissionMenu(@NotNull Player player, @NotNull OfflinePlayer targetPlayer, @NotNull Claim claim, boolean admin) {
-        createInventory(9 * 6, "NClaim - Edit Co-op");
+    private static final int[] CATEGORY_SLOTS = {28,29,30,31,32,33,34,37,38,39,40,41,42,43};
+    private static final int[] PERMISSION_SLOTS = {
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43
+    };
+
+    private static final Map<PermissionCategory, Material> CATEGORY_ICONS;
+    static {
+        Map<PermissionCategory, Material> map = new HashMap<>();
+        map.put(PermissionCategory.BLOCKS, Material.GRASS_BLOCK);
+        map.put(PermissionCategory.CONTAINERS, Material.CHEST);
+        map.put(PermissionCategory.REDSTONE, Material.REDSTONE);
+        map.put(PermissionCategory.DOORS, Material.OAK_DOOR);
+        map.put(PermissionCategory.WORKSTATIONS, Material.CRAFTING_TABLE);
+        map.put(PermissionCategory.INTERACTIONS, Material.LEVER);
+        map.put(PermissionCategory.LIQUIDS, Material.WATER_BUCKET);
+        map.put(PermissionCategory.ENTITIES, Material.VILLAGER_SPAWN_EGG);
+        CATEGORY_ICONS = Collections.unmodifiableMap(map);
+    }
+
+
+    public CoopPermissionsMenu(@NotNull Player player, @NotNull OfflinePlayer coopPlayer, @NotNull Claim claim, boolean admin, @Nullable PermissionCategory category) {
+        super("menu.permission_menu");
+        this.coopPlayer = coopPlayer;
         this.claim = claim;
-        this.targetPlayer = targetPlayer;
         this.admin = admin;
+        this.currentCategory = category;
 
-        setup();
+        setupMenu();
         displayTo(player);
     }
 
-    public void setup() {
-        List<CoopPermission.Permission> permissions = Arrays.asList(
-                CoopPermission.Permission.CAN_BREAK_SPAWNER,
-                CoopPermission.Permission.CAN_PLACE_SPAWNER,
-                CoopPermission.Permission.CAN_CAST_WATER_AND_LAVA,
-                CoopPermission.Permission.CAN_INTERACT_WITH_CLAIM_BEDROCK, // ALWAYS FALSE
-                CoopPermission.Permission.CAN_BREAK_BLOCK,
-                CoopPermission.Permission.CAN_PLACE_BLOCK,
-                CoopPermission.Permission.CAN_INTERACT_WITH_CHEST,
-                CoopPermission.Permission.CAN_INTERACT_WITH_BUTTON_DOOR_PRESSURE_PLATE
-        );
+    private void setupMenu() {
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer.getName()));
+        setBackgroundButton(BackgroundMenu::getButton);
 
-        List<String> permissionNames = Arrays.asList(
-                "Spawner Breaking",
-                "Spawner Placing",
-                "Casting Water and Lavas",
-                "Interact With Claim Bedrock",
-                "Breaking Blocks",
-                "Placing Blocks",
-                "Interacting with Chests",
-                "Interacting with Buttons, Doors, Pressure Plates"
-        );
+        addBackButton();
+        addPlayerInfoButton();
+        addCategoryButtons();
+        addPermissionButtons();
+        addKickButton();
+    }
 
-        List<List<String>> permissionLores = Arrays.asList(
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}break {GRAY}the {WHITE}spawners{GRAY}?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}place {GRAY}the {WHITE}spawners{GRAY}?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}cast {GRAY}water or lava?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}interact {GRAY}with claim bedrock?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}break {GRAY}blocks?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}place {GRAY}blocks?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}interact with {GRAY}chests?", "&f"),
-                Arrays.asList("&f", "{GRAY}Can the player {WHITE}interact with", "{GRAY}buttons, doors, pressure plates?" , "&f")
-        );
+    private void addBackButton() {
 
-        List<Integer> paperSlots = Arrays.asList(11, 20, 29, 38, 14, 23, 32, 41);
-        List<Integer> dyeSlots = Arrays.asList(12, 21, 30, 39, 15, 24, 33, 42);
+        addButton(new Button() {
+            final String buttonPath = currentCategory == null ? "menu.back" : "menu.previous_page";
 
-        addButton(new Button(45) {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(10);
+            }
+
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.ARROW)
-                        .name("{ORANGE}Go Back")
+                return ItemCreator.of(currentCategory == null ? Material.OAK_DOOR : Material.FEATHER)
+                        .name(langManager.getString(buttonPath + ".display_name"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                new ManageMenu(p, claim, admin);
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_BACK.playSound(player);
+                if (currentCategory == null) {
+                    new CoopListMenu(player, claim, admin, 0);
+                } else {
+                    new CoopPermissionsMenu(player,  coopPlayer, claim, admin, null);
+                }
             }
         });
+    }
 
-        addButton(new Button(0) {
+    private void addPlayerInfoButton() {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
+
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(getPlayerHead(targetPlayer))
-                        .name("{YELLOW}" + targetPlayer.getName())
-                        .lore("", "{WHITE}You are now {GRAY}setting {WHITE}this", "{WHITE}player's {GRAY}permissions{WHITE}.")
+                String playerName = coopPlayer.isOnline() ? 
+                    "&a" + coopPlayer.getName() : 
+                    "&7" + coopPlayer.getName() + getString("offline");
+
+                List<String> lore = new ArrayList<>(getStringList("player_info.lore"));
+                lore.replaceAll(s -> s.replace("{date}", 
+                    NClaim.serializeDate(claim.getCoopPlayerJoinDate().get(coopPlayer.getUniqueId()))));
+
+                return ItemCreator.of(NClaim.inst().getHeadManager().createHead(coopPlayer))
+                        .name(getString("player_info.display_name").replace("{player}", playerName))
+                        .lore(lore)
                         .get();
             }
-
-            @Override
-            public void onClick(Player p, ClickType clickType) {
-
-            }
         });
+    }
 
-        addButton(new Button(53) {
-            @Override
-            public ItemStack getItem() {
-                return ItemCreator.of(Material.BARRIER)
-                        .name("{BROWN}Kick player from claim")
-                        .lore("",
-                                "{WHITE}After doing this, the player will be",
-                                "{GRAY}kicked {WHITE}from the claim and you",
-                                "{WHITE}will {GRAY}not be able to add {WHITE}the player",
-                                "{WHITE}back to the claim for {GRAY}15 minutes{WHITE}.")
-                        .get();
-            }
+    @SuppressWarnings("ConstantConditions")
+    private void addCategoryButtons() {
+        if (currentCategory != null) return;
 
-            @Override
-            public void onClick(Player p, ClickType clickType) {
-                Consumer<String> onFinish = (result) -> {
-                    if ("confirmed".equals(result)) {
-                        claim.kickCoop(targetPlayer.getUniqueId());
-                        p.closeInventory();
-                    } else if ("declined".equals(result)) {
-                        new PermissionMenu(p, targetPlayer, claim, admin);
-                    }
-                };
+        int slot = 0;
+        for (PermissionCategory category : PermissionCategory.values()) {
+            if (slot >= CATEGORY_SLOTS.length) break;
+            final int currentSlot = slot++;
 
-                new ConfirmMenu(p, "Kick from Claim", Arrays.asList("", "{WHITE}After {GRAY}confirming {WHITE}this action,", "{WHITE}the {GRAY}selected {WHITE}person will be", "{GRAY}kicked {WHITE}from {GRAY}Claim{WHITE}."), onFinish);
-            }
-        });
+            addButton(new Button() {
+                @Override
+                public @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(CATEGORY_SLOTS[currentSlot]);
+                }
 
-        for (int i = 0; i < permissions.size(); i++) {
-            CoopPermission.Permission permEnum = permissions.get(i);
-            String permName = permissionNames.get(i);
-            List<String> permLore = new ArrayList<>(permissionLores.get(i));
-
-            boolean permissionStatus = claim.getCoopPermissionState(targetPlayer.getUniqueId(), permEnum);
-            String permissionColor = permissionStatus ? "{GREEN}Active" : "{RED}Inactive";
-            Material dyeMaterial = permissionStatus ? Material.LIME_DYE : Material.GRAY_DYE;
-
-            permLore.add("{GRAY}Status: " + parse(permissionColor));
-
-            addButton(new Button(paperSlots.get(i)) {
                 @Override
                 public ItemStack getItem() {
-                    return ItemCreator.of(Material.PAPER)
-                            .name("{BROWN}" + permName)
-                            .lore(permLore)
+                    return ItemCreator.of(CATEGORY_ICONS.get(category))
+                            .name(langManager.getString("menu.permission_menu.categories." +
+                                    category.name().toLowerCase() + ".display_name"))
+                            .lore(Arrays.asList(
+                                    "",
+                                    langManager.getString("menu.permission_menu.click_to_view"),
+                                    langManager.getString("menu.permission_menu.right_click_toggle")
+                            ))
                             .get();
                 }
 
                 @Override
-                public void onClick(Player p, ClickType clickType) {
-                    if (!permEnum.equals(CoopPermission.Permission.CAN_INTERACT_WITH_CLAIM_BEDROCK)) {
-                        claim.toggleCoopPermission(targetPlayer.getUniqueId(), permEnum);
-                        new PermissionMenu(p, targetPlayer, claim, admin);
+                public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                    if (clickType == ClickType.RIGHT) {
+                        MessageType.CONFIRM.playSound(player);
+                        NClaim.inst().getClaimCoopManager()
+                                .toggleCoopPermissionCategory(claim, coopPlayer.getUniqueId(), category);
                     }
+                    MessageType.MENU_FORWARD.playSound(player);
+                    new CoopPermissionsMenu(player, coopPlayer, claim, admin, category);
                 }
             });
+        }
+    }
 
-            addButton(new Button(dyeSlots.get(i)) {
+
+    private void addPermissionButtons() {
+        if (currentCategory == null) return;
+
+        Permission[] permissions = claim.getCoopPermissions()
+                .get(coopPlayer.getUniqueId())
+                .getPermissionsByCategory()
+                .get(currentCategory);
+
+        int slot = 0;
+        for (Permission permission : permissions) {
+            if (slot >= PERMISSION_SLOTS.length) break;
+            final int currentSlot = slot++;
+
+            addButton(new Button() {
+                @Override
+                public @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(PERMISSION_SLOTS[currentSlot]);
+                }
+
                 @Override
                 public ItemStack getItem() {
-                    Material finalDyeMaterial = permEnum.equals(CoopPermission.Permission.CAN_INTERACT_WITH_CLAIM_BEDROCK) ? Material.RED_DYE : dyeMaterial;
+                    boolean isEnabled = claim.getCoopPermissions()
+                            .get(coopPlayer.getUniqueId())
+                            .isEnabled(permission);
 
-                    return ItemCreator.of(finalDyeMaterial)
-                            .name("{BROWN}" + permName)
-                            .lore(permLore)
+                    return ItemCreator.of(getPermissionIcon(permission))
+                            .name((isEnabled ? "&a" : "&c") + getString("permissions." +
+                                    permission.name().toLowerCase() + ".display_name"))
+                            .lore(Arrays.asList(
+                                    "",
+                                    langManager.getString(isEnabled ? "menu.enabled" : "menu.disabled")
+                            ))
                             .hideFlag(ItemFlag.values())
                             .get();
                 }
 
                 @Override
-                public void onClick(Player p, ClickType clickType) {
-                    if (!permEnum.equals(CoopPermission.Permission.CAN_INTERACT_WITH_CLAIM_BEDROCK)) {
-                        claim.toggleCoopPermission(targetPlayer.getUniqueId(), permEnum);
-                        new PermissionMenu(p, targetPlayer, claim, admin);
-                    }
+                public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                    NClaim.inst().getClaimCoopManager()
+                            .toggleCoopPermission(claim, coopPlayer.getUniqueId(), permission);
+                    MessageType.CONFIRM.playSound(player);
+                    new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
                 }
             });
         }
+    }
+
+
+    private Material getPermissionIcon(Permission permission) {
+        switch (permission) {
+            case BREAK_BLOCKS:
+                return Material.DIAMOND_PICKAXE;
+            case BREAK_SPAWNER:
+            case PLACE_SPAWNER:
+                return Material.SPAWNER;
+            case PLACE_BLOCKS:
+                return Material.GRASS_BLOCK;
+            case USE_CHEST:
+                return Material.CHEST;
+            case USE_FURNACE:
+                return Material.FURNACE;
+            case USE_BARREL:
+                return Material.BARREL;
+            case USE_SHULKER:
+                return Material.SHULKER_BOX;
+            case USE_HOPPER:
+                return Material.HOPPER;
+            case USE_DISPENSER:
+                return Material.DISPENSER;
+            case USE_REDSTONE:
+                return Material.REDSTONE;
+            case USE_BUTTONS:
+                return Material.STONE_BUTTON;
+            case USE_PRESSURE_PLATES:
+                return Material.STONE_PRESSURE_PLATE;
+            case USE_LEVERS:
+                return Material.LEVER;
+            case USE_DOORS:
+                return Material.OAK_DOOR;
+            case USE_TRAPDOORS:
+                return Material.OAK_TRAPDOOR;
+            case USE_GATES:
+                return Material.OAK_FENCE_GATE;
+            case USE_CRAFTING:
+                return Material.CRAFTING_TABLE;
+            case USE_ENCHANTING:
+                return Material.ENCHANTING_TABLE;
+            case USE_ANVIL:
+                return Material.ANVIL;
+            case USE_GRINDSTONE:
+                return Material.GRINDSTONE;
+            case USE_STONECUTTER:
+                return Material.STONECUTTER;
+            case USE_LOOM:
+                return Material.LOOM;
+            case USE_SMITHING:
+                return Material.SMITHING_TABLE;
+            case USE_CARTOGRAPHY:
+                return Material.CARTOGRAPHY_TABLE;
+            case USE_BREWING:
+                return Material.BREWING_STAND;
+            case USE_BELL:
+                return Material.BELL;
+            case USE_BEACON:
+                return Material.BEACON;
+            case USE_JUKEBOX:
+                return Material.JUKEBOX;
+            case USE_NOTEBLOCK:
+                return Material.NOTE_BLOCK;
+            case USE_CAMPFIRE:
+                return Material.CAMPFIRE;
+            case USE_BED:
+                return Material.RED_BED;
+            case INTERACT_ARMOR_STAND:
+                return Material.ARMOR_STAND;
+            case INTERACT_ITEM_FRAME:
+                return Material.ITEM_FRAME;
+            case PLACE_WATER:
+                return Material.WATER_BUCKET;
+            case PLACE_LAVA:
+                return Material.LAVA_BUCKET;
+            case TAKE_WATER:
+            case TAKE_LAVA:
+                return Material.BUCKET;
+            case INTERACT_VILLAGER:
+                return Material.EMERALD;
+            case LEASH_MOBS:
+                return Material.LEAD;
+            case RIDE_ENTITIES:
+                return Material.SADDLE;
+            default:
+                return Material.BARRIER;
+        }
+    }
+
+    private void addKickButton() {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(16);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.BARRIER)
+                        .name(getString("kick.display_name"))
+                        .lore(getStringList("kick.lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                new ConfirmMenu(player,
+                        langManager.getString("menu.confirm_menu.kick_coop.display_name"),
+                        langManager.getStringList("menu.confirm_menu.kick_coop.lore").stream()
+                                .map(s -> s.replace("{player}", coopPlayer.getName()))
+                                .collect(Collectors.toList()),
+                        result -> {
+                            if ("confirmed".equals(result)) {
+                                player.closeInventory();
+                                NClaim.inst().getClaimCoopManager()
+                                        .removeCoopPlayer(claim, player, coopPlayer.getUniqueId());
+                            } else if ("declined".equals(result)) {
+                                new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
+                            }
+                        });
+            }
+        });
     }
 }

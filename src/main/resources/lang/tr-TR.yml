@@ -1,50 +1,668 @@
-messages:
+command:
+  must_be_player: "{prefix} &cBu komutu kullanmak için oyuncu olmalısınız!"
+  permission_denied: "{prefix} &cBunu yapmak için yetkiniz yok!"
+  in_cooldown: "{prefix} &cTekrar denemeden önce lütfen bir dakika bekleyin."
+  wrong_usage: "{prefix} &fYardıma mı ihtiyacınız var? Tüm komutları görmek için &e/nclaim <help/?> &fkullanın."
+  enter_a_valid_number: "{prefix} &cLütfen geçerli bir sayı girin."
+  enter_a_player: "{prefix} &cLütfen bir oyuncu adı girin."
+  player_data_not_found: "{prefix} &cOyuncu verisi bulunamadı. &7Lütfen tekrar giriş yapıp deneyin."
+  invalid_material: "{prefix} &c{material} &fgeçerli bir materyal değil."
+  invalid_block_type: "{prefix} &c{block} &fgeçerli bir blok türü değil."
+  not_in_claim: "{prefix} &cHerhangi bir bölgede değilsiniz."
+  expiration_extended: "{prefix} &fBölge süresi &e{d} gün&f, &e{h} saat&f, &e{m} dakika &e{price} &fkarşılığında uzatıldı."
+  level:
+    info: "{prefix} &fBu bölgenin toplam değeri &e{value} &7(&e{chunks} &7parça genelinde)"
+  balance:
+    current: "{prefix} &fBakiyenizde &e${balance} &fbulunuyor."
+    not_enough: "{prefix} &cBunu yapmak için yeterli bakiyeniz yok."
+  player:
+    not_found: "{prefix} &c{target} bulunamadı."
+    cant_add_self: "{prefix} &cKendinizi ekleyemezsiniz."
+  reload:
+    success: "{prefix} &aKonfigürasyon başarıyla yeniden yüklendi."
+    failed: "{prefix} &cYeniden yükleme başarısız. Lütfen konsolu kontrol edin."
+  set:
+    block_value_set: "{prefix} &f&e{block} &fblok değeri &e{value} &folarak ayarlandı."
+    target_balance_set: "{prefix} &fBakiyeniz bir yönetici tarafından &e${balance} &folarak ayarlandı."
+    player_balance_set: "{prefix} &e{target} &foyuncusunun bakiyesi &e${amount} &folarak ayarlandı."
+  add:
+    target_added: "{prefix} &e${amount} &fbakiyenize eklendi. &7(Toplam: &e${balance}&7)"
+    player_added: "{prefix} &e${amount} &f&e{target} &foyuncusunun bakiyesine eklendi."
+    world_already_in_blacklist: "{prefix} &c&e{world} &cdünyası zaten kara listede."
+    world_added_to_blacklist: "{prefix} &f&e{world} &fdünyası kara listeye eklendi."
+    region_already_in_blacklist: "{prefix} &c&e{region} &cbölgesi zaten kara listede."
+    region_added_to_blacklist: "{prefix} &f&e{region} &fbölgesi kara listeye eklendi."
+    expiration_extended: "{prefix} &fBölge süresi &e{d} gün&f, &e{h} saat&f, &e{m} dakika &fuzatıldı."
+    block_value_added: "{prefix} &e{block} &fblok değeri &e{value} &folarak ayarlandı."
+    block_already_exists: "{prefix} &c{block} &czaten değer listesinde mevcut."
+  remove:
+    target_removed: "{prefix} &e${amount} &fbakiyenizden çıkarıldı. &7(Toplam: &e${balance}&7)"
+    player_removed: "{prefix} &e${amount} &f&e{target} &foyuncusunun bakiyesinden çıkarıldı."
+    not_in_blacklist: "{prefix} &c{world} &fkara listede değil."
+    world_removed_from_blacklist: "{prefix} &f&e{world} &fdünyası kara listeden çıkarıldı."
+    region_removed_from_blacklist: "{prefix} &f&e{region} &fbölgesi kara listeden çıkarıldı."
+    expiration_subtracted: "{prefix} &fBölge süresi &e{d} gün&f, &e{h} saat&f, &e{m} dakika &fazaltıldı."
+    block_not_found: "{prefix} &c{block} &cblok değerlerinde bulunamadı."
+    block_value_removed: "{prefix} &e{block} &fblok değerlerinden kaldırıldı."
+  change:
+    invalid_lang: "{prefix} &cLütfen geçerli bir dil seçin &7(örn. 'en-US' veya 'tr-TR')"
+    lang_changed: "{prefix} &fDil &e{lang} &folarak değiştirildi."
+    invalid_material: "{prefix} &cGeçersiz materyal: {material}"
+    invalid_value: "{prefix} &cGeçersiz değer! Pozitif bir sayı girin."
+    blockvalue_updated: "{prefix} &aBlok değeri güncellendi: &e{material} &a{old_value} -> {new_value}"
+    blockvalue_added: "{prefix} &aYeni blok değeri eklendi: &e{material} &a= {value}"
+    blockvalue_not_changed: "{prefix} &aEski değer ve yeni değer eşit olduğu için blok değeri değişmedi."
+  migrate:
+    database_disabled: "{prefix} &cVeritabanı bağlantısı yapılandırmada devre dışı."
+    completed: "{prefix} &aTaşıma başarıyla tamamlandı."
+    database_not_connected: "{prefix} &cVeritabanına bağlanılamadı, lütfen veritabanı bağlantınızın doğru olduğundan emin olun."
+    backup_created: "{prefix} &aDosya yedeği başarıyla oluşturuldu."
+    failed: "{prefix} &cTaşıma başarısız. Lütfen konsolu kontrol edin."
 
-  error:
-    not-enough-permission: "%p {RED}Hata: Bunu yapma izniniz yok!"
-    cooldown: "%p {RED}Hata: Tekrar denemeden önce lütfen biraz bekleyin."
-    wrong-usage: "%p {RED}Hata: Yardıma mı ihtiyacınız var? Kullanılabilir tüm komutları görmek için /nclaim <help/?> kullanın."
-    no-player: "%p {RED}Hata: Oyuncu çevrimdışı veya bulunamadı."
-    not-enough-money: "%p {RED}Hata: Bunu yapmak için yeterli paranız yok."
-    reached-max-claim-count: "%p {RED}Hata: Maksimum claim sayısına ulaştınız."
-    in-blacklisted-world: "%p {RED}Hata: Kara listeye alınmış dünyada bunu yapamazsınız."
-    pvp-not-allowed: "%p {RED}Hata: Bu claim içinde PvP yasak."
-    not-found: "%p {RED}Hata: Aradığınız şey bulunamadı."
-    claim-not-yours: "%p {RED}Hata: Bu claim size ait değil."
-    cant-add-yourself: "%p {RED}Hata: Kendinizi ekleyemezsiniz."
-    coop-limit-reached: "%p {RED}Hata: En fazla {DARKRED}%0 {RED}ortak oyuncunuz olabilir!"
-    player-already-coop: "%p {RED}Hata: Oyuncu zaten ortak listesinde."
-    already-claimed: "%p {RED}Hata: Bu chunk zaten claimlenmiş!"
-    invalid-lang: "%p {RED}Hata: Geçersiz dil kodu: %0. Lütfen geçerli bir dil seçin (örn: 'en' veya 'tr')."
-    already-blacklisted: "%p {RED}Hata: {DARKRED}%0 {RED}isimli dünya zaten kara listede."
-    not-in-blacklist: "%p {RED}Hata: {DARKRED}%0 {RED}isimli dünya kara listede değil."
-    enter-a-number: "%p {RED}Hata: Lütfen geçerli bir sayı girin."
+claim:
+  max_reached: "{prefix} &cMaksimum bölge sınırına ulaştınız."
+  not_found: "{prefix} &cHiçbir bölgeniz yok ve hiçbir bölgeye eklenmemişsiniz."
+  in_blacklisted_region_or_world: "{prefix} &cBunu kara listedeki bir dünya veya bölgede yapamazsınız."
+  not_yours: "{prefix} &cBu bölge size ait değil."
+  buy_cancelled: "{prefix} &cBölge satın alımı iptal edildi."
+  already_claimed: "{prefix} &cBu parça zaten alınmış!"
+  received: "{prefix} &aBölgeyi başarıyla aldınız."
+  removed: "{prefix} &fBu parçadaki bölge kaldırıldı."
+  expired: "{prefix} &fBölgenin süresi doldu ve kaldırıldı &7(&e{x}&7, &e{z}&7)."
+  setting_change_cancelled: "&cAyar değişikliği iptal edildi!"
+  pvp_not_allowed: "{prefix} &cBu bölgede PvP'ye izin verilmiyor."
+  level:
+    calculating_started: "{prefix} &aBölge seviyeniz hesaplanıyor, lütfen bekleyin."
+    calculating_in_progress: "{prefix} &cBaşka bir oyuncu bölge seviyesi hesaplıyor, lütfen bir dakika bekleyin"
+    calculating_in_queue: "{prefix} &fBölge seviyesi hesaplama kuyruğunda toplam &7{count} &fkişi var."
+    calculating_in_queue_position: "{prefix} &fSıranız &7{position}&f."
+    queue_is_empty: "{prefix} &fKuyruk boş."
+    your_already_in_queue: "{prefix} &fZaten sıradasın."
+  time:
+    no_time_selected: "{prefix} &cArtırılacak zaman seçilmedi."
+  land:
+    already_own_chunk: "{prefix} &cBu parça zaten sizin!"
+    already_own_land: "{prefix} &cBu arazi zaten sizin!"
+    not_adjacent: "{prefix} &cBölgenizi sadece bitişik parçalara genişletebilirsiniz!"
+    expanded: "{prefix} &aYeni arazi başarıyla bölgenize eklendi."
+    buy_cancelled: "{prefix} &cArazi satın alımı iptal edildi."
+  coop:
+    limit_reached: "{prefix} &cEn fazla &e{0} &cortak oyuncunuz olabilir!"
+    already_added: "{prefix} &c{coop} zaten ortak listesinde."
+    added: "{prefix} &e{coop} &fbölgenize eklendi."
+    removed: "{prefix} &e{coop} &fortak listesinden çıkarıldı."
+    kicked: "{prefix} &f&e{owner} &foyuncusunun bölgesinden çıkarıldınız."
+    joined: "{prefix} &f&e{owner} &foyuncusunun bölgesine eklendiniz."
+    not_in_list: "{prefix} &c{0} &fortak listesinde değil."
+    add_cancelled: "&cOrtak oyuncu ekleme iptal edildi!"
+    remove_cancelled: "&cOrtak oyuncu çıkarma iptal edildi!"
+    permission_toggle_cancelled: "&cOrtak yetki değişikliği iptal edildi!"
 
-  success:
-    claim-received: "%p {GREEN}Başarılı: Claim başarıyla alındı."
-    coop-added: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}claiminize eklendi."
-    coop-kicked: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}ortak listesinden çıkarıldı."
-    player-added-to-claim: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}sizi claimine ekledi."
-    claim-expanded: "%p {GREEN}Başarılı: Claiminize yeni toprak eklendi."
-    reload: "%p {GREEN}Başarılı: Yapılandırma dosyaları başarıyla yeniden yüklendi."
-    target-balance-added: "%p {GREEN}Başarılı: {DARKGREEN}%0$ {GREEN}yönetici tarafından bakiyenize eklendi. {GRAY}({GREEN}Toplam bakiye: {DARKGREEN}%1${GRAY})"
-    player-balance-added: "%p {GREEN}Başarılı: {DARKGREEN}%0${GREEN}, {DARKGREEN}%1 {GREEN}oyuncusunun bakiyesine eklendi."
-    target-balance-removed: "%p {GREEN}Başarılı: {DARKGREEN}%0$ {GREEN}yönetici tarafından bakiyenizden çıkarıldı. {GRAY}({GREEN}Toplam bakiye: {DARKGREEN}%1${GRAY})"
-    player-balance-removed: "%p {GREEN}Başarılı: {DARKGREEN}%0${GREEN}, {DARKGREEN}%1 {GREEN}oyuncusunun bakiyesinden çıkarıldı."
-    expiration-date-changed: "%p {GREEN}Başarılı: Son kullanma tarihi {DARKGREEN}%0 gün{GREEN}, {DARKGREEN}%1 saat{GREEN}, {DARKGREEN}%2 dakika{GREEN} olarak eklendi/azaltıldı."
-    claim-removed: "%p {GREEN}Başarılı: İçinde bulunduğunuz chunk'taki claim silindi."
-    lang-changed: "%p {GREEN}Başarılı: Dil başarıyla {DARKGREEN}%0{GREEN} olarak değiştirildi."
-    blacklisted: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}isimli dünya başarıyla kara listeye eklendi."
-    removed-from-blacklist: "%p {GREEN}Başarılı: {DARKGREEN}%0 {GREEN}isimli dünya kara listeden çıkarıldı!"
+action_bar:
+  unclaimed_chunk: "&7Sahipsiz"
+  claimed_chunk: "&e{owner} &7- {pvp_status}"
+  pvp_enabled: "&cPvP"
+  pvp_disabled: "&aPvP"
 
-  reminder:
-    claim-expired: "%p {PURPLE}Hatırlatma: {WHITE}Claim süresi doldu ve kaldırıldı {GRAY}({RED}%0{WHITE}, {RED}%1{GRAY})."
-    player-not-in-coop: "%p {PURPLE}Hatırlatma: {RED}%0 {WHITE}zaten ortak listesinde değil."
-    player-balance: "%p {PURPLE}Hatırlatma: {WHITE}Bakiyeniz: {GRAY}%0{WHITE}$"
+hologram:
+  title: "&6⚔ Korumalı Bölge ⚔"
+  owner: "&fSahip: &e{owner}"
+  time_left: "&fKalan Süre: &e{time_left}"
+  coop_count: "&fOrtak Oyuncular: &e{coop_count}"
+  total_size: "&fToplam Boyut: &e{total_size} &7parça"
 
-action-bar:
-  unclaimed-chunk: "{GRAY}Sahipsiz"
-  claimed-chunk: "{PURPLE}%0 {GRAY}- %1"
+menu:
+  back:
+    display_name: "&eGeri"
+  previous_page:
+    display_name: "&eÖnceki Sayfa"
+  next_page:
+    display_name: "&eSonraki Sayfa"
+  enabled: "&aEtkin"
+  disabled: "&cDevre Dışı"
+
+  confirm_menu:
+    title: "İşlemi Onayla"
+    confirm:
+      display_name: "&aOnayla"
+    decline:
+      display_name: "&cReddet"
+    buy_claim:
+      display_name: "&6Bölge Satın Al"
+      lore:
+        - ""
+        - "&fBu işlemi onaylarsanız:"
+        - "&7• &e${price} &fbakiyenizden düşülecek"
+        - "&7• &fYeni bir &eBölge &falacaksınız"
+        - ""
+        - "&7Satın almayı onaylamak için tıklayın"
+    expand_land:
+      display_name: "&6Bölgeyi Genişlet"
+      lore:
+        - ""
+        - "&fBu işlemi onaylarsanız:"
+        - "&7• &fMaliyet: &e${price}"
+        - "&7• &fSeçilen parça bölgenize eklenecek"
+        - ""
+        - "&7Genişletmeyi onaylamak için tıklayın"
+    delete_claim:
+      display_name: "&6Bölgeyi Sil"
+      lore:
+        - ""
+        - "&cUyarı: &fBu işlem:"
+        - "&7• &fBölgenizi kalıcı olarak silecek"
+        - "&7• &fGeri alınamaz"
+        - ""
+        - "&7Silmeyi onaylamak için tıklayın"
+    kick_coop:
+      display_name: "&6Üyeyi Çıkar"
+      lore:
+        - ""
+        - "&fBu işlem:"
+        - "&7• &e{player} &foyuncusunu bölgenizden çıkaracak"
+        - "&7• &fTüm yetkilerini iptal edecek"
+        - ""
+        - "&7Çıkarmayı onaylamak için tıklayın"
+    add_coop:
+      display_name: "&6Ortak Üye Ekle"
+      lore:
+        - ""
+        - "&fBu işlem:"
+        - "&7• &e{player} &foyuncusunu bölgenize ekleyecek"
+        - "&7• &fOna ortak yetkileri verecek"
+        - ""
+        - "&7Eklemeyi onaylamak için tıklayın"
+
+  main_menu:
+    title: "Bölge Yönetimi"
+    admin:
+      display_name: "&6Yönetici Menüsü"
+    buy_claim:
+      display_name: "&6Bölge Satın Al"
+      lore:
+        - ""
+        - "&fYeni bir bölge satın alın"
+        - "&7Maliyet: &e${price}"
+        - ""
+        - "&eSatın almak için tıklayın"
+    manage_claims:
+      display_name: "&6Bölgeleri Yönet"
+      lore:
+        - ""
+        - "&fBölgelerinizi yönetin:"
+        - "&7• &fTüm bölgeleri görüntüle"
+        - "&7• &fAyarları değiştir"
+        - "&7• &fÜyeleri yönet"
+        - ""
+        - "&eYönetmek için tıklayın"
+
+  list_menu:
+    title: "Bölge Listesi"
+    list_type:
+      display_name: "&6Liste Türü"
+      all: "Tümü"
+      player: "Oyuncu"
+      coop: "Ortak"
+    your_claims:
+      display_name: "&6Bölge: &e{claim_id}"
+      lore:
+        - ""
+        - "&fDünya: &e{world}"
+        - "&fKonum: &e{coordinates}"
+        - "&fSahip: &e{owner}"
+        - ""
+        - "&7Yönetmek için tıklayın"
+    coop_claims:
+      display_name: "&6Ortak Bölge: &e{claim_id}"
+      lore:
+        - ""
+        - "&fDünya: &e{world}"
+        - "&fKonum: &e{coordinates}"
+        - "&fSahip: &e{owner}"
+        - ""
+        - "&7Sadece görüntüleme erişimi"
+
+  expand_menu:
+    title: "Bölgeyi Genişlet"
+    center:
+      display_name: "&6Merkez Parça"
+      lore:
+        - ""
+        - "&fBu bölgenizin merkez parçası"
+    expand:
+      display_name: "&6Bölgeyi Genişlet"
+      lore:
+        - ""
+        - "&fBölgenizi genişletin"
+        - "&7Maliyet: &e${price}"
+        - ""
+        - "&eSatın almak için tıklayın"
+    claimed:
+      display_name: "&aAlınmış Parça"
+      lore:
+        - ""
+        - "&fBu parça alınmış"
+    not_adjacent:
+      display_name: "&cGeçersiz Parça"
+      lore:
+        - ""
+        - "&fSadece bitişik parçaları alabilirsiniz"
+    claimed_another_player:
+      display_name: "&cBaşka Oyuncu Tarafından Alınmış"
+      lore:
+        - ""
+        - "&fBu parça başka birine ait"
+
+  claim_menu:
+    title: "Bölgeyi Yönet"
+    delete:
+      display_name: "&cBölgeyi Sil"
+      lore:
+        - ""
+        - "&cUyarı: &fBu işlem bölgenizi"
+        - "&fkalıcı olarak geri ödeme olmadan silecek"
+        - ""
+        - "&7Devam etmek için tıklayın"
+    manage_expiry:
+      display_name: "&6Süre Dolumu Yönet"
+      lore:
+        - ""
+        - "&fBölge süresini yönetin:"
+        - "&7• &fSon kullanma tarihini görüntüle"
+        - "&7• &fBölge süresini uzat"
+        - ""
+        - "&eYönetmek için tıklayın"
+    manage_chunks:
+      display_name: "&6Parçaları Yönet"
+      lore:
+        - ""
+        - "&fBölge arazinizi genişletin"
+        - "&7• &fYeni parçalar ekle"
+        - "&7• &fMevcut parçaları görüntüle"
+        - ""
+        - "&eYönetmek için tıklayın"
+    manage_members:
+      display_name: "&6Üyeleri Yönet"
+      lore:
+        - ""
+        - "&fOrtak üyeleri yönetin:"
+        - "&7• &fÜye ekle/çıkar"
+        - "&7• &fYetkilerini değiştir"
+        - ""
+        - "&eYönetmek için tıklayın"
+    manage_settings:
+      display_name: "&6Bölge Ayarları"
+      lore:
+        - ""
+        - "&fBölge ayarlarını yapılandırın:"
+        - "&7• &fYetkiler"
+        - "&7• &fKorumalar"
+        - "&7• &fErişim kuralları"
+        - ""
+        - "&eYapılandırmak için tıklayın"
+
+  manage_coop_menu:
+    title: "Ortak Üyeler"
+    add_coop:
+      display_name: "&aÜye Ekle"
+    coop_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fKatıldı: &7{date}"
+        - ""
+        - "&eDüzenlemek için tıklayın"
+      admin_lore:
+        - "&fYetkiler: &a{yes}&7/&c{no}"
+        - ""
+        - "&eDeğiştirmek için tıklayın"
+
+  manage_time_menu:
+    title: "Süreyi Yönet"
+    claim_info:
+      display_name: "&6Süre Bilgisi"
+      lore:
+        - ""
+        - "&fKalan Süre: &e{time_left}"
+        - "&fSüresi Bitiyor: &e{expires_at}"
+    confirm:
+      display_name: "&aDeğişiklikleri Onayla"
+      lore:
+        - ""
+        - "&fYeni süre:"
+        - "&7• &e{d} &fgün"
+        - "&7• &e{h} &fsaat"
+        - "&7• &e{m} &fdakika"
+        - "&7Maliyet: &e${price}"
+    select_time_unit:
+      display_name: "&6Zaman Birimi Seç"
+      lore:
+        - ""
+        - "&f• {days_status}"
+        - "&f• {hours_status}"
+        - "&f• {minutes_status}"
+    add_one:
+      display_name: "&a+1 {unit}"
+    add_six:
+      display_name: "&a+6 {unit}"
+    subtract_one:
+      display_name: "&c-1 {unit}"
+    subtract_six:
+      display_name: "&c-6 {unit}"
+
+  settings_menu:
+    title: "Bölge Ayarları"
+    settings:
+      pvp:
+        display_name: "&6PvP"
+        lore:
+          - ""
+          - "&fBölgede oyuncu savaşına izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      tnt_explosions:
+        display_name: "&6TNT Hasarı"
+        lore:
+          - ""
+          - "&fTNT'nin bloklara zarar vermesine izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      creeper_explosions:
+        display_name: "&6Creeper Hasarı"
+        lore:
+          - ""
+          - "&fCreeper patlama hasarına izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      mob_attacks:
+        display_name: "&6Canavar Savaşı"
+        lore:
+          - ""
+          - "&fOyuncuların canavarlarla savaşmasına izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      monster_spawning:
+        display_name: "&6Canavar Doğumu"
+        lore:
+          - ""
+          - "&fCanavarların doğmasına izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      animal_spawning:
+        display_name: "&6Hayvan Doğumu"
+        lore:
+          - ""
+          - "&fHayvanların doğmasına izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+      villager_interactions:
+        display_name: "&6Köylü Ticaret"
+        lore:
+          - ""
+          - "&fKöylü etkileşimlerine izin ver"
+          - ""
+          - "&7Durum: {status}"
+          - ""
+          - "&eAçmak/kapatmak için tıklayın"
+
+  permission_menu:
+    title: "{player} Oyuncusunu Yönet"
+    click_to_view: "&eGörmek için tıklayın"
+    right_click_toggle: "&eTümünü açmak/kapatmak için sağ tık"
+    offline: "&7(Çevrimdışı)"
+
+    player_info:
+      display_name: "&e{player}"
+      lore:
+        - "&fKatıldı: &7{date}"
+        - ""
+        - "&7Aşağıdan yetkileri yönetin"
+
+    kick:
+      display_name: "&cÜyeyi Çıkar"
+      lore:
+        - ""
+        - "&fBu üyeyi bölgenizden"
+        - "&fçıkarın"
+        - ""
+        - "&7Çıkarmak için tıklayın"
+
+    categories:
+      blocks:
+        display_name: "&6Blok Yetkileri"
+      containers:
+        display_name: "&6Konteyner Erişimi"
+      redstone:
+        display_name: "&6Redstone Kullanımı"
+      doors:
+        display_name: "&6Kapı Erişimi"
+      workstations:
+        display_name: "&6İş İstasyonu Kullanımı"
+      interactions:
+        display_name: "&6Etkileşim Hakları"
+      liquids:
+        display_name: "&6Sıvı Yönetimi"
+      entities:
+        display_name: "&6Varlık Etkileşimleri"
+
+    permissions:
+      break_blocks:
+        display_name: "&fBlok Kır"
+      break_spawner:
+        display_name: "&fSpawner Kır"
+      place_blocks:
+        display_name: "&fBlok Yerleştir"
+      place_spawner:
+        display_name: "&fSpawner Yerleştir"
+      use_chest:
+        display_name: "&fSandık Kullan"
+      use_furnace:
+        display_name: "&fFırın Kullan"
+      use_barrel:
+        display_name: "&fVaril Kullan"
+      use_shulker:
+        display_name: "&fShulker Kutu Kullan"
+      use_hopper:
+        display_name: "&fHuni Kullan"
+      use_dispenser:
+        display_name: "&fDispenser Kullan"
+      use_redstone:
+        display_name: "&fRedstone Kullan"
+      use_buttons:
+        display_name: "&fDüğme Kullan"
+      use_pressure_plates:
+        display_name: "&fBasınç Plakası Kullan"
+      use_levers:
+        display_name: "&fKol Kullan"
+      use_doors:
+        display_name: "&fKapı Kullan"
+      use_trapdoors:
+        display_name: "&fTuzak Kapısı Kullan"
+      use_gates:
+        display_name: "&fKapı Kullan"
+      use_crafting:
+        display_name: "&fÜretim Masası Kullan"
+      use_enchanting:
+        display_name: "&fBüyü Masası Kullan"
+      use_anvil:
+        display_name: "&fÖrs Kullan"
+      use_grindstone:
+        display_name: "&fÖğütme Taşı Kullan"
+      use_stonecutter:
+        display_name: "&fTaş Kesici Kullan"
+      use_loom:
+        display_name: "&fDokuma Tezgahı Kullan"
+      use_smithing:
+        display_name: "&fDemircilik Masası Kullan"
+      use_cartography:
+        display_name: "&fHaritacılık Masası Kullan"
+      use_brewing:
+        display_name: "&fDemleme Standı Kullan"
+      use_bell:
+        display_name: "&fÇan Kullan"
+      use_beacon:
+        display_name: "&fİşaret Kullan"
+      use_jukebox:
+        display_name: "&fMüzik Kutusu Kullan"
+      use_noteblock:
+        display_name: "&fNot Bloğu Kullan"
+      use_campfire:
+        display_name: "&fKamp Ateşi Kullan"
+      use_bed:
+        display_name: "&fYatak Kullan"
+      interact_armor_stand:
+        display_name: "&fZırh Standı Kullan"
+      interact_item_frame:
+        display_name: "&fEşya Çerçevesi Kullan"
+      place_water:
+        display_name: "&fSu Yerleştir"
+      place_lava:
+        display_name: "&fLav Yerleştir"
+      take_water:
+        display_name: "&fSu Al"
+      take_lava:
+        display_name: "&fLav Al"
+      interact_villager:
+        display_name: "&fKöylülerle Ticaret Yap"
+      leash_mobs:
+        display_name: "&fCanavarları Bağla"
+      ride_entities:
+        display_name: "&fVarlıklara Bin"
+
+  admin:
+    main_menu:
+      title: "Yönetici Paneli"
+      manage_claims:
+        display_name: "&6Tüm Bölgeleri Yönet"
+
+    all_claims_menu:
+      title: "Tüm Bölgeler"
+      reset_settings:
+        display_name: "&cAyarları Sıfırla"
+      search_player:
+        display_name: "&aOyuncu Ara"
+      sort_by_date:
+        display_name: "&aTarihe Göre Sırala"
+        lore:
+          - ""
+          - "&f• {newest_status}"
+          - "&f• {oldest_status}"
+      delete_selected:
+        display_name: "&cSeçilenleri Sil"
+      claim_items:
+        selected:
+          display_name: "&a{owner}'nin Bölgesi &7(Seçili)"
+          lore:
+            - ""
+            - "&fOluşturuldu: &7{created_at}"
+            - "&fKonum: &7{world}, {coordinates}"
+            - "&fBoyut: &7{land_size} parça"
+            - "&fOrtak Üyeler: &7{coop_count}"
+            - "&fAyarlar: &a{yes}&7/&c{no}"
+            - ""
+            - "&eTıkla &7- &fYönet"
+            - "&eShift Tıkla &7- &fIşınlan"
+            - "&eSağ Tıkla &7- &fSeçimi Kaldır"
+        unselected:
+          display_name: "&6{owner}'nin Bölgesi"
+          lore:
+            - ""
+            - "&fOluşturuldu: &7{created_at}"
+            - "&fKonum: &7{world}, {coordinates}"
+            - "&fBoyut: &7{land_size} parça"
+            - "&fOrtak Üyeler: &7{coop_count}"
+            - "&fAyarlar: &a{yes}&7/&c{no}"
+            - ""
+            - "&eTıkla &7- &fYönet"
+            - "&eShift Tıkla &7- &fIşınlan"
+            - "&eSağ Tıkla &7- &fSeç"
+
+    manage_claim_menu:
+      title: "{owner}'nin Bölgesi"
+      manage_coop:
+        display_name: "&6Ortakları Yönet"
+        lore:
+          - ""
+          - "&fOrtak üyeleri yönetin:"
+          - "&7• &fÜyeleri görüntüle"
+          - "&7• &fYetkilerini değiştir"
+          - "&7• &fÜye ekle/çıkar"
+          - ""
+          - "&eYönetmek için tıklayın"
+      manage_lands:
+        display_name: "&6Arazileri Yönet"
+        lore:
+          - ""
+          - "&fBölge arazilerini yönetin:"
+          - "&7• &fParçaları görüntüle"
+          - "&7• &fParça ekle/çıkar"
+          - ""
+          - "&eYönetmek için tıklayın"
+      manage_expiration:
+        display_name: "&6Süre Dolumunu Yönet"
+        lore:
+          - ""
+          - "&fBölge süresini yönetin:"
+          - "&7• &fSüre dolumunu görüntüle"
+          - "&7• &fSüreyi değiştir"
+          - ""
+          - "&eYönetmek için tıklayın"
+      delete_claim:
+        display_name: "&cBölgeyi Sil"
+        lore:
+          - ""
+          - "&cUyarı: &fBu işlem:"
+          - "&7• &fBölgeyi kalıcı olarak silecek"
+          - "&7• &fTüm ayarları kaldıracak"
+          - "&7• &fGeri alınamaz"
+          - ""
+          - "&7Silmek için tıklayın"
+
+    manage_time_menu:
+      title: "{owner}'nin Bölgesi"
+      claim_info:
+        display_name: "&6Bölge Bilgisi"
+        lore:
+          - ""
+          - "&fKalan: &e{time_left}"
+          - "&fSüresi Bitiyor: &e{expires_at}"
+      time_display:
+        display_name: "&e{d} &fgün &e{h} &fsaat &e{m} &fdakika"
+      confirm:
+        display_name: "&aDeğişiklikleri Onayla"
+        lore:
+          - ""
+          - "&fYeni Süre:"
+          - "&7• &e{d} &fgün"
+          - "&7• &e{h} &fsaat"
+          - "&7• &e{m} &fdakika"
+      select_time_unit:
+        display_name: "&6Zaman Birimi Seç"
+        lore:
+          - ""
+          - "&f• {days_status}"
+          - "&f• {hours_status}"
+          - "&f• {minutes_status}"
+      add_one:
+        display_name: "&a+1 {unit}"
+      add_six:
+        display_name: "&a+6 {unit}"
+      subtract_one:
+        display_name: "&c-1 {unit}"
+      subtract_six:
+        display_name: "&c-6 {unit}"
 
 # DEĞİŞTİRMEYİN!
 lang_version: "{version}"

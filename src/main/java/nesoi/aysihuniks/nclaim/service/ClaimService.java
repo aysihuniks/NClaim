@@ -1,0 +1,262 @@
+package nesoi.aysihuniks.nclaim.service;
+
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.api.events.ClaimBuyLandEvent;
+import nesoi.aysihuniks.nclaim.api.events.ClaimCreateEvent;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.ClaimSetting;
+import nesoi.aysihuniks.nclaim.model.User;
+import nesoi.aysihuniks.nclaim.enums.Balance;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import net.milkbowl.vault.economy.Economy;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.Util;
+
+import java.util.*;
+
+@RequiredArgsConstructor
+public class ClaimService {
+    private final NClaim plugin;
+
+    public void buyNewClaim(Player player) {
+        Chunk chunk = player.getLocation().getChunk();
+        User user = User.getUser(player.getUniqueId());
+
+        if (!canCreateClaim(player, user, chunk)) {
+            return;
+        }
+
+        if (!handleClaimPayment(player, user)) {
+            return;
+        }
+
+        createNewClaim(player, chunk);
+
+        if (plugin.getNconfig().isDatabaseEnabled()) {
+            plugin.getMySQLManager().saveClaim(Claim.getClaim(chunk));
+            plugin.getMySQLManager().saveUser(user);
+        }
+    }
+
+    public void buyLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk) {
+        if (claim.getChunk().equals(chunk)) {
+            player.sendMessage(plugin.getLangManager().getString("claim.land.already_own_chunk"));
+            return;
+        }
+
+        String chunkKey = chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ();
+        if (claim.getLands().contains(chunkKey)) {
+            player.sendMessage(plugin.getLangManager().getString("claim.land.already_own_land"));
+            return;
+        }
+
+        if (!isAdjacentChunk(claim, chunk)) {
+            player.sendMessage(plugin.getLangManager().getString("claim.land.not_adjacent"));
+            return;
+        }
+
+        if (Claim.getClaim(chunk) != null) {
+            player.sendMessage(plugin.getLangManager().getString("claim.already_claimed"));
+            return;
+        }
+
+        User user = User.getUser(player.getUniqueId());
+        double landPrice = plugin.getNconfig().eachLandBuyPrice;
+
+        ClaimBuyLandEvent buyLandEvent = new ClaimBuyLandEvent(player, claim, chunk);
+        Bukkit.getPluginManager().callEvent(buyLandEvent);
+
+        if (buyLandEvent.isCancelled()) {
+            player.sendMessage(plugin.getLangManager().getString("claim.land.buy_cancelled"));
+            return;
+        }
+
+        if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.land_buy_price")) {
+            if (!handlePayment(player, user, landPrice)) {
+                return;
+            }
+        }
+
+        claim.getLands().add(chunkKey);
+
+        if (plugin.getNconfig().isDatabaseEnabled()) {
+            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getMySQLManager().saveUser(user);
+        }
+
+        player.sendMessage(plugin.getLangManager().getString("claim.land.expanded"));
+    }
+
+    private boolean isAdjacentChunk(Claim claim, Chunk targetChunk) {
+        int claimX = claim.getChunk().getX();
+        int claimZ = claim.getChunk().getZ();
+        int targetX = targetChunk.getX();
+        int targetZ = targetChunk.getZ();
+
+        if (isAdjacent(claimX, claimZ, targetX, targetZ)) {
+            return true;
+        }
+
+        for (String landKey : claim.getLands()) {
+            String[] coords = landKey.split(",");
+            if (coords.length >= 3) {
+                int landX = Integer.parseInt(coords[1]);
+                int landZ = Integer.parseInt(coords[2]);
+                if (isAdjacent(landX, landZ, targetX, targetZ)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAdjacent(int x1, int z1, int x2, int z2) {
+        return (Math.abs(x1 - x2) == 1 && z1 == z2) || (x1 == x2 && Math.abs(z1 - z2) == 1);
+    }
+
+    private boolean canCreateClaim(Player player, User user, Chunk chunk) {
+        if (isInBlacklistedRegion(player.getLocation())) {
+            if (!player.hasPermission("nclaim.bypass.*") || !player.hasPermission("nclaim.bypass.blacklisted_regions")) {
+                player.sendMessage(plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
+                return false;
+            }
+        }
+
+        if (user.getPlayerClaims().size() >= plugin.getNconfig().getMaxClaimCount(player)) {
+            player.sendMessage(plugin.getLangManager().getString("claim.max_reached"));
+            return false;
+        }
+
+        if (!player.hasPermission("nclaim.buy")) {
+            player.sendMessage(plugin.getLangManager().getString("command.permission_denied"));
+            return false;
+        }
+
+        if (Claim.getClaim(chunk) != null) {
+            player.sendMessage(plugin.getLangManager().getString("claim.already_claimed"));
+            return false;
+        }
+
+        if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(chunk.getWorld().getName())) {
+            if (!player.hasPermission("nclaim.bypass.*") || !player.hasPermission("nclaim.bypass.blacklisted_worlds")) {
+                player.sendMessage(plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean handleClaimPayment(Player player, User user) {
+        if (player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.claim_buy_price")) {
+            return true;
+        }
+
+        double claimPrice = plugin.getNconfig().getClaimBuyPrice();
+        return handlePayment(player, user, claimPrice);
+    }
+
+    private void createNewClaim(Player player, Chunk chunk) {
+        String claimId = generateClaimId(chunk);
+        Date createdAt = new Date();
+        Date expiredAt = calculateExpirationDate();
+        Location bedrockLocation = player.getLocation().getBlock().getLocation();
+
+        bedrockLocation.getBlock().setType(Material.BEDROCK);
+
+        long initialValue = plugin.getBlockValueManager().calculateChunkValue(chunk);
+
+        Claim claim = new Claim(
+                claimId,
+                chunk,
+                createdAt,
+                expiredAt,
+                player.getUniqueId(),
+                bedrockLocation,
+                initialValue,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new HashMap<>(),
+                new HashMap<>(),
+                new ClaimSetting()
+        );
+        ClaimCreateEvent createEvent = new ClaimCreateEvent(player, claim);
+        Bukkit.getPluginManager().callEvent(createEvent);
+
+        if (createEvent.isCancelled()) {
+            player.sendMessage(plugin.getLangManager().getString("claim.buy_cancelled"));
+            return;
+        }
+
+        plugin.getHologramManager().createHologram(bedrockLocation);
+        User.getUser(player.getUniqueId()).getPlayerClaims().add(claim);
+        player.sendMessage(plugin.getLangManager().getString("claim.received"));
+    }
+
+    private String generateClaimId(Chunk chunk) {
+        return chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ();
+    }
+
+    private Date calculateExpirationDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, plugin.getNconfig().getClaimExpiryDays());
+        return calendar.getTime();
+    }
+
+    private boolean handlePayment(Player player, User user, double amount) {
+        if (plugin.getBalanceSystem() == Balance.PLAYERDATA) {
+            if (user.getBalance() >= amount) {
+                user.setBalance(user.getBalance() - amount);
+                return true;
+            }
+        } else if (plugin.getBalanceSystem() == Balance.VAULT) {
+            Economy econ = plugin.getEconomy();
+            if (econ != null && econ.has(player, amount)) {
+                econ.withdrawPlayer(player, amount);
+                return true;
+            }
+        }
+
+        player.sendMessage(plugin.getLangManager().getString("command.balance.not_enough"));
+        return false;
+    }
+
+    private boolean isInBlacklistedRegion(Location location) {
+
+        if (!NClaim.inst().isWorldGuardEnabled()) return false;
+
+        try {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            if (container == null) return false;
+
+            RegionQuery query = container.createQuery();
+            ApplicableRegionSet set = query.getApplicableRegions(BukkitAdapter.adapt(location));
+
+            List<String> blacklistedRegions = plugin.getNconfig().getBlacklistedRegions();
+            if (blacklistedRegions == null || blacklistedRegions.isEmpty()) return false;
+
+            for (ProtectedRegion region : set) {
+                if (blacklistedRegions.contains(region.getId().toLowerCase())) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Util.log("&cFailed to check if location is in blacklisted region: " + e.getMessage());
+            return false;
+        }
+
+        return false;
+    }
+}

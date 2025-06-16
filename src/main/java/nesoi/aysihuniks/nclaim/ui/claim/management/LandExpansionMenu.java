@@ -1,74 +1,81 @@
-package nesoi.network.NClaim.menus.claim.land;
+package nesoi.aysihuniks.nclaim.ui.claim.management;
 
-import nesoi.network.NClaim.NCoreMain;
-import nesoi.network.NClaim.menus.claim.admin.inside.ManageClaimMenu;
-import nesoi.network.NClaim.menus.claim.inside.ClaimMenu;
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.utils.ChunkBorderManager;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.utils.LangManager;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.LazyButton;
-import org.nandayo.DAPI.guimanager.Menu;
-import org.nandayo.DAPI.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.Menu;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.MenuType;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class ExpandMenu extends Menu {
+public class LandExpansionMenu extends Menu {
 
     private final @NotNull Claim claim;
-    List<Integer> frameSlots = Arrays.asList(0, 8, 9, 17, 18, 26, 27, 35, 36, 44);
-    Collection<Chunk> allClaimChunks;
-    private boolean admin = false;
+    private final @NotNull Collection<Chunk> allClaimChunks;
+    private final boolean admin;
+    private final LangManager langManager;
+    private final ConfigurationSection menuSection;
 
-    public ExpandMenu(Player p, @NotNull Claim claim, Boolean admin) {
+    public LandExpansionMenu(@NotNull Player player, @NotNull Claim claim, boolean admin) {
         this.claim = claim;
-        this.createInventory(9 * 5, "NClaim - Expand Claim");
         this.allClaimChunks = claim.getAllChunks();
         this.admin = admin;
-        setupMenu(p);
-        displayTo(p);
+        this.langManager = NClaim.inst().getLangManager();
+        this.menuSection = langManager.getSection("menu.expand_menu");
+        setupMenu();
+        displayTo(player);
     }
 
-    private void setupMenu(Player p) {
-        this.addLazyButton(new LazyButton(Arrays.asList(0, 8, 9, 17, 18, 26, 27, 35, 36, 44)) {
-            @Override
-            public ItemStack getItem() {
-                return ItemCreator.of(Material.GRAY_STAINED_GLASS_PANE).name(" ").get();
-            }
-        });
+    private void setupMenu() {
+        createInventory(MenuType.CHEST_5_ROWS, langManager.getString(menuSection,"title"));
+        setBackgroundButton(BackgroundMenu::getButton);
 
-        this.addButton(new Button(22) {
+        this.addButton(new Button() {
+            final String configPath = "center";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(22);
+            }
+
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.BEDROCK)
-                        .name("{BROWN}Center Chunk")
-                        .lore(
-                                "",
-                                "{WHITE}This is your current claim center chunk."
-                        )
+                        .name(langManager.getString(menuSection, configPath + ".display_name"))
+                        .lore(langManager.getStringList(menuSection, configPath + ".lore"))
                         .get();
             }
 
             @Override
-            public void onClick(Player player, ClickType clickType) {
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_BACK.playSound(player);
                 if (!admin) {
-                    new ClaimMenu(player, claim);
+                    new ClaimManagementMenu(player, claim);
                 } else {
-                    new ManageClaimMenu(player, claim);
+                    new AdminClaimManagementMenu(player, claim);
                 }
             }
         });
 
         for (int i = 0; i < 45; i++) {
-            if (frameSlots.contains(i) || i == 22)
-                continue;
+            if (i == 22) continue;
             addDirtButton(i);
         }
     }
@@ -77,116 +84,92 @@ public class ExpandMenu extends Menu {
         Chunk thatChunk = calculateNewChunk(slot);
         Claim thatClaim = Claim.getClaim(thatChunk);
 
+        String configPath;
+        Material material;
+        boolean clickable = false;
+
         if (admin) {
             if (thatClaim == null) {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.BROWN_WOOL)
-                                .name("{BROWN}Expand Claim")
-                                .lore("", "{GRAY}Click to add this chunk to your claim.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                        if (clickType.isLeftClick()) {
-                            claim.buyLand(p, thatChunk);
-                            new ExpandMenu(p, claim, admin);
-                        } else {
-                            p.closeInventory();
-                            ChunkBorderManager chunkBorderManager = NCoreMain.inst().chunkBorderManager;
-                            chunkBorderManager.showChunkBorder(p, thatChunk);
-                        }
-                    }
-                });
+                configPath = "expand";
+                material = Material.BROWN_WOOL;
             } else {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.LIME_WOOL)
-                                .name("{GREEN}Claimed Chunk")
-                                .lore("", "{GRAY}This chunk is already claimed.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                    }
-                });
+                configPath = "claimed";
+                material = Material.LIME_WOOL;
             }
+            clickable = true;
         } else {
             if (!isAdjacentToClaim(thatChunk)) {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.BARRIER)
-                                .name("{RED}Invalid Chunk")
-                                .lore("", "{GRAY}You can't claim chunks that are not adjacent.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                    }
-                });
+                configPath = "not_adjacent";
+                material = Material.BLACK_WOOL;
             } else if (thatClaim == null) {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.BROWN_WOOL)
-                                .name("{BROWN}Expand Claim")
-                                .lore("", "{GRAY}Click to add this chunk to your claim.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                        if (clickType.isLeftClick()) {
-                            claim.buyLand(p, thatChunk);
-                            new ExpandMenu(p, claim, admin);
-                        } else {
-                            p.closeInventory();
-                            ChunkBorderManager chunkBorderManager = NCoreMain.inst().chunkBorderManager;
-                            chunkBorderManager.showChunkBorder(p, thatChunk);
-                        }
-                    }
-                });
-            } else if (claim.getLands().contains(NCoreMain.serializeChunk(thatChunk))) {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.LIME_WOOL)
-                                .name("{GREEN}Claimed Chunk")
-                                .lore("", "{GRAY}This chunk is already claimed.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                    }
-                });
+                configPath = "expand";
+                material = Material.BROWN_WOOL;
+                clickable = true;
+            } else if (claim.getLands().contains(NClaim.serializeChunk(thatChunk))) {
+                configPath = "claimed";
+                material = Material.LIME_WOOL;
+                clickable = true;
             } else {
-                addButton(new Button(slot) {
-                    @Override
-                    public ItemStack getItem() {
-                        return ItemCreator.of(Material.RED_WOOL)
-                                .name("{RED}Claimed by Another Player")
-                                .lore("", "{GRAY}This chunk is already claimed by another player.")
-                                .get();
-                    }
-
-                    @Override
-                    public void onClick(Player p, ClickType clickType) {
-                    }
-                });
+                configPath = "claimed_another_player";
+                material = Material.RED_WOOL;
             }
         }
+
+        addButton(createButton(slot, configPath, material, thatChunk, clickable));
+    }
+
+    private Button createButton(int slot, String configPath, Material material, Chunk thatChunk, boolean clickable) {
+        return new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(slot);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                double landPrice = NClaim.inst().getNconfig().getEachLandBuyPrice();
+                String displayName = langManager.getString(menuSection, configPath + ".display_name");
+                List<String> lore = new ArrayList<>(langManager.getStringList(menuSection, configPath + ".lore"));
+                if (configPath.equals("expand")) {
+                    lore.replaceAll(s -> s.replace("{price}", String.valueOf(landPrice)));
+                }
+                return ItemCreator.of(material)
+                        .name(displayName)
+                        .lore(lore)
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!clickable) return;
+                if (clickType.isLeftClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {
+                    Consumer<String> onFinish = (result) -> {
+                        if ("confirmed".equals(result)) {
+                            NClaim.inst().getClaimService().buyLand(claim, player, thatChunk);
+                            new LandExpansionMenu(player, claim, admin);
+                        } else if ("declined".equals(result)) {
+                            new LandExpansionMenu(player, claim, admin);
+                        }
+                    };
+
+                    new ConfirmMenu(player,
+                            langManager.getString("menu.confirm_menu.expand_land.display_name"),
+                            langManager.getStringList("menu.confirm_menu.expand_land.lore")
+                                    .stream()
+                                    .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getEachLandBuyPrice())))
+                                    .collect(Collectors.toList()),
+                            onFinish);
+                } else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.LIME_WOOL || clickType.isRightClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {
+                    player.closeInventory();
+                    NClaim.inst().getClaimVisualizerService().showClaimBorders(player, thatChunk);
+                }
+            }
+        };
     }
 
     private boolean isAdjacentToClaim(@NotNull Chunk thatChunk) {
         return allClaimChunks.stream()
-                .anyMatch(c -> c != null && NCoreMain.isChunkAdjacent(c, thatChunk, 2));
+                .anyMatch(c -> c != null && NClaim.isChunkAdjacent(c, thatChunk, 2));
     }
 
     private Chunk calculateNewChunk(int slot) {

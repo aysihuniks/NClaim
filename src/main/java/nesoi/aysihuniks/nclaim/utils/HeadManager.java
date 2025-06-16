@@ -1,99 +1,177 @@
-package nesoi.network.NClaim.utils;
+package nesoi.aysihuniks.nclaim.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import de.tr7zw.nbtapi.NBT;
-import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
+import lombok.Getter;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.HeadProvider;
+import nesoi.aysihuniks.nclaim.model.User;
+import net.skinsrestorer.api.PropertyUtils;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.property.SkinProperty;
+import net.skinsrestorer.api.storage.PlayerStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.DAPI;
+import org.nandayo.dapi.Util;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
+@Getter
 public class HeadManager {
-
-    static public boolean api = false;
+    private final HeadProvider headProvider;
+    private final int version;
+    private final SkinsRestorer skinsRestorer;
+    private final boolean skinRestorerHooked;
+    private final Map<UUID, String> skinTextureCache;
+    private final Map<UUID, ItemStack> headCache;
+    private final Map<UUID, Long> textureFetchCooldown;
+    private static final long COOLDOWN_MS = 3600 * 1000;
 
     public HeadManager() {
-        api = true;
+        version = DAPI.getInstance().getWrapper().getMinecraftVersion();
+        skinsRestorer = getSkinsRestorerInstance();
+        skinRestorerHooked = skinsRestorer != null;
+        headProvider = skinRestorerHooked ? HeadProvider.SKINRESTORER : HeadProvider.NBTAPI;
+        skinTextureCache = new HashMap<>();
+        headCache = new HashMap<>();
+        textureFetchCooldown = new HashMap<>();
+        Util.log("&aHeadManager enabled successfully! Using " + headProvider.name() + " for heads.");
     }
 
-
-    public static HashMap<Player, String> textureMap = new HashMap<>();
-
-    public static String offlinePlayerTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ==";
-
-    public static ItemStack getPlayerHead(OfflinePlayer player) {
-
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-
-        if (!api) return head;
-
-        String texture = textureMap.get(player);
-
-        if (isVersionAtLeast("1.20.5")) {
-            NBT.modifyComponents(head, nbt -> {
-                ReadWriteNBT profileNbt = nbt.getOrCreateCompound("minecraft:profile");
-                profileNbt.setUUID("id", UUID.randomUUID());
-                ReadWriteNBT propertiesNbt = profileNbt.getCompoundList("properties").addCompound();
-                propertiesNbt.setString("name", "textures");
-                propertiesNbt.setString("value", (texture != null) ? texture : offlinePlayerTexture);
-            });
-        } else {
-            NBT.modify(head, nbt -> {
-                ReadWriteNBT skullOwnerCompound = nbt.getOrCreateCompound("SkullOwner");
-                skullOwnerCompound.setUUID("Id", UUID.randomUUID());
-                skullOwnerCompound.getOrCreateCompound("Properties")
-                        .getCompoundList("textures")
-                        .addCompound()
-                        .setString("Value", (texture != null) ? texture : offlinePlayerTexture);
-            });
-        }
-
-        return head;
-    }
-
-    public static String getFromName(String name) {
+    private SkinsRestorer getSkinsRestorerInstance() {
         try {
-            URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
-            InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
-            String uuid = new JsonParser().parse(reader_0).getAsJsonObject().get("id").getAsString();
-
-            URL url_1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false");
-            InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
-            JsonObject textureProperty = new JsonParser().parse(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
-            String texture = textureProperty.get("value").getAsString();
-
-            return texture;
-        } catch (IOException e) {
+            return (SkinsRestorer) Bukkit.getPluginManager().getPlugin("SkinsRestorer");
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public static boolean isVersionAtLeast(String compareVersion) {
-        String[] versionParts = Bukkit.getBukkitVersion().split("-")[0].split("\\.");
-        int minor = Integer.parseInt(versionParts[1]);
-        int patch;
-        if(versionParts.length > 2) patch = Integer.parseInt(versionParts[2]); else patch = 0;
-
-        String[] compareParts = compareVersion.split("\\.");
-        int compareMinor = Integer.parseInt(compareParts[1]);
-        int comparePatch;
-        if(compareParts.length > 2) comparePatch = Integer.parseInt(compareParts[2]); else comparePatch = 0;
-
-        if(minor == compareMinor && patch >= comparePatch) {
-            return true;
+    @Nullable
+    public String getSkinTextureValue(@NotNull UUID uuid) {
+        Long lastFetched = textureFetchCooldown.get(uuid);
+        if (lastFetched != null && System.currentTimeMillis() - lastFetched < COOLDOWN_MS) {
+            User user = User.getUser(uuid);
+            if (user != null && user.getSkinTexture() != null) {
+                return user.getSkinTexture();
+            }
+            return skinTextureCache.get(uuid);
         }
-        return minor > compareMinor;
+
+        User user = User.getUser(uuid);
+        if (user != null && user.getSkinTexture() != null) {
+            return user.getSkinTexture();
+        }
+
+        String cachedTexture = skinTextureCache.get(uuid);
+        if (cachedTexture != null) {
+            return cachedTexture;
+        }
+
+        String texture = null;
+        if (skinRestorerHooked) {
+            OfflinePlayer offPlayer = Bukkit.getOfflinePlayer(uuid);
+            PlayerStorage storage = skinsRestorer.getPlayerStorage();
+            try {
+                Optional<SkinProperty> property = storage.getSkinForPlayer(uuid, offPlayer.getName());
+                if (property.isPresent()) {
+                    String textureURL = PropertyUtils.getSkinTextureUrl(property.get());
+                    String json = "{\"textures\":{\"SKIN\":{\"url\":\"" + textureURL + "\"}}}";
+                    texture = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (Exception ignored) {}
+        } else {
+            try {
+                URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + Bukkit.getOfflinePlayer(uuid).getName());
+                InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
+                String id = new JsonParser().parse(reader_0).getAsJsonObject().get("id").getAsString();
+
+                URL url_1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
+                InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
+                JsonObject textureProperty = new JsonParser().parse(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
+                texture = textureProperty.get("value").getAsString();
+            } catch (IOException ignored) {}
+        }
+
+        if (texture != null) {
+            textureFetchCooldown.put(uuid, System.currentTimeMillis());
+            skinTextureCache.put(uuid, texture);
+            if (user != null) {
+                user.setSkinTexture(texture);
+                User.saveUser(uuid);
+            }
+        }
+
+        return texture;
+    }
+
+    public ItemStack createHead(OfflinePlayer player) {
+        UUID uuid = player.getUniqueId();
+
+        ItemStack cachedHead = headCache.get(uuid);
+        if (cachedHead != null) {
+            return cachedHead.clone();
+        }
+
+        String texture = getSkinTextureValue(uuid);
+        if (texture == null) {
+            ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
+            headCache.put(uuid, defaultHead);
+            return defaultHead.clone();
+        }
+
+        ItemStack head = createHeadWithTexture(texture);
+        headCache.put(uuid, head);
+        return head.clone();
+    }
+
+    public ItemStack createHeadWithTexture(final String texture) {
+        try {
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            if (version > 204) {
+                NBT.modifyComponents(head, nbt -> {
+                    ReadWriteNBT profileNbt = nbt.getOrCreateCompound("minecraft:profile");
+                    profileNbt.setUUID("id", UUID.randomUUID());
+                    ReadWriteNBT propertiesNbt = profileNbt.getCompoundList("properties").addCompound();
+                    propertiesNbt.setString("name", "textures");
+                    propertiesNbt.setString("value", texture);
+                });
+            } else {
+                NBT.modify(head, nbt -> {
+                    ReadWriteNBT skullOwnerCompound = nbt.getOrCreateCompound("SkullOwner");
+                    skullOwnerCompound.setUUID("Id", UUID.randomUUID());
+                    skullOwnerCompound.getOrCreateCompound("Properties")
+                            .getCompoundList("textures")
+                            .addCompound()
+                            .setString("Value", texture);
+                });
+            }
+            return head;
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[HeadManager] Error creating head with NBTAPI: " + e.getMessage());
+            return new ItemStack(Material.PLAYER_HEAD);
+        }
+    }
+
+    public void preloadTexturesAsync(Collection<UUID> uuids) {
+        Bukkit.getScheduler().runTaskAsynchronously(NClaim.inst(), () -> {
+            for (UUID uuid : uuids) {
+                String texture = getSkinTextureValue(uuid);
+                if (texture != null) {
+                    ItemStack head = createHeadWithTexture(texture);
+                    headCache.put(uuid, head);
+                }
+            }
+        });
     }
 }

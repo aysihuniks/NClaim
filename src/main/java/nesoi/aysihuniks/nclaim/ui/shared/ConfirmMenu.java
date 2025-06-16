@@ -1,83 +1,109 @@
-package nesoi.network.NClaim.menus;
+package nesoi.aysihuniks.nclaim.ui.shared;
 
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.ItemCreator;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.nandayo.DAPI.guimanager.LazyButton;
-import org.nandayo.DAPI.guimanager.Menu;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.MenuType;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
-public class ConfirmMenu extends Menu {
-
-    private final Consumer<String> onFinish;
+public class ConfirmMenu extends BaseMenu {
     private final String itemName;
     private final List<String> lore;
+    private final Consumer<String> onFinish;
 
-    public ConfirmMenu(Player p, String itemName, List<String> lore, Consumer<String> onFinish) {
-        createInventory(9 * 5, "Do you approve this action");
+    public ConfirmMenu(Player player, String itemName, List<String> lore, Consumer<String> onFinish) {
+        super("menu.confirm_menu");
+        
         this.itemName = itemName;
-        this.onFinish = onFinish;
         this.lore = lore;
-        addLazyButton(new LazyButton(Arrays.asList(0, 8, 9, 17, 18, 26, 27, 35, 36, 44)) {
+        this.onFinish = onFinish;
 
-            @Override
-            public ItemStack getItem() {
-                return ItemCreator.of(Material.GRAY_STAINED_GLASS_PANE).name(" ").get();
-            }
-        });
+        createInventory(MenuType.CHEST_3_ROWS, getString("title"));
+        setBackgroundButton(BackgroundMenu::getButton);
         setup();
-        displayTo(p);
+        MessageType.MENU_FORWARD.playSound(player);
+        displayTo(player);
     }
 
     private void setup() {
-        addButton(new Button(22) {
+        addInfoButton();
+        addConfirmButton();
+        addDeclineButton();
+    }
+
+    private void addInfoButton() {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
+
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.BOOK)
-                        .name(("{BROWN}" + itemName))
+                        .name(itemName)
                         .lore(lore)
                         .get();
             }
+        });
+    }
+
+    private void addConfirmButton() {
+        addButton(new Button() {
+            final String buttonPath = "confirm";
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(11);
             }
-        });
 
-        addButton(new Button(20) {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.GREEN_DYE)
-                        .name("{GREEN}Confirm")
+                        .name(getString(buttonPath + ".display_name"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 onFinish.accept("confirmed");
+                MessageType.CONFIRM.playSound(player);
             }
         });
+    }
 
-        addButton(new Button(24) {
+    private void addDeclineButton() {
+        addButton(new Button() {
+            final String buttonPath = "decline";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(15);
+            }
+
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.RED_DYE)
-                        .name("{RED}Decline")
+                        .name(getString(buttonPath + ".display_name"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 onFinish.accept("declined");
+                MessageType.WARN.playSound(player);
             }
         });
-
     }
 }

@@ -1,138 +1,162 @@
+package nesoi.aysihuniks.nclaim.ui.claim.management;
 
-package nesoi.network.NClaim.menus.claim.inside;
-
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.model.ClaimSetting;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.Setting;
+import nesoi.aysihuniks.nclaim.model.SettingData;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.ClaimSetting;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.Menu;
-import org.nandayo.DAPI.ItemCreator;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.MenuType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
-import static org.nandayo.DAPI.HexUtil.parse;
-
-public class SettingMenu extends Menu {
-
+public class ClaimSettingsMenu extends BaseMenu {
     private final Claim claim;
+    private final int page;
 
-    public SettingMenu(Player p, Claim claim) {
-        createInventory(9 * 6, "NClaim - Manage Settings");
+    private static final int[] settingSlots = {
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43
+    };
+
+    private final List<SettingData> settings = Arrays.asList(
+            new SettingData(Setting.CLAIM_PVP, "pvp", Material.DIAMOND_SWORD),
+            new SettingData(Setting.TNT_DAMAGE, "tnt_explosions", Material.TNT),
+            new SettingData(Setting.CREEPER_DAMAGE, "creeper_explosions", Material.CREEPER_SPAWN_EGG),
+            new SettingData(Setting.MOB_ATTACKING, "mob_attacks", Material.GOLDEN_APPLE),
+            new SettingData(Setting.MONSTER_SPAWNING, "monster_spawning", Material.ZOMBIE_SPAWN_EGG),
+            new SettingData(Setting.ANIMAL_SPAWNING, "animal_spawning", Material.COW_SPAWN_EGG),
+            new SettingData(Setting.VILLAGER_INTERACTION, "villager_interactions", Material.VILLAGER_SPAWN_EGG)
+    );
+
+    public ClaimSettingsMenu(Player player, Claim claim, int page) {
+        super("menu.settings_menu");
         this.claim = claim;
-        setup();
-        displayTo(p);
+        this.page = page;
+
+        setupMenu();
+        displayTo(player);
     }
 
-    void setup() {
-        List<ClaimSetting.Setting> settings = Arrays.asList(
-                ClaimSetting.Setting.CLAIM_PVP,
-                ClaimSetting.Setting.TNT_DAMAGE,
-                ClaimSetting.Setting.CREEPER_DAMAGE,
-                ClaimSetting.Setting.MOB_ATTACKING,
-                ClaimSetting.Setting.MONSTER_SPAWNING,
-                ClaimSetting.Setting.ANIMAL_SPAWNING,
-                ClaimSetting.Setting.VILLAGER_INTERACTION
-        );
+    private void setupMenu() {
+        createInventory(MenuType.CHEST_6_ROWS, getString("title"));
+        setBackgroundButton(BackgroundMenu::getButton);
+        addNavigationButton();
+        addSettingButtons();
+        
+        if (hasNextPage()) {
+            addNextPageButton();
+        }
+    }
 
-        List<String> settingNames = Arrays.asList(
-                "PvP",
-                "TNT Explosions",
-                "Creeper Explosions",
-                "Mob Attacks",
-                "Monster Spawning",
-                "Animal Spawning",
-                "Villager Interactions"
-        );
+    private void addNavigationButton() {
+        addButton(new Button() {
+            final String buttonPath = page == 0 ? "menu.back" : "menu.previous_page";
 
-        List<List<String>> settingLores = Arrays.asList(
-                Arrays.asList("", "{GRAY}Allow players to {WHITE}fight each other", "{GRAY}inside the claim?", ""), // PvP = default false
-                Arrays.asList("", "{GRAY}Allow {WHITE}TNT explosions", "{GRAY}to break blocks inside the claim?", ""), // TNT Explosions = default true
-                Arrays.asList("", "{GRAY}Allow {WHITE}Creeper explosions", "{GRAY}to break blocks inside the claim?", ""), // Creeper Explosions = default true
-                Arrays.asList("", "{GRAY}Allow players to {WHITE}attack mobs", "{GRAY}inside the claim?", ""), // Mob Attacks = default false
-                Arrays.asList("", "{GRAY}Allow {WHITE}monsters to spawn", "{GRAY}inside the claim?", ""), // Monster Spawning = default true
-                Arrays.asList("", "{GRAY}Allow {WHITE}animals to spawn", "{GRAY}inside the claim?", ""), // Animal Spawning = default true
-                Arrays.asList("", "{GRAY}Allow players to {WHITE}interact with villagers", "{GRAY}inside the claim?", "") // Villager Interactions = default false
-        );
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(10);
+            }
 
-        List<Material> materials = Arrays.asList(
-                Material.DIAMOND_SWORD,
-                Material.TNT,
-                Material.CREEPER_SPAWN_EGG,
-                Material.GOLDEN_APPLE,
-                Material.ZOMBIE_SPAWN_EGG,
-                Material.COW_SPAWN_EGG,
-                Material.VILLAGER_SPAWN_EGG
-        );
-
-        addButton(new Button(45) {
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.ARROW)
-                        .name("{ORANGE}Go Back")
+                return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
+                        .name(langManager.getString(buttonPath + ".display_name"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                new ClaimMenu(p, claim);
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_BACK.playSound(player);
+                if (page == 0) {
+                    new ClaimManagementMenu(player, claim);
+                } else {
+                    new ClaimSettingsMenu(player, claim, page - 1);
+                }
             }
         });
+    }
 
-        List<Integer> itemSlots = Arrays.asList(11, 20, 29, 38, 14, 23, 32);
-        List<Integer> dyeSlots = Arrays.asList(12, 21, 30, 39, 15, 24, 33);
+    private void addNextPageButton() {
+        addButton(new Button() {
+            final String buttonPath = "menu.next_page";
 
-        for (int i = 0; i < settings.size(); i++) {
-            ClaimSetting.Setting settingEnum = settings.get(i);
-            String settingName = settingNames.get(i);
-            List<String> originalSettingLore = settingLores.get(i);
-            Material material = materials.get(i);
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(16);
+            }
 
-            List<String> settingLore = new ArrayList<>(originalSettingLore);
-            boolean settingStatus = claim.getSettingState(settingEnum);
-            String settingColor = settingStatus ? "{GREEN}Enabled" : "{RED}Disabled";
-            Material toggleMaterial = settingStatus ? Material.LIME_DYE : Material.GRAY_DYE;
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.COMPASS)
+                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .get();
+            }
 
-            settingLore.add("{GRAY}Status: " + parse(settingColor));
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new ClaimSettingsMenu(player, claim, page + 1);
+            }
+        });
+    }
 
-            addButton(new Button(itemSlots.get(i)) {
-                @Override
-                public ItemStack getItem() {
-                    return ItemCreator.of(material)
-                            .name("{BROWN}" + settingName)
-                            .lore(settingLore)
-                            .hideFlag(ItemFlag.values())
-                            .get();
-                }
+    private void addSettingButtons() {
+        int startIndex = page * settingSlots.length;
+        int endIndex = Math.min(startIndex + settingSlots.length, settings.size());
 
-                @Override
-                public void onClick(Player p, ClickType clickType) {
-                    claim.getSettings().toggle(settingEnum);
-                    new SettingMenu(p, claim);
-                }
-            });
-
-            addButton(new Button(dyeSlots.get(i)) {
-                @Override
-                public ItemStack getItem() {
-                    return ItemCreator.of(toggleMaterial)
-                            .name("{BROWN}" + settingName)
-                            .lore(settingLore)
-                            .hideFlag(ItemFlag.values())
-                            .get();
-                }
-
-                @Override
-                public void onClick(Player p, ClickType clickType) {
-                    claim.toggleClaimSetting(settingEnum);
-                    new SettingMenu(p, claim);
-                }
-            });
+        for (int i = startIndex, slotIndex = 0; i < endIndex; i++, slotIndex++) {
+            SettingData settingData = settings.get(i);
+            addSettingButton(settingData, slotIndex);
         }
+    }
+
+    private void addSettingButton(SettingData settingData, int slotIndex) {
+        addButton(new Button() {
+            final String buttonPath = "settings." + settingData.getConfigKey();
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(settingSlots[slotIndex]);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                boolean isEnabled = claim.getSettings().isEnabled(settingData.getSetting());
+                String status = isEnabled ? langManager.getString("menu.enabled") : langManager.getString("menu.disabled");
+                List<String> lore = getStringList(buttonPath + ".lore");
+                lore.replaceAll(l -> l.replace("{status}", status));
+
+                return ItemCreator.of(settingData.getMaterial())
+                        .name(getString(buttonPath + ".display_name"))
+                        .lore(lore)
+                        .hideFlag(ItemFlag.values())
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.CONFIRM.playSound(player);
+                NClaim.inst().getClaimSettingsManager().toggleSetting(claim, player, settingData.getSetting());
+                new ClaimSettingsMenu(player, claim, page);
+            }
+        });
+    }
+
+    private boolean hasNextPage() {
+        return (page + 1) * settingSlots.length < settings.size();
     }
 }

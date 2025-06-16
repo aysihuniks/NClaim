@@ -1,74 +1,129 @@
-package nesoi.network.NClaim.utils;
+package nesoi.aysihuniks.nclaim.service;
 
-import nesoi.network.NClaim.NCoreMain;
-import org.bukkit.*;
+import lombok.RequiredArgsConstructor;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+import java.util.HashSet;
 
-public class ChunkBorderManager {
+@RequiredArgsConstructor
+public class ClaimVisualizerService {
+    private final NClaim plugin;
+    private final Map<UUID, BukkitTask> activeVisualizations = new HashMap<>();
+    private final Set<UUID> playersInPreviewMode = new HashSet<>(); 
 
-    private final HashMap<UUID, BukkitRunnable> activeBorders = new HashMap<>();
+    public void showClaimBorders(Player player, Chunk chunk) {
+        cancelVisualization(player);
+        playersInPreviewMode.add(player.getUniqueId());
 
-    public void showChunkBorder(Player player, Chunk chunk) {
-        UUID playerId = player.getUniqueId();
-
-        closeChunkBorder(player);
-
-        BukkitRunnable task = new BukkitRunnable() {
-            int counter = 30;
-
-            @Override
-            public void run() {
-                if (counter <= 0) {
-                    closeChunkBorder(player);
-
-                }
-
-                counter--;
-                drawChunkBorder(player, chunk);
+        AtomicInteger counter = new AtomicInteger(0);
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            if (!player.isOnline() || !player.getWorld().equals(chunk.getWorld()) || counter.get() >= 10) {
+                cancelVisualization(player);
+                return;
             }
-        };
+            visualizeChunkBorders(player, chunk);
+            counter.incrementAndGet();
+        }, 0L, 20L);
 
-        task.runTaskTimer(NCoreMain.inst(), 0L, 20L);
-        activeBorders.put(playerId, task);
+        activeVisualizations.put(player.getUniqueId(), task);
     }
 
-    public void closeChunkBorder(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (activeBorders.containsKey(playerId)) {
-            BukkitRunnable task = activeBorders.get(playerId);
+    public void showClaimBorders(Player player) {
+        cancelVisualization(player);
+        playersInPreviewMode.add(player.getUniqueId());
+
+        AtomicInteger counter = new AtomicInteger(0);
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            if (!player.isOnline() || counter.get() >= 10) {
+                cancelVisualization(player);
+                return;
+            }
+            Chunk currentChunk = player.getLocation().getChunk();
+            visualizeChunkBorders(player, currentChunk);
+            counter.incrementAndGet();
+        }, 0L, 20L);
+
+        activeVisualizations.put(player.getUniqueId(), task);
+    }
+
+    public void cancelVisualization(Player player) {
+        BukkitTask task = activeVisualizations.remove(player.getUniqueId());
+        if (task != null) {
             task.cancel();
-            activeBorders.remove(playerId);
-
         }
-
+        playersInPreviewMode.remove(player.getUniqueId());
     }
 
-    private void drawChunkBorder(Player player, Chunk chunk) {
+    private void visualizeChunkBorders(Player player, Chunk chunk) {
         World world = chunk.getWorld();
-        int minX = chunk.getX() * 16;
-        int minZ = chunk.getZ() * 16;
-        int maxX = minX + 16;
-        int maxZ = minZ + 16;
-        int y = player.getLocation().getBlockY();
+        int chunkX = chunk.getX() * 16;
+        int chunkZ = chunk.getZ() * 16;
+        double playerY = player.getLocation().getY();
 
+        int maxHeight = 32;
+        int stepHeight = 4;
 
-        for (int x = minX; x <= maxX; x += 2) {
-            spawnParticle(world, x, y, minZ);
-            spawnParticle(world, x, y, maxZ);
+        List<Location> corners = new ArrayList<>();
+        corners.add(new Location(world, chunkX, playerY, chunkZ));
+        corners.add(new Location(world, chunkX + 15, playerY, chunkZ));
+        corners.add(new Location(world, chunkX + 15, playerY, chunkZ + 15));
+        corners.add(new Location(world, chunkX, playerY, chunkZ + 15));
+
+        for (int i = 0; i < corners.size(); i++) {
+            Location start = corners.get(i);
+            Location end = corners.get((i + 1) % corners.size());
+
+            double distance = start.distance(end);
+            Vector direction = end.toVector().subtract(start.toVector()).normalize();
+
+            for (double d = 0; d <= distance; d += 0.5) {
+                Location particleLoc = start.clone().add(direction.clone().multiply(d));
+                world.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
+            }
         }
 
-        for (int z = minZ; z <= maxZ; z += 2) {
-            spawnParticle(world, minX, y, z);
-            spawnParticle(world, maxX, y, z);
-        }
-    }
+        for (Location corner : corners) {
+            for (double y = playerY; y < playerY + maxHeight; y += 0.5) {
+                Location pillarLoc = corner.clone();
+                pillarLoc.setY(y);
+                world.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
+            }
+            for (double y = playerY; y > playerY - maxHeight; y -= 0.5) {
+                Location pillarLoc = corner.clone();
+                pillarLoc.setY(y);
+                world.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
+            }
 
-    private void spawnParticle(World world, int x, int y, int z) {
-        world.spawnParticle(Particle.COMPOSTER, new Location(world, x + 0.5, y + 0.1, z + 0.5), 1, 0, 0, 0, 0);
+        }
+
+        for (double y = playerY + stepHeight; y < playerY + maxHeight; y += stepHeight) {
+            for (int i = 0; i < corners.size(); i++) {
+                Location start = corners.get(i).clone().add(0, y - playerY, 0);
+                Location end = corners.get((i + 1) % corners.size()).clone().add(0, y - playerY, 0);
+
+                double distance = start.distance(end);
+                Vector direction = end.toVector().subtract(start.toVector()).normalize();
+
+                for (double d = 0; d <= distance; d += 0.5) {
+                    Location particleLoc = start.clone().add(direction.clone().multiply(d));
+                    world.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
+                }
+            }
+        }
     }
 }
-//pup

@@ -1,0 +1,14 @@
+package nesoi.aysihuniks.nclaim.enums;
+
+public enum LegacyPermission {
+
+    CAN_BREAK_SPAWNER,
+    CAN_PLACE_SPAWNER,
+    CAN_CAST_WATER_AND_LAVA,
+    CAN_INTERACT_WITH_CLAIM_BEDROCK,
+    CAN_PLACE_BLOCK,
+    CAN_BREAK_BLOCK,
+    CAN_INTERACT_WITH_CHEST,
+    CAN_INTERACT_WITH_BUTTON_DOOR_PRESSURE_PLATE
+
+}

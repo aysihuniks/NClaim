@@ -1,56 +1,97 @@
-package nesoi.network.NClaim.model;
+package nesoi.aysihuniks.nclaim.model;
 
-import java.util.HashMap;
+import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.enums.PermissionCategory;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class CoopPermission {
-
-    public enum Permission {
-        CAN_BREAK_SPAWNER,
-        CAN_PLACE_SPAWNER,
-        CAN_CAST_WATER_AND_LAVA,
-        CAN_INTERACT_WITH_CLAIM_BEDROCK,
-        CAN_PLACE_BLOCK,
-        CAN_BREAK_BLOCK,
-        CAN_INTERACT_WITH_CHEST,
-        CAN_INTERACT_WITH_BUTTON_DOOR_PRESSURE_PLATE,
-    }
+    private final Map<Permission, Boolean> permissionStates;
 
     public CoopPermission() {
-
+        this.permissionStates = new EnumMap<>(Permission.class);
+        for (Permission permission : Permission.values()) {
+            permissionStates.put(permission, false);
+        }
     }
-
-    private final HashMap<CoopPermission.Permission, Boolean> permissions = new HashMap<CoopPermission.Permission, Boolean>() {{
-        put(Permission.CAN_BREAK_SPAWNER, false);
-        put(Permission.CAN_PLACE_SPAWNER, false);
-        put(Permission.CAN_CAST_WATER_AND_LAVA, false);
-        put(Permission.CAN_INTERACT_WITH_CLAIM_BEDROCK, false);
-        put(Permission.CAN_PLACE_BLOCK, false);
-        put(Permission.CAN_BREAK_BLOCK, false);
-        put(Permission.CAN_INTERACT_WITH_CHEST, false);
-        put(Permission.CAN_INTERACT_WITH_BUTTON_DOOR_PRESSURE_PLATE, false);
-    }};
 
     public boolean isEnabled(Permission permission) {
-        return permissions.get(permission);
+        return permissionStates.getOrDefault(permission, false);
     }
 
-    public void set(Permission permission, boolean value) {
-        permissions.put(permission, value);
+    public void setEnabled(Permission permission, boolean enabled) {
+        permissionStates.put(permission, enabled);
     }
 
     public void toggle(Permission permission) {
-        set(permission, !isEnabled(permission));
+        setEnabled(permission, !isEnabled(permission));
     }
 
-    /*
-    * Spawner breaking
-    * Spawner placing
-    * Casting water or lava
-    * Interact with claim bedrock (always false)
-    * Breaking blocks
-    * Placing blocks
-    * Interacting chests
-    * Interacting with buttons, doors, pressure plates
-    * */
+    public boolean hasAllPermissionsInCategory(PermissionCategory category) {
+        return category.getPermissions().stream()
+                .allMatch(this::isEnabled);
+    }
 
+    public void setAllPermissionsInCategory(PermissionCategory category, boolean state) {
+        category.getPermissions().forEach(permission -> 
+            permissionStates.put(permission, state));
+    }
+
+    public Map<PermissionCategory, Permission[]> getPermissionsByCategory() {
+        Map<PermissionCategory, Permission[]> result = new EnumMap<>(PermissionCategory.class);
+        for (PermissionCategory category : PermissionCategory.values()) {
+            result.put(category, category.getPermissions().toArray(new Permission[0]));
+        }
+        return result;
+    }
+
+    public Map<Permission, Boolean> getAllPermissions() {
+        return new EnumMap<>(permissionStates);
+    }
+
+    public String serialize() {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<Permission, Boolean> entry : permissionStates.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(entry.getKey().name())
+                   .append(":")
+                   .append(entry.getValue() ? "1" : "0");
+        }
+        return builder.toString();
+    }
+
+    public static CoopPermission deserialize(String data) {
+        CoopPermission permission = new CoopPermission();
+        if (data == null || data.isEmpty()) {
+            return permission;
+        }
+
+        String[] pairs = data.split(",");
+        for (String pair : pairs) {
+            String[] parts = pair.split(":");
+            if (parts.length == 2) {
+                try {
+                    Permission perm = Permission.valueOf(parts[0]);
+                    boolean value = "1".equals(parts[1]);
+                    permission.setEnabled(perm, value);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+        return permission;
+    }
+
+    public void reset() {
+        for (Permission permission : Permission.values()) {
+            permissionStates.put(permission, false);
+        }
+    }
+
+    public void copyFrom(CoopPermission other) {
+        this.permissionStates.clear();
+        this.permissionStates.putAll(other.permissionStates);
+    }
 }

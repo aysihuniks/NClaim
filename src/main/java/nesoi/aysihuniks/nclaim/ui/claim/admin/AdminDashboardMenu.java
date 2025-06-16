@@ -1,38 +1,58 @@
-package nesoi.network.NClaim.menus.claim.admin;
+package nesoi.aysihuniks.nclaim.ui.claim.admin;
 
-import nesoi.network.NClaim.NCoreMain;
-import nesoi.network.NClaim.menus.claim.admin.inside.AllClaim;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.Menu;
-import org.nandayo.DAPI.ItemCreator;
-import org.nandayo.DAPI.object.DMaterial;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.object.DMaterial;
 
 import java.util.ArrayList;
+import java.util.Set;
 
-public class AdminMenu extends Menu {
+public class AdminDashboardMenu extends BaseMenu {
 
-    public AdminMenu(Player p) {
-        createInventory(9*3, "NClaim - Admin Menu");
+    public AdminDashboardMenu(Player player) {
+        super("menu.admin.main_menu");
 
-        setup();
-        displayTo(p);
+        setupMenu();
+        displayTo(player);
     }
 
-    private void setup() {
-        addButton(new Button(0) {
+    private void setupMenu() {
+        createInventory(MenuType.CHEST_3_ROWS, getString("title"));
+        setBackgroundButton(BackgroundMenu::getButton);
+        addManageClaimsButton();
+    }
+
+    private void addManageClaimsButton() {
+        addButton(new Button() {
+            final String buttonPath = "manage_claims";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
+
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(NCoreMain.getMaterial(DMaterial.AMETHYST_BLOCK, DMaterial.PURPUR_BLOCK))
-                        .name("{BROWN}Manage All Claims")
+                return ItemCreator.of(NClaim.getMaterial(DMaterial.AMETHYST_BLOCK, DMaterial.SHULKER_BOX))
+                        .name(getString(buttonPath + ".display_name"))
+                        .lore(getStringList(buttonPath + ".lore"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                new AllClaim(p, null, true, 0, new ArrayList<>());
+            public void onClick(@NotNull Player player, ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
             }
         });
     }

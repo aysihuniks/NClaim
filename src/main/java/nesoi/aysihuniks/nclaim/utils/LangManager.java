@@ -1,171 +1,186 @@
-package nesoi.network.NClaim.utils;
+package nesoi.aysihuniks.nclaim.utils;
 
-import nesoi.network.NClaim.NCoreMain;
+import nesoi.aysihuniks.nclaim.NClaim;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.nandayo.DAPI.Util;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.HexUtil;
+import org.nandayo.dapi.Util;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LangManager {
 
-    private final NCoreMain plugin;
-
-    private final List<String> languages = Arrays.asList("en-US","tr-TR");
-    private final String defaultLang = "en-US";
-    private FileConfiguration DEFAULT_CONFIG = null;
-
-    private final String selectedLang;
-    private final File file;
-    private FileConfiguration config;
-
-    public LangManager(NCoreMain plugin, String fileName) {
+    private final @NotNull NClaim plugin;
+    private final File folder;
+    public LangManager(@NotNull NClaim plugin, @NotNull String fileName) {
         this.plugin = plugin;
-        File dir = new File(plugin.getDataFolder(), "lang");
-        if (!dir.exists()) {
-            dir.mkdirs();
+        this.folder = new File(plugin.getDataFolder(), "lang");
+        if(!folder.exists()) {
+            folder.mkdirs();
         }
-        loadFiles();
-        if(!languages.contains(fileName)) {
-            Util.log("&cLanguage " + fileName + " not found. Using default language.");
-            fileName = defaultLang;
-        }
-        this.selectedLang = fileName;
-        this.file = new File(dir, fileName + ".yml");
-        this.config = YamlConfiguration.loadConfiguration(file);
-        updateLanguage();
+        this.loadDefaultFiles();
+        this.loadFiles(fileName);
     }
 
-    public List<String> getLanguages() {
-        return languages;
-    }
+    public final List<String> REGISTERED_LANGUAGES = new ArrayList<>();
+    private final List<String> DEFAULT_LANGUAGES = Arrays.asList("en-US","tr-TR");
+    private final String DEFAULT_LANGUAGE = "en-US";
+    private FileConfiguration DEFAULT_LANGUAGE_CONFIG;
 
-    public void loadFiles() {
-        for(String lang : languages) {
-            String path = "lang/" + lang + ".yml";
-            File file = new File(plugin.getDataFolder(), path);
-            if(!file.exists() && plugin.getResource(path) != null) {
-                plugin.saveResource(path, false);
-            }
-            //Default lang file
-            if(lang.equals(defaultLang)) {
-                DEFAULT_CONFIG = YamlConfiguration.loadConfiguration(file);
+    private FileConfiguration SELECTED_LANGUAGE_CONFIG;
+
+    private void loadFiles(@NotNull String searchingFor) {
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+        if (files != null) {
+            for(File file : files) {
+                String fileName = file.getName().substring(0, file.getName().length() - 4);
+                REGISTERED_LANGUAGES.add(fileName);
+                if(fileName.equals(searchingFor)) {
+                    this.SELECTED_LANGUAGE_CONFIG = (DEFAULT_LANGUAGES.contains(fileName)) ? updateLanguage(fileName) : YamlConfiguration.loadConfiguration(file);
+                }
+                if(fileName.equals(DEFAULT_LANGUAGE)) {
+                    this.DEFAULT_LANGUAGE_CONFIG = updateLanguage(fileName);
+                }
             }
         }
-        if(DEFAULT_CONFIG == null) {
-            Util.log("&cDefault language (" + defaultLang + ") not found. This may lead to empty messages.");
+        if(this.SELECTED_LANGUAGE_CONFIG == null) {
+            this.SELECTED_LANGUAGE_CONFIG = this.DEFAULT_LANGUAGE_CONFIG;
+            Util.log("&cLanguage " + searchingFor + " was not found. Using default language.");
         }
     }
 
-    public FileConfiguration getConfig() {
-        return config;
-    }
+    private void loadDefaultFiles() {
+        for(String fileName : DEFAULT_LANGUAGES) {
+            File file = new File(folder, fileName + ".yml");
+            if(file.exists() || plugin.getResource("lang/" + fileName + ".yml") == null) continue;
 
-    /*
-     * Return the message
-     */
-    public String getMsg(String path) {
-        return getMsg(path, new Object[0]);
-    }
-
-    public String getMsg(String path, Object... placeholders) {
-        String message = getDefaultIfMissing(path).toString();
-
-        String prefix = NCoreMain.inst().configManager.getString("prefix", "&8[<#fa8443>NClaim&8]&r");
-        message = message.replace("%p", prefix);
-
-        for (int i = 0; i < placeholders.length; i++) {
-            message = message.replace("%" + i, String.valueOf(placeholders[i]));
+            plugin.saveResource("lang/" + fileName + ".yml", false);
         }
-
-        return applyColors(message);
     }
 
+    public FileConfiguration updateLanguage(@NotNull String languageName) {
+        File file = new File(folder, languageName + ".yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-    public String getMsg(ConfigurationSection section, String subPath) {
-        String path = section.getCurrentPath() + "." + subPath;
-        return getMsg(path);
-    }
+        if(compareVersions(config)) return config;
 
-    private String applyColors(String msg) {
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("colors");
-        if (section != null) {
-            for (String color : section.getKeys(false)) {
-                msg = msg.replace("{" + color.toUpperCase(Locale.ROOT) + "}", section.getString(color, ""));
-            }
-        }
-        return org.nandayo.DAPI.HexUtil.parse(msg);
-    }
+        FileConfiguration defConfig = getSourceConfiguration(languageName);
+        if (defConfig == null) return config;
 
-    /*
-     * Missing keys on language files
-     */
-    private Object getDefaultIfMissing(String path) {
-        if(config.contains(path)) {
-            return config.get(path, "");
-        }else if(DEFAULT_CONFIG != null && DEFAULT_CONFIG.contains(path)) {
-            return DEFAULT_CONFIG.get(path, "");
-        }
-        return "";
-    }
+        saveBackupConfig(languageName, config);
 
-    //UPDATE LANGUAGE
-    public LangManager updateLanguage() {
-        String version = plugin.getDescription().getVersion();
-        String configVersion = config.getString("lang_version", "0");
-
-        if(version.equals(configVersion)) return this;
-
-        InputStream defStream = plugin.getResource("lang/" + selectedLang + ".yml");
-        if(defStream == null) {
-            Util.log("&cDefault " + selectedLang + ".yml not found in plugin resources.");
-            return this;
-        }
-
-        // Backup old config
-        saveBackupConfig();
-
-        // Value pasting from old config
-        FileConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
         for(String key : defConfig.getKeys(true)) {
+            if (defConfig.isConfigurationSection(key)) {
+                continue;
+            }
             if(config.contains(key)) {
                 defConfig.set(key, config.get(key));
             }
         }
 
+        defConfig.set("lang_version", plugin.getDescription().getVersion());
+        config = defConfig;
         try {
-            defConfig.set("lang_version", version);
-            defConfig.save(file);
-            config = defConfig;
+            config.save(new File(folder, languageName + ".yml"));
             Util.log("&aUpdated language file.");
         }catch (Exception e) {
-            Util.log("&cFailed to save updated language file.");
-            e.printStackTrace();
+            Util.log("&cFailed to save updated language file. " + e.getMessage());
         }
-        return this;
+        return config;
     }
 
-    private void saveBackupConfig() {
+    private boolean compareVersions(@NotNull FileConfiguration config) {
+        String version = plugin.getDescription().getVersion();
+        String configVersion = config.getString("lang_version", "0");
+        return version.equals(configVersion);
+    }
+
+    private FileConfiguration getSourceConfiguration(@NotNull String languageName) {
+        InputStream defStream = plugin.getResource("lang/" + languageName + ".yml");
+        if(defStream == null) {
+            Util.log("&cDefault '" + languageName + ".yml' was not found in plugin resources.");
+            return null;
+        }
+        return YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
+    }
+
+    private void saveBackupConfig(@NotNull String languageName, @NotNull FileConfiguration config) {
         File backupDir = new File(plugin.getDataFolder(), "backups");
         if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
-        String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());
-        File backupFile = new File(backupDir, "lang_" + selectedLang + "_" + date + ".yml");
+        String date = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        File backupFile = new File(backupDir, "lang_" + languageName + "_" + date + ".yml");
         try {
             config.save(backupFile);
             Util.log("&aBacked up old language file.");
         } catch (Exception e) {
-            Util.log("&cFailed to save old language backup file.");
+            Util.log("&cFailed to save old language backup file. ");
             e.printStackTrace();
         }
+    }
+
+    @Nullable
+    public ConfigurationSection getSection(@NotNull String path) {
+        ConfigurationSection section = SELECTED_LANGUAGE_CONFIG.getConfigurationSection(path);
+        if(section != null) return section;
+        return DEFAULT_LANGUAGE_CONFIG.getConfigurationSection(path);
+    }
+
+    @NotNull
+    public String getString(@NotNull String path) {
+        String str = SELECTED_LANGUAGE_CONFIG.contains(path)
+                ? SELECTED_LANGUAGE_CONFIG.getString(path)
+                : DEFAULT_LANGUAGE_CONFIG.getString(path);
+        if (str == null) {
+            Util.log("&cNull message at path '" + path + "'");
+            return "";
+        }
+        String prefix = NClaim.inst().getConfigManager().getString("prefix", "&8[<#fa8443>NClaim&8]&r");
+        return HexUtil.parse(str.replace("{prefix}", prefix));
+    }
+
+    @NotNull
+    public List<String> getStringList(@NotNull String path) {
+        List<String> list = SELECTED_LANGUAGE_CONFIG.contains(path)
+                ? SELECTED_LANGUAGE_CONFIG.getStringList(path)
+                : DEFAULT_LANGUAGE_CONFIG.getStringList(path);
+        String prefix = NClaim.inst().getConfigManager().getString("prefix", "&8[<#fa8443>NClaim&8]&r");
+        return list.stream()
+                .map(str -> HexUtil.parse(str.replace("{prefix}", prefix)))
+                .collect(Collectors.toList());
+    }
+
+    @NotNull
+    public Boolean getBoolean(@NotNull String path) {
+        return SELECTED_LANGUAGE_CONFIG.contains(path)
+                ? SELECTED_LANGUAGE_CONFIG.getBoolean(path)
+                : DEFAULT_LANGUAGE_CONFIG.getBoolean(path);
+    }
+
+    @NotNull
+    public String getString(@Nullable ConfigurationSection section, @NotNull String subPath) {
+        final String currentPath = section == null ? "" : section.getCurrentPath();
+        return getString(currentPath + "." + subPath);
+    }
+
+    @NotNull
+    public List<String> getStringList(@Nullable ConfigurationSection section, @NotNull String subPath) {
+        final String currentPath = section == null ? "" : section.getCurrentPath();
+        return getStringList(currentPath + "." + subPath);
+    }
+
+    @NotNull
+    public Boolean getBoolean(@Nullable ConfigurationSection section, @NotNull String subPath) {
+        final String currentPath = section == null ? "" : section.getCurrentPath();
+        return getBoolean(currentPath + "." + subPath);
     }
 }

@@ -1,24 +1,12 @@
-package nesoi.network.NClaim.model;
+package nesoi.aysihuniks.nclaim.model;
+
+import nesoi.aysihuniks.nclaim.enums.Setting;
 
 import java.util.HashMap;
 
 public class ClaimSetting {
 
-    public enum Setting {
-        CLAIM_PVP,
-        TNT_DAMAGE,
-        CREEPER_DAMAGE,
-        MOB_ATTACKING,
-        MONSTER_SPAWNING,
-        ANIMAL_SPAWNING,
-        VILLAGER_INTERACTION
-    }
-
-    public ClaimSetting() {
-
-    }
-
-    public final HashMap<ClaimSetting.Setting, Boolean> settings = new HashMap<ClaimSetting.Setting, Boolean>() {{
+    public final HashMap<Setting, Boolean> settings = new HashMap<Setting, Boolean>() {{
         put(Setting.CLAIM_PVP, false);
         put(Setting.TNT_DAMAGE, true);
         put(Setting.CREEPER_DAMAGE, true);
@@ -28,16 +16,12 @@ public class ClaimSetting {
         put(Setting.VILLAGER_INTERACTION, false);
     }};
 
-    public boolean isEnabled(ClaimSetting.Setting setting) {
+    public boolean isEnabled(Setting setting) {
         return settings.get(setting);
     }
 
-    public void set(ClaimSetting.Setting setting, boolean value) {
+    public void set(Setting setting, boolean value) {
         settings.put(setting, value);
-    }
-
-    public void toggle(ClaimSetting.Setting setting) {
-        set(setting, !isEnabled(setting));
     }
 
 }

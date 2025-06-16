@@ -1,4 +1,4 @@
-package nesoi.network.NClaim.enums;
+package nesoi.aysihuniks.nclaim.enums;
 
 public enum Balance {
     VAULT, PLAYERDATA;

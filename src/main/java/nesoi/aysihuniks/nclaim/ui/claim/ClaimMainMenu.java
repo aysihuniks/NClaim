@@ -1,95 +1,156 @@
-package nesoi.network.NClaim.menus.claim;
+package nesoi.aysihuniks.nclaim.ui.claim;
 
-import nesoi.network.NClaim.NCoreMain;
-import nesoi.network.NClaim.menus.ConfirmMenu;
-import nesoi.network.NClaim.menus.claim.admin.AdminMenu;
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.model.User;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminDashboardMenu;
+import nesoi.aysihuniks.nclaim.model.User;
+import nesoi.aysihuniks.nclaim.utils.HeadManager;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.nandayo.DAPI.ItemCreator;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.Menu;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.MenuType;
 
-import java.util.Arrays;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class MainMenu extends Menu {
+public class ClaimMainMenu extends BaseMenu {
 
-    public MainMenu(Player p){
-        createInventory(9*3, "NClaim - General");
+    public ClaimMainMenu(Player player) {
+        super("menu.main_menu");
 
-        if (p.hasPermission("nclaim.admin")) {
-            addButton(new Button(26) {
-                @Override
-                public ItemStack getItem() {
-                    return ItemCreator.of(Material.END_PORTAL_FRAME).name("{ORANGE}Admin Menu").get();
-                }
-
-                @Override
-                public void onClick(Player player, ClickType clickType) {
-                    new AdminMenu(player);
-                }
-            });
-        }
-        setup();
-        displayTo(p);
+        setupMenu(player);
+        displayTo(player);
     }
 
-    public void setup()  {
-        addButton(new Button(12) {
+    private void setupMenu(Player player) {
+        createInventory(MenuType.CHEST_3_ROWS, getString("title"));
+        setBackgroundButton(BackgroundMenu::getButton);
+        addBuyClaimButton();
+        addManageClaimsButton();
+        
+        if (player.hasPermission("nclaim.admin")) {
+            addAdminButton();
+        }
+    }
+
+    private void addBuyClaimButton() {
+        addButton(new Button() {
+            final String buttonPath = "buy_claim";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(11);
+            }
+
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.GRASS_BLOCK)
-                        .name("{BROWN}Buy a Claim")
-                        .lore("",
-                                "{GRAY}If you have enough money ({WHITE}" + NCoreMain.inst().configManager.getInt("claim-buy-price", 1500) + "${GRAY}), ",
-                                "{GRAY}you can buy a {WHITE}new Claim{GRAY}!",
-                                "",
-                                "{YELLOW}Click to purchase a Claim.")
+
+                List<String> lore = getStringList(buttonPath + ".lore");
+                lore.replaceAll(l -> l.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())));
+                
+                return ItemCreator.of(Material.EMERALD)
+                        .name(getString(buttonPath + ".display_name"))
+                        .lore(lore)
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                Consumer<String> onFinish = (result) -> {
-                    if ("confirmed".equals(result)) {
-                        p.closeInventory();
-                        Claim.buy(p);
-                    } else if ("declined".equals(result))  {
-                        new MainMenu(p);
-                    }
-                };
-
-                new ConfirmMenu(p, "Buy a Claim", Arrays.asList("", "{GRAY}If you approve this action,", "{WHITE}" + NCoreMain.inst().configManager.getInt("claim_buy_price", 1500) + "$ will be {WHITE}removed {GRAY}from", "{GRAY}your {WHITE}balance {GRAY}and you will", "{GRAY}buy a {WHITE}new claim{GRAY}."), onFinish);
-            }
-        });
-
-        addButton(new Button(14) {
-            @Override
-            public ItemStack getItem() {
-                return ItemCreator.of(Material.BEDROCK)
-                        .name("{BROWN}Manage Claims")
-                        .lore("",
-                                "{GRAY}Do you want to {WHITE}manage {GRAY}it",
-                                "{WHITE}remotely {GRAY}without going to {WHITE}Claim{GRAY}?",
-                                "",
-                                "{YELLOW}Just click here and manage.")
-                        .get();
-            }
-
-            @Override
-            public void onClick(Player p, ClickType clickType) {
-                User user = User.getUser(p.getUniqueId());
-                if (!user.getPlayerClaims().isEmpty() || !user.getCoopClaims().isEmpty()) {
-                    new ListMenu(p, 0);
-                } else {
-                    p.closeInventory();
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (clickType == ClickType.LEFT) {
+                    handleBuyClaimClick(player);
+                } else if(clickType == ClickType.RIGHT) {
+                    NClaim.inst().getClaimVisualizerService().showClaimBorders(player);
                 }
 
+            }
+        });
+    }
+
+    private void handleBuyClaimClick(Player player) {
+        Consumer<String> onFinish = (result) -> {
+            if ("confirmed".equals(result)) {
+                player.closeInventory();
+                NClaim.inst().getClaimService().buyNewClaim(player);
+            } else if ("declined".equals(result)) {
+                new ClaimMainMenu(player);
+            }
+        };
+
+        new ConfirmMenu(player,
+                langManager.getString("menu.confirm_menu.buy_claim.display_name"),
+                langManager.getStringList("menu.confirm_menu.buy_claim.lore")
+                        .stream()
+                        .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())))
+                        .collect(Collectors.toList()),
+                onFinish);
+    }
+
+    private void addManageClaimsButton() {
+        addButton(new Button() {
+            final String buttonPath = "manage_claims";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(15);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.CHEST)
+                        .name(getString(buttonPath + ".display_name"))
+                        .lore(getStringList(buttonPath + ".lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                handleManageClaimsClick(player);
+            }
+        });
+    }
+
+    private void handleManageClaimsClick(Player player) {
+        User user = User.getUser(player.getUniqueId());
+        if (!user.getPlayerClaims().isEmpty() || !user.getCoopClaims().isEmpty()) {
+            new ClaimListMenu(player, 0);
+        } else {
+            player.closeInventory();
+            player.sendMessage(langManager.getString("claim.not_found"));
+            MessageType.WARN.playSound(player);
+        }
+    }
+
+    private void addAdminButton() {
+        addButton(new Button() {
+            final String buttonPath = "admin";
+
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.COMMAND_BLOCK)
+                        .name(getString(buttonPath + ".display_name"))
+                        .lore(getStringList(buttonPath + ".lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                new AdminDashboardMenu(player);
             }
         });
     }

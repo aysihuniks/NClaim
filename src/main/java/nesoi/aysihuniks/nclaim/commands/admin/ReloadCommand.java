@@ -1,17 +1,35 @@
-package nesoi.network.NClaim.commands;
+package nesoi.aysihuniks.nclaim.commands.admin;
 
-import nesoi.network.NClaim.NCoreMain;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.commands.BaseCommand;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Reload {
+public class ReloadCommand extends BaseCommand {
 
-    public void execute(Player player, String[] args) {
-        if (args.length < 2) return;
-        if (!player.hasPermission("nclaim.reload") || !player.hasPermission("nclaim.admin")) {
-            player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.error.not-enough-permission"));
-            return;
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("This command can only be used by players.");
+            return true;
         }
-        NCoreMain.inst().updateVariables();
-        player.sendMessage(NCoreMain.inst().langManager.getMsg("messages.success.reload"));
+
+        Player player = (Player) sender;
+
+        if (!player.hasPermission("nclaim.reload") || !player.hasPermission("nclaim.admin")) {
+            player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+            return true;
+        }
+
+        try {
+            NClaim.inst().reloadPlugin();
+            player.sendMessage(NClaim.inst().getLangManager().getString("command.reload.success"));
+        } catch (Exception e) {
+            player.sendMessage(NClaim.inst().getLangManager().getString("command.reload.failed"));
+            e.printStackTrace();
+        }
+
+        return true;
     }
 }

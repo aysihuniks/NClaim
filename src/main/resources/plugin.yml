@@ -1,45 +1,73 @@
 name: NClaim
 version: ${project.version}
-main: nesoi.network.NClaim.NCoreMain
+main: nesoi.aysihuniks.nclaim.NClaim
 api-version: '1.16'
-author: aysihuniks
+authors: [ aysihuniks ]
+description: Advanced Chunk Claim System
+depend: [PlaceholderAPI]
+softdepend: [Vault, DecentHolograms, FancyHolograms, SkinRestorer, WorldGuard, Farmer]
 commands:
   nclaim:
-    aliases: nclaim
-    usage: /nclaim <help/?>
+    aliases: [ nc, claim ]
+    usage: "/nclaim <help/?>"
 permissions:
   nclaim.admin:
     default: op
     children:
+      nclaim.adminmenu: true
       nclaim.reload: true
       nclaim.add: true
       nclaim.remove: true
-      nclaim.help: true
-      nclaim.bypass.max-claim-count.: true
-      nclaim.bypass.claim-buy-price: true
-      nclaim.bypass.land-buy-price: true
-      nclaim.bypass.*: true
-      nclaim.adminmenu: true
-    nclaim.reload:
-      default: op
-    nclaim.add:
-      default: op
-    nclaim.remove:
-      default: op
-    nclaim.chunkinfo:
-      default: op
-    nclaim.help:
-      default: op
-    nclaim.bypass.max-claim-count.:
-      default: op
-    nclaim.bypass.claim-buy-price:
-      default: op
-    nclaim.bypass.land-buy-price:
-      default: op
-    nclaim.bypass.*:
-      default: op
-    nclaim.adminmenu:
-      default: op
-
-depend: [PlaceholderAPI, DecentHolograms]
-softdepend: [Vault, NBTAPI]
+      nclaim.migrate: true
+      nclaim.set: true
+  nclaim.bypass.*:
+    children:
+      nclaim.bypass.blacklisted_worlds: true
+      nclaim.bypass.blacklisted_regions: true
+      nclaim.bypass.max_claim_count: true
+      nclaim.bypass.claim_buy_price: true
+      nclaim.bypass.land_buy_price: true
+      nclaim.bypass.pvp: true
+      nclaim.bypass.interact: true
+      nclaim.bypass.break: true
+      nclaim.bypass.place: true
+  nclaim.use:
+    default: true
+  nclaim.help:
+    default: true
+  nclaim.balance:
+    default: true
+  nclaim.buy:
+    default: true
+  nclaim.adminmenu:
+    default: false
+  nclaim.reload:
+    default: false
+  nclaim.add:
+    default: false
+  nclaim.remove:
+    default: false
+  nclaim.migrate:
+    default: false
+  nclaim.set:
+    default: false
+  nclaim.bypass.blacklisted_worlds:
+    default: false
+  nclaim.bypass.blacklisted_regions:
+    default: false
+  nclaim.bypass.max_claim_count:
+    default: false
+  nclaim.bypass.claim_buy_price:
+    default: false
+  nclaim.bypass.land_buy_price:
+    default: false
+  nclaim.bypass.pvp:
+    default: false
+  nclaim.bypass.interact:
+    default: false
+  nclaim.bypass.break:
+    default: false
+  nclaim.bypass.place:
+    default: false
+  nclaim.maxclaim:
+    default: false

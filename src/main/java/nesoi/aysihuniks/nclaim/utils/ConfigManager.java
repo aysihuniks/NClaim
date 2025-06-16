@@ -1,6 +1,6 @@
-package nesoi.network.NClaim.utils;
+package nesoi.aysihuniks.nclaim.utils;
 
-import nesoi.network.NClaim.NCoreMain;
+import nesoi.aysihuniks.nclaim.NClaim;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -65,7 +65,7 @@ public class ConfigManager {
 
     public void saveConfig() {
         try {
-            config.save(new File(NCoreMain.inst().getDataFolder(), "config.yml"));
+            config.save(new File(NClaim.inst().getDataFolder(), "config.yml"));
         } catch (IOException e) {
             e.printStackTrace();
         }

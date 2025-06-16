@@ -1,129 +1,157 @@
-package nesoi.network.NClaim.menus.claim.inside;
+package nesoi.aysihuniks.nclaim.ui.claim.management;
 
-import nesoi.network.NClaim.NCoreMain;
-import nesoi.network.NClaim.menus.ConfirmMenu;
-import nesoi.network.NClaim.menus.claim.coop.ManageMenu;
-import nesoi.network.NClaim.menus.claim.land.ExpandMenu;
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.utils.ChunkBorderManager;
+import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.utils.HeadManager;
+import nesoi.aysihuniks.nclaim.utils.LangManager;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.DAPI.guimanager.Button;
-import org.nandayo.DAPI.guimanager.Menu;
-import org.nandayo.DAPI.ItemCreator;
+import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.Menu;
+import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.MenuType;
 
+import java.util.Set;
 
-import java.util.Arrays;
-import java.util.function.Consumer;
+public class ClaimManagementMenu extends Menu {
+    private final @NotNull Claim claim;
+    private final LangManager langManager;
+    private final ConfigurationSection menuSection;
+    private Player player;
 
-import static nesoi.network.NClaim.utils.HeadManager.getPlayerHead;
+    public ClaimManagementMenu(Player player, @NotNull Claim claim) {
+        this.claim = claim;
+        this.player = player;
+        this.langManager = NClaim.inst().getLangManager();
+        this.menuSection = langManager.getSection("menu.claim_menu");
+        setupMenu();
+        displayTo(player);
+    }
 
-public class ClaimMenu extends Menu {
-
-    public ClaimMenu(Player p, @NotNull Claim claim) {
-        createInventory(9*3, "NClaim - Manage Claim");
-
-        ChunkBorderManager chunkBorderManager = NCoreMain.inst().chunkBorderManager;
-        chunkBorderManager.closeChunkBorder(p);
-        addButton(new Button(26) {
+    private void setupMenu() {
+        createInventory(MenuType.CHEST_3_ROWS, langManager.getString(menuSection, "title"));
+        setBackgroundButton(BackgroundMenu::getButton);
+        
+        addButton(new Button() {
             @Override
-            public ItemStack getItem() {
-                return ItemCreator.of(Material.BARRIER)
-                        .name("{RED}Delete the Claim")
-                        .lore("",
-                                "{WHITE}If you click this button your",
-                                "{WHITE}claim will be {GRAY}deleted forever{WHITE},",
-                                "{WHITE}and there will be {GRAY}no price refund{WHITE}.")
-                        .get();
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(11);
             }
 
-            @Override
-            public void onClick(Player player, ClickType clickType) {
-                Consumer<String> onFinish = (result) -> {
-                    if ("confirmed".equals(result)) {
-                        p.closeInventory();
-                        claim.remove();
-                    } else if ("declined".equals(result)) {
-                        new ClaimMenu(p, claim);
-                    }
-                };
-
-                new ConfirmMenu(p, "Delete the Claim", Arrays.asList("", "{WHITE}If you {GRAY}approve {WHITE}this action,", "{WHITE}the claim {GRAY}permanently {WHITE}will be","{GRAY}deleted {WHITE}and {GRAY}cannot be restored{WHITE}."), onFinish);
-            }
-        });
-
-        addButton(new Button(11) {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.GRASS_BLOCK)
-                        .name("{BROWN}Manage Chunks")
-                        .lore(
-                                "",
-                                "{GRAY}Expand {WHITE}your {GRAY}Claim {WHITE}here.",
-                                "{WHITE}No need to buy a new claim.",
-                                "",
-                                "{YELLOW}Click to expand."
-                        )
+                        .name(langManager.getString(menuSection, "manage_chunks.display_name"))
+                        .lore(langManager.getStringList(menuSection, "manage_chunks.lore"))
                         .get();
             }
 
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                new ExpandMenu(p, claim, false);
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new LandExpansionMenu(player, claim, false);
             }
         });
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(12);
+            }
 
-        addButton(new Button(13) {
             @Override
             public ItemStack getItem() {
-                ItemStack itemStack;
-                itemStack = getPlayerHead(p.getPlayer());
-                itemStack = ItemCreator.of(itemStack)
-                        .name("{BROWN}Manage Members")
-                        .lore(
-                                "",
-                                "{WHITE}Here you can manage your {GRAY}coop",
-                                "{WHITE}members. Easily {GRAY}add {WHITE}or {GRAY}remove",
-                                "{WHITE}members from your claim",
-                                "",
-                                "{YELLOW}Click to manage coops."
-                        )
+                return ItemCreator.of(Material.CLOCK)
+                        .name(langManager.getString(menuSection, "manage_expiry.display_name"))
+                        .lore(langManager.getStringList(menuSection, "manage_expiry.lore"))
                         .get();
-                return itemStack;
             }
-
             @Override
-            public void onClick(Player p, ClickType clickType) {
-                new ManageMenu(p, claim, false);
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new TimeManagementMenu(player, 0,0,0,0, claim);
             }
         });
 
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
 
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(NClaim.inst().getHeadManager().createHead(player))
+                        .name(langManager.getString(menuSection, "manage_members.display_name"))
+                        .lore(langManager.getStringList(menuSection, "manage_members.lore"))
+                        .get();
+            }
 
-        addButton(new Button(15) {
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new CoopListMenu(player, claim, false);
+            }
+        });
+
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(14);
+            }
+
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.END_CRYSTAL)
-                        .name("{BROWN}Manage Claim Settings")
-                        .lore("",
-                                "{WHITE}Manage your claim's {GRAY}settings.",
-                                "{WHITE}Easily {GRAY}adjust {WHITE}permissions for everyone.",
-                                "",
-                                "{YELLOW}Click to manage settings."
-                        )
-
+                        .name(langManager.getString(menuSection, "manage_settings.display_name"))
+                        .lore(langManager.getStringList(menuSection, "manage_settings.lore"))
                         .get();
             }
 
             @Override
-            public void onClick(Player player, ClickType clickType) {
-                new SettingMenu(p, claim);
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                new ClaimSettingsMenu(player, claim, 0);
             }
         });
 
-        displayTo(p);
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(15) ;
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.TNT)
+                        .name(langManager.getString(menuSection, "delete.display_name"))
+                        .lore(langManager.getStringList(menuSection, "delete.lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                new ConfirmMenu(player,
+                        langManager.getString("menu.confirm_menu.delete_claim.display_name"),
+                        langManager.getStringList("menu.confirm_menu.delete_claim.lore"),
+                        (result) -> {
+                            if ("confirmed".equals(result)) {
+                                claim.remove(RemoveCause.UNCLAIM);
+                                player.closeInventory();
+                            } else if ("declined".equals(result)) {
+                                new ClaimManagementMenu(player, claim);
+                            }
+                        });
+            }
+        });
     }
 }

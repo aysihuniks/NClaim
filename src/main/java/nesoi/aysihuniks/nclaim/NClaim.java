@@ -1,44 +1,80 @@
-package nesoi.network.NClaim;
+package nesoi.aysihuniks.nclaim;
 
-import nesoi.network.NClaim.enums.Balance;
-import nesoi.network.NClaim.executors.AdminCommandExecutor;
-import nesoi.network.NClaim.executors.MainCommandExecutor;
-import nesoi.network.NClaim.model.Claim;
-import nesoi.network.NClaim.integrations.Expension;
-import nesoi.network.NClaim.model.User;
-import nesoi.network.NClaim.systems.claim.ClaimManager;
-import nesoi.network.NClaim.utils.*;
+import de.tr7zw.changeme.nbtapi.NBT;
+import lombok.Getter;
+import lombok.Setter;
+import nesoi.aysihuniks.nclaim.commands.AllCommandExecutor;
+import nesoi.aysihuniks.nclaim.database.DatabaseManager;
+import nesoi.aysihuniks.nclaim.database.MySQLManager;
+import nesoi.aysihuniks.nclaim.database.SQLiteManager;
+import nesoi.aysihuniks.nclaim.enums.Balance;
+import nesoi.aysihuniks.nclaim.enums.HoloEnum;
+import nesoi.aysihuniks.nclaim.integrations.Expansion;
+import nesoi.aysihuniks.nclaim.integrations.GeikFarmer;
+import nesoi.aysihuniks.nclaim.integrations.Metrics;
+import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.User;
+import nesoi.aysihuniks.nclaim.model.UserManager;
+import nesoi.aysihuniks.nclaim.service.*;
+import nesoi.aysihuniks.nclaim.utils.*;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.*;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.DAPI.DAPI;
-import org.nandayo.DAPI.HexUtil;
-import org.nandayo.DAPI.Util;
-import org.nandayo.DAPI.object.DMaterial;
-import org.nandayo.DAPI.object.DParticle;
+import org.nandayo.dapi.DAPI;
+import org.nandayo.dapi.HexUtil;
+import org.nandayo.dapi.Util;
+import org.nandayo.dapi.object.DMaterial;
+import org.nandayo.dapi.object.DParticle;
+import org.nandayo.dapi.object.DSound;
+import space.arim.morepaperlib.MorePaperLib;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static nesoi.network.NClaim.utils.HeadManager.getFromName;
-import static org.nandayo.DAPI.HexUtil.parse;
+@Getter
+@Setter
+public final class NClaim extends JavaPlugin {
+    private static NClaim instance;
 
-public final class NCoreMain extends JavaPlugin implements Listener {
+    // Services
+    private Wrapper wrapper;
+    private ClaimService claimService;
+    private ClaimStorageManager claimStorageManager;
+    private ClaimExpirationManager claimExpirationManager;
+    private ClaimCoopManager claimCoopManager;
+    private HologramManager hologramManager;
+    private ClaimVisualizerService claimVisualizerService;
+    private ClaimSettingsManager claimSettingsManager;
+    private BlockValueManager blockValueManager;
+    private HeadManager headManager;
+    private MorePaperLib morePaperLib;
+    private MySQLManager mySQLManager;
+    private SQLiteManager sqLiteManager;
+    private DatabaseManager databaseManager;
+    @Getter
+    private static Economy econ = null;
 
-    private static NCoreMain instance;
-    public static NCoreMain inst() {
+    // Managers
+    private LangManager langManager;
+    private ConfigManager configManager;
+
+    // Configuration
+    private Config nconfig;
+    private Balance balanceSystem;
+    private static Economy economy;
+
+    // DAPI Instance
+    private DAPI dapi;
+
+    public static NClaim inst() {
         return instance;
     }
 
@@ -46,182 +82,382 @@ public final class NCoreMain extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
-        PluginManager pm = Bukkit.getPluginManager();
+        initializeDAPI();
 
-        pm.registerEvents(this, this);
-        pm.registerEvents(new ClaimManager(), this);
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        nconfig = new Config(this).load().updateConfig();
+        configManager = new ConfigManager(nconfig.get());
 
-        getCommand("nclaim").setExecutor(new MainCommandExecutor());
-        if (!getDataFolder().exists()) getDataFolder().mkdirs();
+        initializeManagers();
 
-        //UPDATE VALUES
-        updateVariables();
+        setupDatabase();
 
-        // APIS
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Expension(this).register();
+        loadConfigurations();
+
+        registerEventHandlers();
+        registerCommands();
+
+        setupIntegrations();
+
+        if (!NBT.preloadApi()) {
+            Util.log("&cNBT-API wasn't initialized properly, disabling the plugin");
+            getPluginLoader().disablePlugin(this);
+            return;
         }
 
-        if (Bukkit.getPluginManager().getPlugin("NBTAPI") != null) {
-            new HeadManager();
+        initializeHologramManager();
+
+        setupHeadManager();
+
+        startTasks();
+
+        loadData();
+
+        setupMetrics();
+    }
+
+    private void initializeDAPI() {
+        dapi = new DAPI(this);
+        dapi.registerMenuListener();
+        setupHexColors();
+    }
+
+    private void loadConfigurations() {
+        File blocksFile = new File(getDataFolder(), "blocks.yml");
+        if (!blocksFile.exists()) {
+            saveResource("blocks.yml", false);
+        }
+        blockValueManager.loadBlockValues();
+    }
+
+    public void reloadPlugin() {
+        String oldDatabaseType = nconfig.isDatabaseEnabled() ? nconfig.getDatabaseType().toLowerCase() : "yaml";
+
+        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
+            for (Claim claim : Claim.claims) {
+                try {
+                    databaseManager.saveClaim(claim);
+                } catch (Exception e) {
+                    Util.log("&cError saving claim during reload: " + e.getMessage());
+                }
+            }
+        } else if (claimStorageManager != null) {
+            claimStorageManager.saveClaims();
         }
 
-        Util.PREFIX = "&8[<#fa8443>NClaim&8]&r ";
+        nconfig = new Config(this).load().updateConfig();
+        configManager = new ConfigManager(nconfig.get());
+        langManager = new LangManager(this, configManager.getString("lang_file", "en-US"));
 
-        if(Bukkit.getPluginManager().getPlugin("DecentHolograms") == null) {
-            Util.log("&cYou need the use &4DecentHologram&c to continue running this plugin.");
-            Bukkit.getPluginManager().disablePlugin(this);
+        if (nconfig.isDatabaseEnabled()) {
+            if (mySQLManager != null) {
+                mySQLManager.close();
+            }
+            if (sqLiteManager != null) {
+                sqLiteManager.close();
+            }
+
+            String dbType = nconfig.getDatabaseType().toLowerCase();
+            try {
+                if ("mysql".equals(dbType)) {
+                    mySQLManager = new MySQLManager(nconfig);
+                    databaseManager = mySQLManager;
+                    Util.log("&aMySQL connection reestablished.");
+                } else if ("sqlite".equals(dbType)) {
+                    sqLiteManager = new SQLiteManager(nconfig);
+                    databaseManager = sqLiteManager;
+                    Util.log("&aSQLite connection reestablished.");
+                }
+            } catch (Exception e) {
+                Util.log("&cDatabase reconnection failed: " + e.getMessage());
+                databaseManager = null;
+            }
         }
 
+        claimSettingsManager = new ClaimSettingsManager(this);
 
-        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-            balanceSystem = Balance.VAULT;
-            setupEconomy();
+        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
+            try {
+                List<Claim> claims = databaseManager.loadAllClaims();
+
+                String newDatabaseType = nconfig.getDatabaseType().toLowerCase();
+                if (claims.isEmpty() && !oldDatabaseType.equals(newDatabaseType) && !Claim.claims.isEmpty()) {
+                    Util.log("&eDatabase type changed from " + oldDatabaseType + " to " + newDatabaseType +
+                            ", migrating " + Claim.claims.size() + " claims...");
+
+                    for (Claim claim : Claim.claims) {
+                        try {
+                            databaseManager.saveClaim(claim);
+                        } catch (Exception e) {
+                            Util.log("&cError migrating claim: " + e.getMessage());
+                        }
+                    }
+                    Util.log("&aMigration completed! " + Claim.claims.size() + " claims migrated to " + newDatabaseType);
+                } else {
+                    Claim.claims.clear();
+                    Claim.claims.addAll(claims);
+                }
+
+                Util.log("&aReloaded " + Claim.claims.size() + " claims from database.");
+            } catch (Exception e) {
+                Util.log("&cFailed to reload from database: " + e.getMessage());
+                if (claimStorageManager != null) {
+                    claimStorageManager.loadClaims();
+                }
+            }
         } else {
+            if (claimStorageManager != null) {
+                claimStorageManager.loadClaims();
+            }
+        }
+
+        for (Player player : getServer().getOnlinePlayers()) {
+            try {
+                User.saveUser(player.getUniqueId());
+                User.loadUser(player.getUniqueId());
+            } catch (Exception e) {
+                Util.log("&cError reloading user " + player.getName() + ": " + e.getMessage());
+            }
+        }
+
+        blockValueManager.reloadBlockValues();
+
+        Util.log("&aPlugin reload completed!");
+    }
+
+    private void initializeManagers() {
+        wrapper = new Wrapper(this);
+        morePaperLib = new MorePaperLib(this);
+        if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
+            GeikFarmer.registerIntegration();
+        }
+
+        blockValueManager = new BlockValueManager(this);
+        claimService = new ClaimService(this);
+        claimStorageManager = new ClaimStorageManager(this);
+        claimExpirationManager = new ClaimExpirationManager(this);
+        claimCoopManager = new ClaimCoopManager(this);
+        claimVisualizerService = new ClaimVisualizerService(this);
+        claimSettingsManager = new ClaimSettingsManager(this);
+        langManager = new LangManager(this, configManager.getString("lang_file", "en-US"));
+    }
+
+    private void initializeHologramManager() {
+        if (HoloEnum.getActiveHologram() == null) {
+            Util.log("&cNo supported hologram plugin found (DecentHolograms or FancyHolograms). Disabling hologram functionality.");
+            return;
+        }
+        try {
+            hologramManager = new HologramManager(this);
+            Util.log("&aHologramManager initialized successfully!");
+        } catch (Exception e) {
+            Util.log("&cFailed to initialize HologramManager: " + e.getMessage());
+        }
+    }
+
+    private void registerEventHandlers() {
+        getServer().getPluginManager().registerEvents(new UserManager(), this);
+        getServer().getPluginManager().registerEvents(new ClaimManager(this, claimCoopManager), this);
+    }
+
+    private void registerCommands() {
+        PluginCommand command = getCommand("nclaim");
+        if (command != null) {
+            command.setExecutor(new AllCommandExecutor());
+            command.setTabCompleter(new AllCommandExecutor());
+        }
+    }
+
+    private void setupIntegrations() {
+        setupHologramPlugin();
+        setupWorldGuard();
+        setupPlaceholderAPI();
+        setupVault();
+        checkForUpdates();
+    }
+
+    private void setupHologramPlugin() {
+        if (!HoloEnum.isHologramPluginEnabled()) {
+            Util.log("&cYou need to have one of the &rDecentHolograms &cor &rFancyHolograms &cplugins installed!");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void setupHeadManager() {
+        try {
+            headManager = new HeadManager();
+            Util.log("&aHeadManager initialized successfully!");
+        } catch (Exception e) {
+            Util.log("&cFailed to initialize HeadManager: " + e.getMessage());
+        }
+    }
+
+    private boolean worldGuardEnabled;
+
+    private void setupWorldGuard() {
+        if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
+            worldGuardEnabled = true;
+            Util.log("&aWorldGuard integration enabled successfully!");
+        } else {
+            worldGuardEnabled = false;
+            Util.log("&eWorldGuard not found! Region protection features will be disabled.");
+        }
+    }
+
+    private void setupPlaceholderAPI() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new Expansion(this).register();
+        }
+    }
+
+    private void setupVault() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            Util.log("&cVault plugin not found! Using PlayerData balance system.");
+            balanceSystem = Balance.PLAYERDATA;
+            return;
+        }
+
+        try {
+            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+            if (rsp == null) {
+                Util.log("&cVault plugin found but no economy provider found! Using playerdata balance system.");
+                balanceSystem = Balance.PLAYERDATA;
+                return;
+            }
+
+            econ = rsp.getProvider();
+            balanceSystem = Balance.VAULT;
+            Util.log("&aSuccessfully hooked into Vault economy!");
+        } catch (Exception e) {
+            Util.log("&cError setting up Vault economy: " + e.getMessage());
             balanceSystem = Balance.PLAYERDATA;
         }
+    }
 
-        new AdminCommandExecutor();
+    private void setupMetrics() {
+        new Metrics(this, 24693);
+    }
 
-        //UPDATE CHECK
-        if(configManager.getBoolean("check_for_updates", true)) {
-            //SPIGOT RESOURCE ID
-            int resourceId = 122527;
-            new UpdateChecker(this, resourceId).getVersion(version -> {
-                if (this.getDescription().getVersion().equals(version)) {
-                    Util.log("&aPlugin is up-to-date.");
-                } else {
-                    Util.log("&fThere is a new version update. (&e" + version + "&f)");
-                }
-            });
-        }
+    private void startTasks() {
+        claimExpirationManager.startExpirationChecker();
+
+        long MINUTES = getNconfig().getAutoSave() * 60 * 20L;
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                Claim.checkExpiredClaims();
+                long startTime = System.currentTimeMillis();
+
+                for (Claim claim : Claim.claims) {
+                    long claimValue = blockValueManager.calculateClaimValue(claim);
+                    claim.setClaimValue(claimValue);
+                }
+
+                claimStorageManager.saveClaims();
+                int claimCount = Claim.claims.size();
+
+                Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
+                for (Player player : onlinePlayers) {
+                    User.saveUser(player.getUniqueId());
+                }
+
+                long duration = System.currentTimeMillis() - startTime;
+                Util.log(String.format("&aAuto-save completed! &7(Saved &f%d claims &7and calculated values &7in &f%dms&7)",
+                        claimCount, duration));
             }
-        }.runTaskTimer(NCoreMain.inst(), 0L, 20L * 10);
+        }.runTaskTimer(this, MINUTES, MINUTES);
+    }
 
-        //bStats
-        int pluginId = 24693;
-        new Metrics(this, pluginId);
+    private void loadData() {
+        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
+            try {
+                List<Claim> claims = databaseManager.loadAllClaims();
+                Claim.claims.clear();
+                Claim.claims.addAll(claims);
+                Util.log("&aLoaded " + claims.size() + " claims from database.");
 
-        //DAPI
-        DAPI dapi = new DAPI(this);
-        dapi.registerMenuListener();
+                if (claims.isEmpty()) {
+                    checkForMigrationOpportunity();
+                }
+            } catch (Exception e) {
+                Util.log("&cFailed to load from database: " + e.getMessage());
+                claimStorageManager.loadClaims();
+            }
+        } else {
+            claimStorageManager.loadClaims();
+        }
 
-        HexUtil.placeholders.put("{WHITE}", "<#FFF8E8>");
-        HexUtil.placeholders.put("{DARKGREEN}", "<#0A6847>");
-        HexUtil.placeholders.put("{GREEN}", "<#7ABA78>");
-        HexUtil.placeholders.put("{DARKRED}", "<#6D2323>");
-        HexUtil.placeholders.put("{RED}", "<#cf2525>");
-        HexUtil.placeholders.put("{YELLOW}", "<#FFEC9E>");
-        HexUtil.placeholders.put("{ORANGE}", "<#fa8443>");
-        HexUtil.placeholders.put("{GRAY}", "<#ababab>");
-        HexUtil.placeholders.put("{BROWN}", "<#825B32>");
-        HexUtil.placeholders.put("{PURPLE}", "<#8D77AB>");
-        HexUtil.placeholders.put("{prefix}", "&8[<#fa8443>NClaim&8]&r");
-
-        // Claim & User Model
-        Claim.loadData();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : getServer().getOnlinePlayers()) {
             User.loadUser(player.getUniqueId());
         }
     }
 
-    public ChunkBorderManager chunkBorderManager;
-    public LangManager langManager;
-    public ConfigManager configManager;
-    public Config config;
-    public Claim claim;
+    private void setupHexColors() {
+        Map<String, String> colors = new HashMap<>();
+        colors.put("{WHITE}", "<#FFF8E8>");
+        colors.put("{DARKGREEN}", "<#0A6847>");
+        colors.put("{GREEN}", "<#7ABA78>");
+        colors.put("{DARKRED}", "<#6D2323>");
+        colors.put("{RED}", "<#cf2525>");
+        colors.put("{YELLOW}", "<#FFEC9E>");
+        colors.put("{ORANGE}", "<#fa8443>");
+        colors.put("{GRAY}", "<#ababab>");
+        colors.put("{BROWN}", "<#825B32>");
+        colors.put("{PURPLE}", "<#8D77AB>");
+        colors.put("{prefix}", "&8[<#fa8443>NClaim&8]&r");
 
-    public Balance balanceSystem;
-
-
-    public void updateVariables() {
-        config = new Config(this).load().updateConfig();
-        config.load();
-
-        configManager = new ConfigManager(config.get());
-        chunkBorderManager = new ChunkBorderManager();
-        langManager = new LangManager(this, configManager.getString("lang_file", "en-US")).updateLanguage();
-
+        HexUtil.placeholders.putAll(colors);
+        Util.PREFIX = "&8[<#fa8443>NClaim&8]&r ";
     }
 
     @Override
     public void onDisable() {
-        Claim.saveData();
+        claimExpirationManager.stopExpirationChecker();
+        if (claimStorageManager != null) {
+            claimStorageManager.saveClaims();
+        }
 
-        for(Player player : getServer().getOnlinePlayers()) {
+        for (Player player : getServer().getOnlinePlayers()) {
             User.saveUser(player.getUniqueId());
         }
 
+        if (mySQLManager != null) {
+            mySQLManager.close();
+        }
+        if (sqLiteManager != null) {
+            sqLiteManager.close();
+        }
+
         instance = null;
-
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
-        if (HeadManager.api) {
-            HeadManager.textureMap.put(player, getFromName(player.getName()));
-        }
-
-        User.loadUser(player.getUniqueId());
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-
-        if (HeadManager.api) {
-            HeadManager.textureMap.remove(player);
-        }
-
-        User.saveUser(player.getUniqueId());
-    }
-
-    // action bar sender
+    // Utility methods
     public static void sendActionBar(Player player, String message) {
         if (message == null || message.isEmpty()) return;
-        String formattedText = parse(message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(formattedText));
-
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
+                TextComponent.fromLegacyText(HexUtil.parse(message)));
     }
 
-    // Vault
-    public static Economy economy = null;
-    private void setupEconomy()
-    {
-        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-        if (economyProvider != null) {
-            economy = economyProvider.getProvider();
-        }
+    public static boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {
+        return Math.abs(chunk.getX() - thatChunk.getX()) <= radius &&
+                Math.abs(chunk.getZ() - thatChunk.getZ()) <= radius;
     }
 
-    public Economy getEconomy() {
-        return economy;
+    public static Material getMaterial(DMaterial dMaterial, DMaterial def) {
+        Material mat = dMaterial.parseMaterial();
+        return mat != null ? mat : (def != null ? def.parseMaterial() : Material.AIR);
     }
 
-    // GM
-
-    static public boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {
-        return Math.abs(chunk.getX() - thatChunk.getX()) <= radius && Math.abs(chunk.getZ() - thatChunk.getZ()) <= radius;
-    }
-
-    static public Material getMaterial(DMaterial dMaterial, DMaterial def) {
-        Material mat = dMaterial.get();
-        if(mat != null) return mat;
-        return def != null ? def.get() : null;
-    }
-
-    public Particle getParticle(@NotNull DParticle dParticle, @NotNull DParticle def) {
+    public static Particle getParticle(@NotNull DParticle dParticle, @NotNull DParticle def) {
         Particle particle = dParticle.get();
-        if(particle != null) return particle;
-        return def.get();
+        return particle != null ? particle : def.get();
+    }
+
+    public static Sound getSound(@NotNull DSound dSound, @NotNull DSound def) {
+        Sound sound = dSound.parseSound();
+        return sound != null ? sound : def.parseSound();
     }
 
     static public String serializeDate(Date date) {
@@ -274,9 +510,75 @@ public final class NCoreMain extends JavaPlugin implements Listener {
 
     static public Chunk deserializeChunk(@NotNull String chunk) {
         String[] chunkParts = chunk.split(",");
-        if(chunkParts.length != 3) return null;
+        if (chunkParts.length != 3) return null;
         World world = Bukkit.getWorld(chunkParts[0]);
         if (world == null) return null;
         return world.getChunkAt(Integer.parseInt(chunkParts[1]), Integer.parseInt(chunkParts[2]));
+    }
+
+    // Database Migration
+    private void setupDatabase() {
+        if (nconfig.isDatabaseEnabled()) {
+            try {
+                String dbType = nconfig.getDatabaseType().toLowerCase();
+                if ("mysql".equals(dbType)) {
+                    mySQLManager = new MySQLManager(nconfig);
+                    databaseManager = mySQLManager;
+                    Util.log("&aInitializing MySQL connection...");
+                } else if ("sqlite".equals(dbType)) {
+                    sqLiteManager = new SQLiteManager(nconfig);
+                    databaseManager = sqLiteManager;
+                    Util.log("&aInitializing SQLite connection...");
+                } else {
+                    throw new IllegalArgumentException("Unsupported database type: " + dbType);
+                }
+
+                int claimCount = databaseManager.getClaimCount();
+                int userCount = databaseManager.getUserCount();
+                Util.log("&aFound " + claimCount + " claims and " + userCount + " users in database");
+
+                Util.log("&a" + dbType.toUpperCase() + " connection established successfully!");
+            } catch (Exception e) {
+                nconfig.setDatabaseEnabled(false);
+                nconfig.save();
+                Util.log("&cDatabase connection failed (Falling back to YAML): " + e.getMessage());
+            }
+        }
+    }
+
+    private void checkForMigrationOpportunity() {
+        File claimsFile = new File(getDataFolder(), "claims.yml");
+        File playersFolder = new File(getDataFolder(), "players");
+
+        boolean hasClaimData = claimsFile.exists();
+        boolean hasUserData = playersFolder.exists() &&
+                playersFolder.listFiles() != null &&
+                playersFolder.listFiles().length > 0;
+
+        if (hasClaimData || hasUserData) {
+            String dbType = nconfig.getDatabaseType().toUpperCase();
+            Util.log("&eEmpty " + dbType + " database detected but YAML data exists.");
+            Util.log("&eYou can use '/nclaim migrate' command to migrate your data to database.");
+        }
+    }
+
+    // Vault
+    public Economy getEconomy() {
+        return econ;
+    }
+
+    // Checker
+    public void checkForUpdates() {
+        if (configManager.getBoolean("check_for_updates", true)) {
+            // SPIGOT RESOURCE ID
+            int resourceId = 122527;
+            new UpdateChecker(this, resourceId).getVersion(version -> {
+                if (this.getDescription().getVersion().equals(version)) {
+                    Util.log("&aPlugin is up-to-date.");
+                } else {
+                    Util.log("&fThere is a new version update. (&e" + version + "&f)");
+                }
+            });
+        }
     }
 }

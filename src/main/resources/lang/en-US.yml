@@ -1,53 +1,668 @@
-# WARNING!
-# %0, %1, %2... are placeholders and can be removed if not needed.
+command:
+  must_be_player: "{prefix} &cYou must be a player to use this command!"
+  permission_denied: "{prefix} &cYou don't have permission to do that!"
+  in_cooldown: "{prefix} &cPlease wait a moment before trying again."
+  wrong_usage: "{prefix} &fNeed help? Use &e/nclaim <help/?> &fto see all available commands."
+  enter_a_valid_number: "{prefix} &cPlease enter a valid number."
+  enter_a_player: "{prefix} &cPlease enter a player name."
+  player_data_not_found: "{prefix} &cPlayer data not found. &7Please rejoin and try again."
+  invalid_material: "{prefix} &c{material} &fis not a valid material."
+  invalid_block_type: "{prefix} &c{block} &fis not a valid block type."
+  not_in_claim: "{prefix} &cYou are not in any claim."
+  expiration_extended: "{prefix} &fClaim expiration extended by &e{d} days&f, &e{h} hours&f, &e{m} minutes for &e{price}&f."
+  level:
+    info: "{prefix} &fThis claim's total value is &e{value} &7(across &e{chunks} &7chunks)"
+  balance:
+    current: "{prefix} &fYou have &e${balance} &fin your balance."
+    not_enough: "{prefix} &cYou don't have enough balance to do that."
+  player:
+    not_found: "{prefix} &c{target} not found."
+    cant_add_self: "{prefix} &cYou cannot add yourself."
+  reload:
+    success: "{prefix} &aConfiguration successfully reloaded."
+    failed: "{prefix} &cReload failed. Please check the console."
+  set:
+    block_value_set: "{prefix} &fThe value of &e{block} &fhas been set to &e{value}&f."
+    target_balance_set: "{prefix} &fYour balance has been set to &e${balance} &fby an admin."
+    player_balance_set: "{prefix} &e{target}'s &fbalance has been set to &e${amount}&f."
+  add:
+    target_added: "{prefix} &e${amount} &fhas been added to your balance. &7(Total: &e${balance}&7)"
+    player_added: "{prefix} &e${amount} &fhas been added to &e{target}'s &fbalance."
+    world_already_in_blacklist: "{prefix} &cWorld &e{world} &cis already in the blacklist."
+    world_added_to_blacklist: "{prefix} &fWorld &e{world} &fhas been added to the blacklist."
+    region_already_in_blacklist: "{prefix} &cRegion &e{region} &cis already in the blacklist."
+    region_added_to_blacklist: "{prefix} &fRegion &e{region} &fhas been added to the blacklist."
+    expiration_extended: "{prefix} &fClaim expiration extended by &e{d} days&f, &e{h} hours&f, &e{m} minutes&f."
+    block_value_added: "{prefix} &e{block} &fvalue has been set to &e{value}&f."
+    block_already_exists: "{prefix} &c{block} &calready exists in the value list."
+  remove:
+    target_removed: "{prefix} &e${amount} &fhas been removed from your balance. &7(Total: &e${balance}&7)"
+    player_removed: "{prefix} &e${amount} &fhas been removed from &e{target}'s &fbalance."
+    not_in_blacklist: "{prefix} &c{world} &fis not in the blacklist."
+    world_removed_from_blacklist: "{prefix} &fWorld &e{world} &fhas been removed from the blacklist."
+    region_removed_from_blacklist: "{prefix} &fRegion &e{region} &fhas been removed from the blacklist."
+    expiration_subtracted: "{prefix} &fClaim expiration reduced by &e{d} days&f, &e{h} hours&f, &e{m} minutes&f."
+    block_not_found: "{prefix} &c{block} &cwas not found in block values."
+    block_value_removed: "{prefix} &e{block} &fhas been removed from block values."
+  change:
+    invalid_lang: "{prefix} &cPlease choose a valid language &7(e.g., 'en-US' or 'tr-TR')"
+    lang_changed: "{prefix} &fLanguage has been changed to &e{lang}&f."
+    invalid_material: "{prefix} &cInvalid material: {material}"
+    invalid_value: "{prefix} &cInvalid value! Please enter a positive number."
+    blockvalue_updated: "{prefix} &aBlock value updated: &e{material} &a{old_value} -> {new_value}"
+    blockvalue_added: "{prefix} &aNew block value added: &e{material} &a= {value}"
+    blockvalue_not_changed: "{prefix} &aThe block value has not changed because the old value and the new value are equal."
+  migrate:
+    database_disabled: "{prefix} &cDatabase connection is disabled in config."
+    completed: "{prefix} &aMigration successfully completed."
+    database_not_connected: "{prefix} &cDatabase not connected, please make sure your database connection is correct."
+    backup_created: "{prefix} &aFiles backup created successfully."
+    failed: "{prefix} &cMigration failed. Please check the console."
 
-messages:
+claim:
+  max_reached: "{prefix} &cYou have reached the maximum claim limit."
+  not_found: "{prefix} &cYou don't own any claims and aren't added to any claims."
+  in_blacklisted_region_or_world: "{prefix} &cYou can't do that in a blacklisted world or region."
+  not_yours: "{prefix} &cThis claim doesn't belong to you."
+  buy_cancelled: "{prefix} &cClaim purchase cancelled."
+  already_claimed: "{prefix} &cThis chunk is already claimed!"
+  received: "{prefix} &aYou have successfully received the claim."
+  removed: "{prefix} &fThe claim in this chunk has been removed."
+  expired: "{prefix} &fClaim has expired and was removed &7(&e{x}&7, &e{z}&7)."
+  setting_change_cancelled: "&cSetting change was cancelled!"
+  pvp_not_allowed: "{prefix} &cPvP is not allowed in this claim."
+  level:
+    calculating_started: "{prefix} &aYour claim level is being calculated, please wait."
+    calculating_in_progress: "{prefix} &cAnother player is calculating the claim level, please wait a moment"
+    calculating_in_queue: "{prefix} &fThere are a total of &7{count} &fpeople in the claim level calculation."
+    calculating_in_queue_position: "{prefix} &fYour turn is &7{position}&f."
+    queue_is_empty: "{prefix} &fQueue is empty."
+    your_already_in_queue: "{prefix} &fYou have already in queue."
+  time:
+    no_time_selected: "{prefix} &cThere is no time to increase."
+  land:
+    already_own_chunk: "{prefix} &cYou already own this chunk!"
+    already_own_land: "{prefix} &cYou already own this land!"
+    not_adjacent: "{prefix} &cYou can only expand your claim to adjacent chunks!"
+    expanded: "{prefix} &aNew land successfully added to your claim."
+    buy_cancelled: "{prefix} &cLand purchase cancelled."
+  coop:
+    limit_reached: "{prefix} &cYou can only have up to &e{0} &cco-op players!"
+    already_added: "{prefix} &c{coop} is already in the co-op list."
+    added: "{prefix} &e{coop} &fhas been added to your claim."
+    removed: "{prefix} &e{coop} &fhas been removed from the co-op list."
+    kicked: "{prefix} &fYou were removed from &e{owner}'s &fclaim."
+    joined: "{prefix} &fYou have been added to &e{owner}'s &fclaim."
+    not_in_list: "{prefix} &c{0} &fis not in the co-op list."
+    add_cancelled: "&cAdding co-op player was cancelled!"
+    remove_cancelled: "&cRemoving co-op player was cancelled!"
+    permission_toggle_cancelled: "&cChanging co-op permission was cancelled!"
 
-  error:
-    not-enough-permission: "%p {RED}Error: You don't have permission to do that!"
-    cooldown: "%p {RED}Error: Please wait a moment before trying again."
-    wrong-usage: "%p {RED}Error: Need help? Use /nclaim <help/?> to see all available commands."
-    no-player: "%p {RED}Error: Player is offline or not found."
-    not-enough-money: "%p {RED}Error: You don't have enough money to do that."
-    reached-max-claim-count: "%p {RED}Error: You have reached the maximum claim count."
-    in-blacklisted-world: "%p {RED}Error: You can't do that in the blacklisted world."
-    pvp-not-allowed: "%p {RED}Error: PvP not allowed in this claim."
-    not-found: "%p {RED}Error: What you are looking for was not found."
-    claim-not-yours: "%p {RED}Error: This claim is not yours."
-    cant-add-yourself: "%p {RED}Error: You cannot add yourself."
-    coop-limit-reached: "%p {RED}Error: You can only have up to {DARKRED}%0 {RED}co-op players!"
-    player-already-coop: "%p {RED}Error: Player already in the coop list."
-    already-claimed: "%p {RED}Error: This chunk is already claimed!"
-    invalid-lang: "%p {RED}Error: Invalid language code: %0. Please choose a valid language (e.g., 'en' or 'tr')."
-    already-blacklisted: "%p {RED}Error: {DARKRED}%0 {RED}named world is already in the blacklist."
-    not-in-blacklist: "%p {RED}Error: {DARKRED}%0 {RED}named world is not in the blacklist."
-    enter-a-number: "%p {RED}Error: Please enter a valid number."
+action_bar:
+  unclaimed_chunk: "&7Unclaimed"
+  claimed_chunk: "&e{owner} &7- {pvp_status}"
+  pvp_enabled: "&cPvP"
+  pvp_disabled: "&aPvP"
 
-  success:
-    claim-received: "%p {GREEN}Success: You successfully received the claim."
-    coop-added: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been added to your claim."
-    coop-kicked: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}has been removed from the co-op list."
-    player-added-to-claim: "%p {GREEN}Success: You have been added to %0's claim."
-    claim-expanded: "%p {GREEN}Success: New land added to your claim."
-    reload: "%p {GREEN}Success: Configuration files have been successfully reloaded."
-    target-balance-added: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}added to your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
-    player-balance-added: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been added to %1's balance."
-    target-balance-removed: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from your balance by admin. {GRAY}({GREEN}Total balance: {DARKGREEN}%1${GRAY})"
-    player-balance-removed: "%p {GREEN}Success: {DARKGREEN}%0$ {GREEN}has been removed from {DARKGREEN}%1's {GREEN}balance."
-    expiration-date-changed: "%p {GREEN}Success: Expiration date extended/subtracted by {DARKGREEN}%0 days{GREEN}, {DARKGREEN}%1 hours{GREEN}, {DARKGREEN}%2 minutes{GREEN}."
-    claim-removed: "%p {GREEN}Success: The claim in the chunk you were in has been deleted."
-    lang-changed: "%p {GREEN}Success: Language has been successfully changed to {DARKGREEN}%0{GREEN}."
-    blacklisted: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}named world has been successfully blacklisted."
-    removed-from-blacklist: "%p {GREEN}Success: {DARKGREEN}%0 {GREEN}named world has been removed from the blacklist!"
+hologram:
+  title: "&6⚔ Protected Area ⚔"
+  owner: "&fOwner: &e{owner}"
+  time_left: "&fTime Left: &e{time_left}"
+  coop_count: "&fCo-op Players: &e{coop_count}"
+  total_size: "&fTotal Size: &e{total_size} &7chunks"
 
-  reminder:
-    claim-expired: "%p {PURPLE}Reminder: {WHITE}Claim time expired and was removed {GRAY}({RED}%0{WHITE}, {RED}%1{GRAY})."
-    player-not-in-coop: "%p {PURPLE}Reminder: {RED}%0 {WHITE}is already not in the co-op list."
-    player-balance: "%p {PURPLE}Reminder: {WHITE}You have {GRAY}%0{WHITE}$ in your balance."
+menu:
+  back:
+    display_name: "&eBack"
+  previous_page:
+    display_name: "&ePrevious Page"
+  next_page:
+    display_name: "&eNext Page"
+  enabled: "&aEnabled"
+  disabled: "&cDisabled"
 
-action-bar:
-  unclaimed-chunk: "{GRAY}Unclaimed"
-  claimed-chunk: "{PURPLE}%0 {GRAY}- %1"
+  confirm_menu:
+    title: "Confirm Action"
+    confirm:
+      display_name: "&aConfirm"
+    decline:
+      display_name: "&cDecline"
+    buy_claim:
+      display_name: "&6Buy a Claim"
+      lore:
+        - ""
+        - "&fIf you approve this action:"
+        - "&7• &e${price} &fwill be deducted from your balance"
+        - "&7• &fYou will receive a &enew Claim"
+        - ""
+        - "&7Click to confirm purchase"
+    expand_land:
+      display_name: "&6Expand Claim"
+      lore:
+        - ""
+        - "&fIf you approve this action:"
+        - "&7• &fCost: &e${price}"
+        - "&7• &fSelected chunk will be added to your claim"
+        - ""
+        - "&7Click to confirm expansion"
+    delete_claim:
+      display_name: "&6Delete Claim"
+      lore:
+        - ""
+        - "&cWarning: &fThis action will:"
+        - "&7• &fPermanently delete your claim"
+        - "&7• &fCannot be undone"
+        - ""
+        - "&7Click to confirm deletion"
+    kick_coop:
+      display_name: "&6Remove Co-op"
+      lore:
+        - ""
+        - "&fThis action will:"
+        - "&7• &fRemove &e{player} &ffrom your claim"
+        - "&7• &fRevoke all their permissions"
+        - ""
+        - "&7Click to confirm removal"
+    add_coop:
+      display_name: "&6Add Co-op Member"
+      lore:
+        - ""
+        - "&fThis action will:"
+        - "&7• &fAdd &e{player} &fto your claim"
+        - "&7• &fGrant them co-op permissions"
+        - ""
+        - "&7Click to confirm addition"
+
+  main_menu:
+    title: "Claim Management"
+    admin:
+      display_name: "&6Admin Menu"
+    buy_claim:
+      display_name: "&6Buy a Claim"
+      lore:
+        - ""
+        - "&fPurchase a new claim"
+        - "&7Cost: &e${price}"
+        - ""
+        - "&eClick to purchase"
+    manage_claims:
+      display_name: "&6Manage Claims"
+      lore:
+        - ""
+        - "&fManage your claims:"
+        - "&7• &fView all claims"
+        - "&7• &fModify settings"
+        - "&7• &fManage members"
+        - ""
+        - "&eClick to manage"
+
+  list_menu:
+    title: "Claims List"
+    list_type:
+      display_name: "&6List Type"
+      all: "All"
+      player: "Player"
+      coop: "Co-op"
+    your_claims:
+      display_name: "&6Claim: &e{claim_id}"
+      lore:
+        - ""
+        - "&fWorld: &e{world}"
+        - "&fLocation: &e{coordinates}"
+        - "&fOwner: &e{owner}"
+        - ""
+        - "&7Click to manage"
+    coop_claims:
+      display_name: "&6Co-op Claim: &e{claim_id}"
+      lore:
+        - ""
+        - "&fWorld: &e{world}"
+        - "&fLocation: &e{coordinates}"
+        - "&fOwner: &e{owner}"
+        - ""
+        - "&7View only access"
+
+  expand_menu:
+    title: "Expand Claim"
+    center:
+      display_name: "&6Center Chunk"
+      lore:
+        - ""
+        - "&fThis is your claim's center chunk"
+    expand:
+      display_name: "&6Expand Claim"
+      lore:
+        - ""
+        - "&fExpand your claim"
+        - "&7Cost: &e${price}"
+        - ""
+        - "&eClick to purchase"
+    claimed:
+      display_name: "&aClaimed Chunk"
+      lore:
+        - ""
+        - "&fThis chunk is claimed"
+    not_adjacent:
+      display_name: "&cInvalid Chunk"
+      lore:
+        - ""
+        - "&fYou can only claim adjacent chunks"
+    claimed_another_player:
+      display_name: "&cClaimed by Another Player"
+      lore:
+        - ""
+        - "&fThis chunk belongs to someone else"
+
+  claim_menu:
+    title: "Manage Claim"
+    delete:
+      display_name: "&cDelete Claim"
+      lore:
+        - ""
+        - "&cWarning: &fThis will permanently delete"
+        - "&fyour claim without any refund"
+        - ""
+        - "&7Click to proceed"
+    manage_expiry:
+      display_name: "&6Manage Expiration"
+      lore:
+        - ""
+        - "&fManage claim duration:"
+        - "&7• &fView expiration date"
+        - "&7• &fExtend claim time"
+        - ""
+        - "&eClick to manage"
+    manage_chunks:
+      display_name: "&6Manage Chunks"
+      lore:
+        - ""
+        - "&fExpand your claim territory"
+        - "&7• &fAdd new chunks"
+        - "&7• &fView current chunks"
+        - ""
+        - "&eClick to manage"
+    manage_members:
+      display_name: "&6Manage Members"
+      lore:
+        - ""
+        - "&fManage co-op members:"
+        - "&7• &fAdd/Remove members"
+        - "&7• &fModify permissions"
+        - ""
+        - "&eClick to manage"
+    manage_settings:
+      display_name: "&6Claim Settings"
+      lore:
+        - ""
+        - "&fConfigure claim settings:"
+        - "&7• &fPermissions"
+        - "&7• &fProtections"
+        - "&7• &fAccess rules"
+        - ""
+        - "&eClick to configure"
+
+  manage_coop_menu:
+    title: "Co-op Members"
+    add_coop:
+      display_name: "&aAdd Member"
+    coop_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fJoined: &7{date}"
+        - ""
+        - "&eClick to edit"
+      admin_lore:
+        - "&fPermissions: &a{yes}&7/&c{no}"
+        - ""
+        - "&eClick to modify"
+
+  manage_time_menu:
+    title: "Manage Time"
+    claim_info:
+      display_name: "&6Duration Info"
+      lore:
+        - ""
+        - "&fTime Remaining: &e{time_left}"
+        - "&fExpires: &e{expires_at}"
+    confirm:
+      display_name: "&aConfirm Changes"
+      lore:
+        - ""
+        - "&fNew duration:"
+        - "&7• &e{d} &fdays"
+        - "&7• &e{h} &fhours"
+        - "&7• &e{m} &fminutes"
+        - "&7Cost: &e${price}"
+    select_time_unit:
+      display_name: "&6Select Time Unit"
+      lore:
+        - ""
+        - "&f• {days_status}"
+        - "&f• {hours_status}"
+        - "&f• {minutes_status}"
+    add_one:
+      display_name: "&a+1 {unit}"
+    add_six:
+      display_name: "&a+6 {unit}"
+    subtract_one:
+      display_name: "&c-1 {unit}"
+    subtract_six:
+      display_name: "&c-6 {unit}"
+
+  settings_menu:
+    title: "Claim Settings"
+    settings:
+      pvp:
+        display_name: "&6PvP"
+        lore:
+          - ""
+          - "&fAllow player combat in claim"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      tnt_explosions:
+        display_name: "&6TNT Damage"
+        lore:
+          - ""
+          - "&fAllow TNT to damage blocks"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      creeper_explosions:
+        display_name: "&6Creeper Damage"
+        lore:
+          - ""
+          - "&fAllow Creeper explosion damage"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      mob_attacks:
+        display_name: "&6Mob Combat"
+        lore:
+          - ""
+          - "&fAllow players to fight mobs"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      monster_spawning:
+        display_name: "&6Monster Spawning"
+        lore:
+          - ""
+          - "&fAllow monsters to spawn"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      animal_spawning:
+        display_name: "&6Animal Spawning"
+        lore:
+          - ""
+          - "&fAllow animals to spawn"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      villager_interactions:
+        display_name: "&6Villager Trading"
+        lore:
+          - ""
+          - "&fAllow villager interactions"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+
+  permission_menu:
+    title: "Manage {player}"
+    click_to_view: "&eClick to view"
+    right_click_toggle: "&eRight-click to toggle all"
+    offline: "&7(Offline)"
+
+    player_info:
+      display_name: "&e{player}"
+      lore:
+        - "&fJoined: &7{date}"
+        - ""
+        - "&7Manage permissions below"
+
+    kick:
+      display_name: "&cRemove Member"
+      lore:
+        - ""
+        - "&fRemove this member"
+        - "&ffrom your claim"
+        - ""
+        - "&7Click to remove"
+
+    categories:
+      blocks:
+        display_name: "&6Block Permissions"
+      containers:
+        display_name: "&6Container Access"
+      redstone:
+        display_name: "&6Redstone Usage"
+      doors:
+        display_name: "&6Door Access"
+      workstations:
+        display_name: "&6Workstation Usage"
+      interactions:
+        display_name: "&6Interaction Rights"
+      liquids:
+        display_name: "&6Liquid Management"
+      entities:
+        display_name: "&6Entity Interactions"
+
+    permissions:
+      break_blocks:
+        display_name: "&fBreak Blocks"
+      break_spawner:
+        display_name: "&fBreak Spawners"
+      place_blocks:
+        display_name: "&fPlace Blocks"
+      place_spawner:
+        display_name: "&fPlace Spawners"
+      use_chest:
+        display_name: "&fUse Chests"
+      use_furnace:
+        display_name: "&fUse Furnaces"
+      use_barrel:
+        display_name: "&fUse Barrels"
+      use_shulker:
+        display_name: "&fUse Shulker Boxes"
+      use_hopper:
+        display_name: "&fUse Hoppers"
+      use_dispenser:
+        display_name: "&fUse Dispensers"
+      use_redstone:
+        display_name: "&fUse Redstone"
+      use_buttons:
+        display_name: "&fUse Buttons"
+      use_pressure_plates:
+        display_name: "&fUse Pressure Plates"
+      use_levers:
+        display_name: "&fUse Levers"
+      use_doors:
+        display_name: "&fUse Doors"
+      use_trapdoors:
+        display_name: "&fUse Trapdoors"
+      use_gates:
+        display_name: "&fUse Gates"
+      use_crafting:
+        display_name: "&fUse Crafting Tables"
+      use_enchanting:
+        display_name: "&fUse Enchanting Tables"
+      use_anvil:
+        display_name: "&fUse Anvils"
+      use_grindstone:
+        display_name: "&fUse Grindstones"
+      use_stonecutter:
+        display_name: "&fUse Stonecutters"
+      use_loom:
+        display_name: "&fUse Looms"
+      use_smithing:
+        display_name: "&fUse Smithing Tables"
+      use_cartography:
+        display_name: "&fUse Cartography Tables"
+      use_brewing:
+        display_name: "&fUse Brewing Stands"
+      use_bell:
+        display_name: "&fUse Bells"
+      use_beacon:
+        display_name: "&fUse Beacons"
+      use_jukebox:
+        display_name: "&fUse Jukeboxes"
+      use_noteblock:
+        display_name: "&fUse Note Blocks"
+      use_campfire:
+        display_name: "&fUse Campfires"
+      use_bed:
+        display_name: "&fUse Beds"
+      interact_armor_stand:
+        display_name: "&fUse Armor Stands"
+      interact_item_frame:
+        display_name: "&fUse Item Frames"
+      place_water:
+        display_name: "&fPlace Water"
+      place_lava:
+        display_name: "&fPlace Lava"
+      take_water:
+        display_name: "&fTake Water"
+      take_lava:
+        display_name: "&fTake Lava"
+      interact_villager:
+        display_name: "&fTrade with Villagers"
+      leash_mobs:
+        display_name: "&fLeash Mobs"
+      ride_entities:
+        display_name: "&fRide Entities"
+
+  admin:
+    main_menu:
+      title: "Admin Dashboard"
+      manage_claims:
+        display_name: "&6Manage All Claims"
+
+    all_claims_menu:
+      title: "All Claims"
+      reset_settings:
+        display_name: "&cReset Settings"
+      search_player:
+        display_name: "&aSearch Player"
+      sort_by_date:
+        display_name: "&aSort by Date"
+        lore:
+          - ""
+          - "&f• {newest_status}"
+          - "&f• {oldest_status}"
+      delete_selected:
+        display_name: "&cDelete Selected"
+      claim_items:
+        selected:
+          display_name: "&a{owner}'s Claim &7(Selected)"
+          lore:
+            - ""
+            - "&fCreated: &7{created_at}"
+            - "&fLocation: &7{world}, {coordinates}"
+            - "&fSize: &7{land_size} chunks"
+            - "&fCo-op Members: &7{coop_count}"
+            - "&fSettings: &a{yes}&7/&c{no}"
+            - ""
+            - "&eClick &7- &fManage"
+            - "&eShift Click &7- &fTeleport"
+            - "&eRight Click &7- &fDeselect"
+        unselected:
+          display_name: "&6{owner}'s Claim"
+          lore:
+            - ""
+            - "&fCreated: &7{created_at}"
+            - "&fLocation: &7{world}, {coordinates}"
+            - "&fSize: &7{land_size} chunks"
+            - "&fCo-op Members: &7{coop_count}"
+            - "&fSettings: &a{yes}&7/&c{no}"
+            - ""
+            - "&eClick &7- &fManage"
+            - "&eShift Click &7- &fTeleport"
+            - "&eRight Click &7- &fSelect"
+
+    manage_claim_menu:
+      title: "{owner}'s Claim"
+      manage_coop:
+        display_name: "&6Manage Co-op"
+        lore:
+          - ""
+          - "&fManage co-op members:"
+          - "&7• &fView members"
+          - "&7• &fModify permissions"
+          - "&7• &fAdd/Remove members"
+          - ""
+          - "&eClick to manage"
+      manage_lands:
+        display_name: "&6Manage Lands"
+        lore:
+          - ""
+          - "&fManage claim territories:"
+          - "&7• &fView chunks"
+          - "&7• &fAdd/Remove chunks"
+          - ""
+          - "&eClick to manage"
+      manage_expiration:
+        display_name: "&6Manage Expiration"
+        lore:
+          - ""
+          - "&fManage claim duration:"
+          - "&7• &fView expiration"
+          - "&7• &fModify time"
+          - ""
+          - "&eClick to manage"
+      delete_claim:
+        display_name: "&cDelete Claim"
+        lore:
+          - ""
+          - "&cWarning: &fThis will:"
+          - "&7• &fPermanently delete the claim"
+          - "&7• &fRemove all settings"
+          - "&7• &fCannot be undone"
+          - ""
+          - "&7Click to delete"
+
+    manage_time_menu:
+      title: "{owner}'s Claim"
+      claim_info:
+        display_name: "&6Claim Information"
+        lore:
+          - ""
+          - "&fRemaining: &e{time_left}"
+          - "&fExpires: &e{expires_at}"
+      time_display:
+        display_name: "&e{d} &fdays &e{h} &fhours &e{m} &fminutes"
+      confirm:
+        display_name: "&aConfirm Changes"
+        lore:
+          - ""
+          - "&fNew Duration:"
+          - "&7• &e{d} &fdays"
+          - "&7• &e{h} &fhours"
+          - "&7• &e{m} &fminutes"
+      select_time_unit:
+        display_name: "&6Select Time Unit"
+        lore:
+          - ""
+          - "&f• {days_status}"
+          - "&f• {hours_status}"
+          - "&f• {minutes_status}"
+      add_one:
+        display_name: "&a+1 {unit}"
+      add_six:
+        display_name: "&a+6 {unit}"
+      subtract_one:
+        display_name: "&c-1 {unit}"
+      subtract_six:
+        display_name: "&c-6 {unit}"
 
 # DO NOT CHANGE!
 lang_version: "{version}"

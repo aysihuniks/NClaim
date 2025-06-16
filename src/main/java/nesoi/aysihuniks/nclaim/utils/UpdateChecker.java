@@ -1,15 +1,14 @@
-package nesoi.network.NClaim.utils;
+package nesoi.aysihuniks.nclaim.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.nandayo.dapi.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.function.Consumer;
-
-import static org.nandayo.DAPI.Util.log;
 
 public class UpdateChecker {
 
@@ -29,7 +28,7 @@ public class UpdateChecker {
                     consumer.accept(scann.next());
                 }
             } catch (IOException e) {
-                log("&cUnable to check for updates: " + e.getMessage());
+                Util.log("&cUnable to check for updates: " + e.getMessage());
             }
         });
     }
