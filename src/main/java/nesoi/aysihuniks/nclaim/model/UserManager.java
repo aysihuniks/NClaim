@@ -43,7 +43,7 @@ public class UserManager implements Listener {
                     }
                 }
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[UserManager] Failed to fetch skin texture for " + event.getPlayer().getName() + ": " + e.getMessage());
+                Util.log("UserManager failed to fetch skin texture for " + event.getPlayer.getName() ": " + e.getMessage());
             }
         }, 200L);
     }

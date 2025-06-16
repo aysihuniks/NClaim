@@ -158,7 +158,7 @@ public class HeadManager {
             }
             return head;
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[HeadManager] Error creating head with NBTAPI: " + e.getMessage());
+            Util.log("HeadManager error creating head with NBTAPI: " + e.getMessage());
             return new ItemStack(Material.PLAYER_HEAD);
         }
     }

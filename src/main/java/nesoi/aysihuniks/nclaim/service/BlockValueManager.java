@@ -159,13 +159,8 @@ public class BlockValueManager {
                         Chunk landChunk = world.getChunkAt(x, z);
                         chunkValue = calculateChunkValue(landChunk);
                         totalValue += chunkValue;
-                        Util.log("&aCalculated value for land chunk " + getChunkCacheKey(landChunk) + ": " + chunkValue);
-                    } else {
-                        Util.log("&cWorld not found for land: " + landStr);
                     }
-                } catch (NumberFormatException e) {
-                    Util.log("&cInvalid land coordinate format: " + landStr);
-                }
+                } catch (NumberFormatException ignored) {}
             }
         }
 
@@ -248,7 +243,6 @@ public class BlockValueManager {
 
     public long calculateChunkValue(Chunk chunk) {
         if (chunk == null) {
-            Util.log("&cChunk is null, returning 0");
             return 0;
         }
 
