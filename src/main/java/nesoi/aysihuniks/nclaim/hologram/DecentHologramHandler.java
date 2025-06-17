@@ -1,9 +1,18 @@
 package nesoi.aysihuniks.nclaim.hologram;
 
 import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.DecentHolograms;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.plugin.Plugin;
+import org.nandayo.dapi.Util;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DecentHologramHandler implements HologramHandler {
     @Override
@@ -18,5 +27,12 @@ public class DecentHologramHandler implements HologramHandler {
         if (DHAPI.getHologram(hologramId) != null) {
             DHAPI.removeHologram(hologramId);
         }
+    }
+
+    @Override
+    public List<String> getHologramIds() {
+        return Hologram.getCachedHologramNames().stream()
+                .filter(id -> id != null && id.startsWith("claim_"))
+                .collect(Collectors.toList());
     }
 }

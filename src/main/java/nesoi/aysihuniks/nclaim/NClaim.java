@@ -9,6 +9,7 @@ import nesoi.aysihuniks.nclaim.database.MySQLManager;
 import nesoi.aysihuniks.nclaim.database.SQLiteManager;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
+import nesoi.aysihuniks.nclaim.hologram.HologramManager;
 import nesoi.aysihuniks.nclaim.integrations.Expansion;
 import nesoi.aysihuniks.nclaim.integrations.GeikFarmer;
 import nesoi.aysihuniks.nclaim.integrations.Metrics;
@@ -223,6 +224,7 @@ public final class NClaim extends JavaPlugin {
         }
 
         blockValueManager.reloadBlockValues();
+        hologramManager.forceCleanup();
 
         Util.log("&aPlugin reload completed!");
     }
@@ -255,6 +257,8 @@ public final class NClaim extends JavaPlugin {
         } catch (Exception e) {
             Util.log("&cFailed to initialize HologramManager: " + e.getMessage());
         }
+
+        hologramManager.cleanupOrphanedHolograms();
     }
 
     private void registerEventHandlers() {

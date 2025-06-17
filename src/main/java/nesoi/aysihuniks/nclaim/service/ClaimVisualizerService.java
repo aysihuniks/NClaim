@@ -93,7 +93,7 @@ public class ClaimVisualizerService {
 
             for (double d = 0; d <= distance; d += 0.5) {
                 Location particleLoc = start.clone().add(direction.clone().multiply(d));
-                world.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
+                player.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
             }
         }
 
@@ -101,14 +101,13 @@ public class ClaimVisualizerService {
             for (double y = playerY; y < playerY + maxHeight; y += 0.5) {
                 Location pillarLoc = corner.clone();
                 pillarLoc.setY(y);
-                world.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
+                player.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
             }
             for (double y = playerY; y > playerY - maxHeight; y -= 0.5) {
                 Location pillarLoc = corner.clone();
                 pillarLoc.setY(y);
-                world.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
+                player.spawnParticle(Particle.END_ROD, pillarLoc, 0, 0, 0, 0, 0);
             }
-
         }
 
         for (double y = playerY + stepHeight; y < playerY + maxHeight; y += stepHeight) {
@@ -121,7 +120,7 @@ public class ClaimVisualizerService {
 
                 for (double d = 0; d <= distance; d += 0.5) {
                     Location particleLoc = start.clone().add(direction.clone().multiply(d));
-                    world.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
+                    player.spawnParticle(Particle.END_ROD, particleLoc, 0, 0, 0, 0, 0);
                 }
             }
         }

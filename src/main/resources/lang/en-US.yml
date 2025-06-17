@@ -110,6 +110,7 @@ hologram:
   time_left: "&fTime Left: &e{time_left}"
   coop_count: "&fCo-op Players: &e{coop_count}"
   total_size: "&fTotal Size: &e{total_size} &7chunks"
+  edit: "&eRight click to edit"
 
 menu:
   back:

@@ -110,6 +110,7 @@ hologram:
   time_left: "&fKalan Süre: &e{time_left}"
   coop_count: "&fOrtak Oyuncular: &e{coop_count}"
   total_size: "&fToplam Boyut: &e{total_size} &7parça"
+  edit: "&eSağ tıkla ve özelleştir"
 
 menu:
   back:

@@ -6,8 +6,10 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
+import org.nandayo.dapi.Util;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FancyHologramHandler implements HologramHandler {
     @Override
@@ -27,4 +29,13 @@ public class FancyHologramHandler implements HologramHandler {
         HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
         manager.getHologram(hologramId).ifPresent(manager::removeHologram);
     }
+
+    @Override
+    public List<String> getHologramIds() {
+        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        return manager.getHolograms().stream()
+                .map(Hologram::getName)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
 }
