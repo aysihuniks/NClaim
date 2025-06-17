@@ -205,9 +205,10 @@ Here are some screenshots from the plugin:
 ![2](https://github.com/user-attachments/assets/dc3c25c3-87c1-4539-bb88-5ca3fd8b0ce6)
 ![3](https://github.com/user-attachments/assets/4e5807ce-998f-4121-91c5-a4ceb1d17248)
 ![4](https://github.com/user-attachments/assets/d87d0166-6d59-449d-9fd7-bbceb55102f5)
-![5](https://github.com/user-attachments/assets/3ac88a5b-df70-4cc4-be00-215d6eadbf3a)
-![6](https://github.com/user-attachments/assets/7456bb35-bab1-4dda-93d6-b926b8790191)
-![7](https://github.com/user-attachments/assets/a8770a50-4d63-4d09-a31e-a0d10aed1eec)
+![5](https://github.com/user-attachments/assets/6b5067f4-c191-41ae-bfd0-ce8e04151a57)
+![6](https://github.com/user-attachments/assets/3ac88a5b-df70-4cc4-be00-215d6eadbf3a)
+![7](https://github.com/user-attachments/assets/7456bb35-bab1-4dda-93d6-b926b8790191)
+![8](https://github.com/user-attachments/assets/a8770a50-4d63-4d09-a31e-a0d10aed1eec)
 
 
 
