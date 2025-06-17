@@ -19,41 +19,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 @RequiredArgsConstructor
 public class ClaimCoopManager {
     private final NClaim plugin;
-
-    private boolean isContainer(Material type) {
-        return type == Material.CHEST || type == Material.TRAPPED_CHEST ||
-               type == Material.BARREL || type == Material.SHULKER_BOX ||
-               Tag.SHULKER_BOXES.isTagged(type) || type == Material.DISPENSER ||
-               type == Material.DROPPER || type == Material.HOPPER ||
-               type == Material.FURNACE || type == Material.BLAST_FURNACE ||
-               type == Material.SMOKER;
-    }
-
-    private boolean isWorkstation(Material type) {
-        return type == Material.CRAFTING_TABLE || type == Material.ENCHANTING_TABLE ||
-               Tag.ANVIL.isTagged(type) || type == Material.GRINDSTONE ||
-               type == Material.STONECUTTER || type == Material.LOOM ||
-               type == Material.SMITHING_TABLE || type == Material.CARTOGRAPHY_TABLE ||
-               type == Material.BREWING_STAND;
-    }
-
-    private boolean isRedstone(Material type) {
-        return type == Material.REPEATER || type == Material.COMPARATOR ||
-               type == Material.REDSTONE_WIRE || Tag.BUTTONS.isTagged(type) ||
-               Tag.PRESSURE_PLATES.isTagged(type) || type == Material.LEVER ||
-               type == Material.DAYLIGHT_DETECTOR;
-    }
-
-    private boolean isDoor(Material type) {
-        return Tag.DOORS.isTagged(type) || Tag.TRAPDOORS.isTagged(type) ||
-               Tag.FENCE_GATES.isTagged(type);
-    }
 
     public boolean hasPermission(Player player, Claim claim, Permission permission) {
         if (player.hasPermission("nclaim.bypass") || isClaimOwner(claim, player)) {
@@ -66,134 +38,6 @@ public class ClaimCoopManager {
         }
         
         return claim.getCoopPermissions().get(playerUuid).isEnabled(permission);
-    }
-
-    public boolean canModifyBlock(Player player, Claim claim, Block block, boolean isBreaking) {
-        Material type = block.getType();
-        
-        if (type == Material.SPAWNER) {
-            return hasPermission(player, claim, isBreaking ? 
-                    Permission.BREAK_SPAWNER : 
-                    Permission.PLACE_SPAWNER);
-        }
-        
-        return hasPermission(player, claim, isBreaking ? 
-                Permission.BREAK_BLOCKS : 
-                Permission.PLACE_BLOCKS);
-    }
-
-    public boolean canUseContainer(Player player, Claim claim, Material type) {
-        Permission permission = null;
-
-        if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
-            permission = Permission.USE_CHEST;
-        } else if (type == Material.FURNACE || type == Material.BLAST_FURNACE || type == Material.SMOKER) {
-            permission = Permission.USE_FURNACE;
-        } else if (type == Material.BARREL) {
-            permission = Permission.USE_BARREL;
-        } else if (type == Material.SHULKER_BOX) {
-            permission = Permission.USE_SHULKER;
-        } else if (type == Material.HOPPER) {
-            permission = Permission.USE_HOPPER;
-        } else if (type == Material.DISPENSER || type == Material.DROPPER) {
-            permission = Permission.USE_DISPENSER;
-        }
-
-        return permission != null && hasPermission(player, claim, permission);
-    }
-
-    public boolean canUseInteractable(Player player, Claim claim, Material type) {
-        if (isWorkstation(type)) {
-            Permission permission = null;
-
-            if (type == Material.CRAFTING_TABLE) {
-                permission = Permission.USE_CRAFTING;
-            } else if (type == Material.ENCHANTING_TABLE) {
-                permission = Permission.USE_ENCHANTING;
-            } else if (type == Material.ANVIL || type == Material.CHIPPED_ANVIL || type == Material.DAMAGED_ANVIL) {
-                permission = Permission.USE_ANVIL;
-            } else if (type == Material.GRINDSTONE) {
-                permission = Permission.USE_GRINDSTONE;
-            } else if (type == Material.STONECUTTER) {
-                permission = Permission.USE_STONECUTTER;
-            } else if (type == Material.LOOM) {
-                permission = Permission.USE_LOOM;
-            } else if (type == Material.SMITHING_TABLE) {
-                permission = Permission.USE_SMITHING;
-            } else if (type == Material.CARTOGRAPHY_TABLE) {
-                permission = Permission.USE_CARTOGRAPHY;
-            } else if (type == Material.BREWING_STAND) {
-                permission = Permission.USE_BREWING;
-            }
-
-            return permission != null && hasPermission(player, claim, permission);
-        }
-
-        if (isRedstone(type)) {
-            Permission permission = null;
-
-            if (type == Material.REPEATER || type == Material.COMPARATOR || type == Material.REDSTONE_WIRE) {
-                permission = Permission.USE_REDSTONE;
-            } else if (type == Material.STONE_BUTTON || type == Material.OAK_BUTTON || type == Material.BIRCH_BUTTON) {
-                permission = Permission.USE_BUTTONS;
-            } else if (type == Material.STONE_PRESSURE_PLATE || type == Material.LIGHT_WEIGHTED_PRESSURE_PLATE) {
-                permission = Permission.USE_PRESSURE_PLATES;
-            } else if (type == Material.LEVER) {
-                permission = Permission.USE_LEVERS;
-            }
-
-            return permission != null && hasPermission(player, claim, permission);
-        }
-
-        if (isDoor(type)) {
-            if (Tag.DOORS.isTagged(type)) return hasPermission(player, claim, Permission.USE_DOORS);
-            if (Tag.TRAPDOORS.isTagged(type)) return hasPermission(player, claim, Permission.USE_TRAPDOORS);
-            if (Tag.FENCE_GATES.isTagged(type)) return hasPermission(player, claim, Permission.USE_GATES);
-        }
-
-        Permission permission = null;
-
-        if (type == Material.BELL) {
-            permission = Permission.USE_BELL;
-        } else if (type == Material.BEACON) {
-            permission = Permission.USE_BEACON;
-        } else if (type == Material.JUKEBOX) {
-            permission = Permission.USE_JUKEBOX;
-        } else if (type == Material.NOTE_BLOCK) {
-            permission = Permission.USE_NOTEBLOCK;
-        } else if (type == Material.CAMPFIRE || type == Material.SOUL_CAMPFIRE) {
-            permission = Permission.USE_CAMPFIRE;
-        }
-
-        return permission != null && hasPermission(player, claim, permission);
-    }
-
-
-    public boolean canInteractWithEntity(Player player, Claim claim, Entity entity) {
-        if (entity instanceof Villager) {
-            return hasPermission(player, claim, Permission.INTERACT_VILLAGER);
-        }
-        
-        if (entity instanceof org.bukkit.entity.ArmorStand) {
-            return hasPermission(player, claim, Permission.INTERACT_ARMOR_STAND);
-        }
-
-        if (entity instanceof org.bukkit.entity.ItemFrame) {
-            return hasPermission(player, claim, Permission.INTERACT_ITEM_FRAME);
-        }
-
-        return true;
-    }
-
-    public boolean canUseBed(Player player, Claim claim) {
-        return hasPermission(player, claim, Permission.USE_BED);
-    }
-
-    public boolean canManageLiquids(Player player, Claim claim, boolean isLava) {
-        if (isLava) {
-            return hasPermission(player, claim, Permission.PLACE_LAVA);
-        }
-        return hasPermission(player, claim, Permission.PLACE_WATER);
     }
 
     public void addCoopPlayer(Claim claim, Player owner, Player coopPlayer) {
@@ -310,12 +154,18 @@ public class ClaimCoopManager {
         claim.getCoopPlayers().add(coopUUID);
         claim.getCoopPlayerJoinDate().put(coopUUID, new Date());
         claim.getCoopPermissions().put(coopUUID, new CoopPermission());
+
+        User.getUser(coopUUID).getCoopClaims().add(claim);
+        User.saveUser(coopUUID);
     }
 
     private void removeCoopFromClaimData(Claim claim, UUID coopUUID) {
         claim.getCoopPlayers().remove(coopUUID);
         claim.getCoopPlayerJoinDate().remove(coopUUID);
         claim.getCoopPermissions().remove(coopUUID);
+
+        User.getUser(coopUUID).getCoopClaims().remove(claim);
+        User.saveUser(coopUUID);
     }
 
     private boolean canAddCoop(Claim claim, Player owner, Player coopPlayer) {

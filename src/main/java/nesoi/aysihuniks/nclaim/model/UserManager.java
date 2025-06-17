@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.nandayo.dapi.Util;
 
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class UserManager implements Listener {
                     }
                 }
             } catch (Exception e) {
-                Util.log("UserManager failed to fetch skin texture for " + event.getPlayer.getName() ": " + e.getMessage());
+                Util.log("UserManager failed to fetch skin texture for " + event.getPlayer().getName() + ": " + e.getMessage());
             }
         }, 200L);
     }

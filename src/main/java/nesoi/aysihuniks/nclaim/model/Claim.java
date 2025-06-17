@@ -10,6 +10,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimRemoveEvent;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.ui.claim.ClaimListMenu;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -133,16 +134,18 @@ public class Claim {
         }
 
         // Remove claim from the user's claims list
-        Player owner = Bukkit.getPlayer(getOwner());
-        if (owner != null) {
-            User.getUser(getOwner()).getPlayerClaims().remove(this);
-        }
+        User.getUser(getOwner()).getPlayerClaims().remove(this);
+        User.saveUser(getOwner());
 
         // Remove claim from coop players
         getCoopPlayers().stream()
                 .map(Bukkit::getPlayer)
                 .filter(Objects::nonNull)
-                .forEach(player -> User.getUser(player.getUniqueId()).getCoopClaims().remove(this));
+                .forEach(player -> {
+                    User user = User.getUser(player.getUniqueId());
+                    user.getCoopClaims().remove(this);
+                    User.saveUser(player.getUniqueId());
+                });
 
         // Visual effects
         world.spawnParticle(plugin.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), bedrock, 1);
