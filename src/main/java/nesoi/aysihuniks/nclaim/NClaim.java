@@ -27,6 +27,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.DAPI;
 import org.nandayo.dapi.HexUtil;
@@ -74,6 +75,9 @@ public final class NClaim extends JavaPlugin {
 
     // DAPI Instance
     private DAPI dapi;
+
+    // Auto-save BukkitTask
+    private BukkitTask autoSaveTask;
 
     public static NClaim inst() {
         return instance;
@@ -134,6 +138,8 @@ public final class NClaim extends JavaPlugin {
     }
 
     public void reloadPlugin() {
+        stopTasks();
+
         String oldDatabaseType = nconfig.isDatabaseEnabled() ? nconfig.getDatabaseType().toLowerCase() : "yaml";
 
         if (nconfig.isDatabaseEnabled() && databaseManager != null) {
@@ -226,7 +232,17 @@ public final class NClaim extends JavaPlugin {
         blockValueManager.reloadBlockValues();
         hologramManager.forceCleanup();
 
+        startTasks();
+
         Util.log("&aPlugin reload completed!");
+    }
+
+    private void stopTasks() {
+        if (autoSaveTask != null && !autoSaveTask.isCancelled()) {
+            autoSaveTask.cancel();
+            autoSaveTask = null;
+        }
+        claimExpirationManager.stopExpirationChecker();
     }
 
     private void initializeManagers() {
@@ -344,12 +360,17 @@ public final class NClaim extends JavaPlugin {
         new Metrics(this, 24693);
     }
 
+
     private void startTasks() {
         claimExpirationManager.startExpirationChecker();
 
         long MINUTES = getNconfig().getAutoSave() * 60 * 20L;
 
-        new BukkitRunnable() {
+        if (autoSaveTask != null && !autoSaveTask.isCancelled()) {
+            autoSaveTask.cancel();
+        }
+
+        autoSaveTask = new BukkitRunnable() {
             @Override
             public void run() {
                 long startTime = System.currentTimeMillis();
@@ -359,7 +380,16 @@ public final class NClaim extends JavaPlugin {
                     claim.setClaimValue(claimValue);
                 }
 
-                claimStorageManager.saveClaims();
+                if (nconfig.isDatabaseEnabled() && databaseManager != null) {
+                    try {
+                        databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
+                    } catch (Exception e) {
+                        Util.log("&cFailed to save claims to database: " + e.getMessage());
+                    }
+                } else if (claimStorageManager != null) {
+                    claimStorageManager.saveClaims();
+                }
+
                 int claimCount = Claim.claims.size();
 
                 Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
@@ -418,7 +448,8 @@ public final class NClaim extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        claimExpirationManager.stopExpirationChecker();
+        stopTasks();
+
         if (claimStorageManager != null) {
             claimStorageManager.saveClaims();
         }

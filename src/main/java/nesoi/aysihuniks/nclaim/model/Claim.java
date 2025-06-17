@@ -152,11 +152,7 @@ public class Claim {
         world.playSound(bedrock, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            if ("mysql".equals(plugin.getNconfig().getDatabaseType())) {
-                plugin.getMySQLManager().deleteClaim(getClaimId());
-            } else {
-                plugin.getSqLiteManager().deleteClaim(getClaimId());
-            }
+            plugin.getDatabaseManager().deleteClaim(getClaimId());
         }
 
         claims.remove(this);

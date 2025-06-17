@@ -44,8 +44,8 @@ public class ClaimService {
         createNewClaim(player, chunk);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(Claim.getClaim(chunk));
-            plugin.getMySQLManager().saveUser(user);
+            plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
+            plugin.getDatabaseManager().saveUser(user);
         }
     }
 
@@ -91,8 +91,8 @@ public class ClaimService {
         claim.getLands().add(chunkKey);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
-            plugin.getMySQLManager().saveUser(user);
+            plugin.getDatabaseManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveUser(user);
         }
 
         player.sendMessage(plugin.getLangManager().getString("claim.land.expanded"));

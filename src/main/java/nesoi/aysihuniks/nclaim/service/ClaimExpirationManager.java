@@ -38,7 +38,7 @@ public class ClaimExpirationManager {
         for (Claim claim : new ArrayList<>(Claim.claims)) {
             if (claim.getExpiredAt().before(currentDate)) {
                 if (plugin.getNconfig().isDatabaseEnabled()) {
-                    plugin.getMySQLManager().deleteClaim(claim.getClaimId());
+                    plugin.getDatabaseManager().deleteClaim(claim.getClaimId());
                 }
                 claim.remove(RemoveCause.REMOVED);
             }
@@ -56,7 +56,7 @@ public class ClaimExpirationManager {
         claim.setExpiredAt(calendar.getTime());
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
     }
 

@@ -10,10 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ChangeCommand extends BaseCommand {
@@ -124,7 +121,8 @@ public class ChangeCommand extends BaseCommand {
             if (args[1].equalsIgnoreCase("lang")) {
                 return Arrays.asList("tr-TR", "en-US");
             } else if (args[1].equalsIgnoreCase("blockvalue")) {
-                return NClaim.inst().getBlockValueManager().getBlockValues().keySet().stream()
+                Set<Material> ymlMaterials = NClaim.inst().getBlockValueManager().getBlockValues().keySet();
+                return ymlMaterials.stream()
                         .map(Material::name)
                         .collect(Collectors.toList());
             }

@@ -57,7 +57,7 @@ public class ClaimCoopManager {
         addCoopToClaimData(claim, coopUUID);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
 
         owner.sendMessage(plugin.getLangManager().getString("claim.coop.added")
@@ -83,7 +83,7 @@ public class ClaimCoopManager {
         removeCoopFromClaimData(claim, coopUUID);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
 
         Player coopPlayer = Bukkit.getPlayer(coopUUID);
@@ -118,7 +118,7 @@ public class ClaimCoopManager {
         claim.getCoopPermissions().get(player).toggle(permission);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
     }
 
@@ -146,7 +146,7 @@ public class ClaimCoopManager {
         claim.getCoopPermissions().get(player).setAllPermissionsInCategory(category, newState);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
     }
 

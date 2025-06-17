@@ -75,7 +75,7 @@ public class ClaimStorageManager {
     public void saveClaims() {
         if (plugin.getNconfig().isDatabaseEnabled()) {
             try {
-                plugin.getMySQLManager().saveClaimsBatch(new ArrayList<>(Claim.claims));
+                plugin.getDatabaseManager().saveClaimsBatch(new ArrayList<>(Claim.claims));
                 Util.log("&eSaved " + Claim.claims.size() + " claims to database.");
             } catch (Exception e) {
                 Util.log("&cFailed to save claims to database: " + e.getMessage());

@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim.model;
 import lombok.Getter;
 import lombok.Setter;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.database.DatabaseManager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -52,15 +53,16 @@ public class User {
     public static void loadUser(UUID uuid) {
         if (getUser(uuid) != null) return;
 
-        if (NClaim.inst().getNconfig().isDatabaseEnabled() && NClaim.inst().getMySQLManager() != null) {
-            loadFromDatabase(uuid);
+        DatabaseManager dbManager = NClaim.inst().getDatabaseManager();
+        if (NClaim.inst().getNconfig().isDatabaseEnabled() && dbManager != null) {
+            loadFromDatabase(dbManager, uuid);
         } else {
             loadFromYaml(uuid);
         }
     }
 
-    private static void loadFromDatabase(UUID uuid) {
-        User user = NClaim.inst().getMySQLManager().loadUser(uuid);
+    private static void loadFromDatabase(DatabaseManager dbManager, UUID uuid) {
+        User user = dbManager.loadUser(uuid);
         if (user == null) {
             user = createNewUser(uuid);
         }
@@ -101,8 +103,9 @@ public class User {
         User user = getUser(uuid);
         if (user == null) return;
 
-        if (NClaim.inst().getNconfig().isDatabaseEnabled()) {
-            NClaim.inst().getMySQLManager().saveUser(user);
+        DatabaseManager dbManager = NClaim.inst().getDatabaseManager();
+        if (NClaim.inst().getNconfig().isDatabaseEnabled() && dbManager != null) {
+            dbManager.saveUser(user);
         } else {
             saveToYaml(user);
         }

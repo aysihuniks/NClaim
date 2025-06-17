@@ -36,7 +36,7 @@ public class ClaimSettingsManager {
         claim.getSettings().set(setting, newState);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
-            plugin.getMySQLManager().saveClaim(claim);
+            plugin.getDatabaseManager().saveClaim(claim);
         }
     }
 
