@@ -58,9 +58,9 @@ public class HeadManager {
     }
 
     @Nullable
-    public String getSkinTextureValue(@NotNull UUID uuid) {
+    public String getSkinTextureValue(@NotNull UUID uuid, boolean forceFetch) {
         Long lastFetched = textureFetchCooldown.get(uuid);
-        if (lastFetched != null && System.currentTimeMillis() - lastFetched < COOLDOWN_MS) {
+        if (!forceFetch && lastFetched != null && System.currentTimeMillis() - lastFetched < COOLDOWN_MS) {
             User user = User.getUser(uuid);
             if (user != null && user.getSkinTexture() != null) {
                 return user.getSkinTexture();
@@ -74,7 +74,7 @@ public class HeadManager {
         }
 
         String cachedTexture = skinTextureCache.get(uuid);
-        if (cachedTexture != null) {
+        if (cachedTexture != null || skinTextureCache.containsKey(uuid)) {
             return cachedTexture;
         }
 
@@ -100,16 +100,14 @@ public class HeadManager {
                 InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
                 JsonObject textureProperty = new JsonParser().parse(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
                 texture = textureProperty.get("value").getAsString();
-            } catch (IOException ignored) {}
+            } catch (Exception ignored) {}
         }
 
-        if (texture != null) {
-            textureFetchCooldown.put(uuid, System.currentTimeMillis());
-            skinTextureCache.put(uuid, texture);
-            if (user != null) {
-                user.setSkinTexture(texture);
-                User.saveUser(uuid);
-            }
+        textureFetchCooldown.put(uuid, System.currentTimeMillis());
+        skinTextureCache.put(uuid, texture);
+        if (user != null && texture != null) {
+            user.setSkinTexture(texture);
+            User.saveUser(uuid);
         }
 
         return texture;
@@ -123,7 +121,7 @@ public class HeadManager {
             return cachedHead.clone();
         }
 
-        String texture = getSkinTextureValue(uuid);
+        String texture = getSkinTextureValue(uuid, false);
         if (texture == null) {
             ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
             headCache.put(uuid, defaultHead);
@@ -166,10 +164,13 @@ public class HeadManager {
     public void preloadTexturesAsync(Collection<UUID> uuids) {
         Bukkit.getScheduler().runTaskAsynchronously(NClaim.inst(), () -> {
             for (UUID uuid : uuids) {
-                String texture = getSkinTextureValue(uuid);
+                String texture = getSkinTextureValue(uuid, false);
                 if (texture != null) {
                     ItemStack head = createHeadWithTexture(texture);
                     headCache.put(uuid, head);
+                } else {
+                    ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
+                    headCache.put(uuid, defaultHead);
                 }
             }
         });

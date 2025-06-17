@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.nandayo.dapi.Util;
 
 import java.util.UUID;
@@ -22,31 +23,35 @@ public class UserManager implements Listener {
 
         User.loadUser(playerUUID);
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(NClaim.inst(), () -> {
-            try {
-                User user = User.getUser(playerUUID);
-                if (user != null) {
-                    String texture = NClaim.inst().getHeadManager().getSkinTextureValue(playerUUID);
-                    if (texture != null && !texture.equals(user.getSkinTexture())) {
-                        Bukkit.getScheduler().runTask(NClaim.inst(), () -> {
-                            user.setSkinTexture(texture);
-                            User.saveUser(playerUUID);
-                            NClaim.inst().getHeadManager().getSkinTextureCache().put(playerUUID, texture);
-                            ItemStack head = NClaim.inst().getHeadManager().createHeadWithTexture(texture);
-                            NClaim.inst().getHeadManager().getHeadCache().put(playerUUID, head);
-                        });
-                    } else if (texture != null) {
-                        Bukkit.getScheduler().runTask(NClaim.inst(), () -> {
-                            NClaim.inst().getHeadManager().getSkinTextureCache().put(playerUUID, texture);
-                            ItemStack head = NClaim.inst().getHeadManager().createHeadWithTexture(texture);
-                            NClaim.inst().getHeadManager().getHeadCache().put(playerUUID, head);
-                        });
-                    }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    String texture = NClaim.inst().getHeadManager().getSkinTextureValue(playerUUID, true);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            if (texture != null) {
+                                User user = User.getUser(playerUUID);
+                                if (user != null && !texture.equals(user.getSkinTexture())) {
+                                    user.setSkinTexture(texture);
+                                    User.saveUser(playerUUID);
+                                }
+                                NClaim.inst().getHeadManager().getSkinTextureCache().put(playerUUID, texture);
+                                ItemStack head = NClaim.inst().getHeadManager().createHeadWithTexture(texture);
+                                NClaim.inst().getHeadManager().getHeadCache().put(playerUUID, head);
+                            } else {
+                                NClaim.inst().getHeadManager().getSkinTextureCache().put(playerUUID, null);
+                                ItemStack defaultHead = new ItemStack(org.bukkit.Material.PLAYER_HEAD);
+                                NClaim.inst().getHeadManager().getHeadCache().put(playerUUID, defaultHead);
+                            }
+                        }
+                    }.runTask(NClaim.inst());
+                } catch (Exception e) {
+                    Util.log("UserManager failed to fetch skin texture for " + event.getPlayer().getName() + ": " + e.getMessage());
                 }
-            } catch (Exception e) {
-                Util.log("UserManager failed to fetch skin texture for " + event.getPlayer().getName() + ": " + e.getMessage());
             }
-        }, 200L);
+        }.runTaskLaterAsynchronously(NClaim.inst(), 200L);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
