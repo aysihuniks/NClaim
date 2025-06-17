@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.guimanager.Menu;
 import org.nandayo.dapi.ItemCreator;
@@ -32,6 +31,9 @@ public class LandExpansionMenu extends Menu {
     private final boolean admin;
     private final LangManager langManager;
     private final ConfigurationSection menuSection;
+    private final int height;
+    private final int width;
+    private final int rows;
 
     public LandExpansionMenu(@NotNull Player player, @NotNull Claim claim, boolean admin) {
         this.claim = claim;
@@ -39,12 +41,39 @@ public class LandExpansionMenu extends Menu {
         this.admin = admin;
         this.langManager = NClaim.inst().getLangManager();
         this.menuSection = langManager.getSection("menu.expand_menu");
+        this.height = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuHeight(), 3));
+        this.width = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuWidth(), 3));
+        this.rows = Math.min((height * 2 + 1), 6);
         setupMenu();
         displayTo(player);
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_5_ROWS, langManager.getString(menuSection,"title"));
+        MenuType menuType;
+        switch (rows) {
+            case 1:
+                menuType = MenuType.CHEST_1_ROW;
+                break;
+            case 2:
+                menuType = MenuType.CHEST_2_ROWS;
+                break;
+            case 3:
+                menuType = MenuType.CHEST_3_ROWS;
+                break;
+            case 4:
+                menuType = MenuType.CHEST_4_ROWS;
+                break;
+            case 5:
+                menuType = MenuType.CHEST_5_ROWS;
+                break;
+            case 6:
+                menuType = MenuType.CHEST_6_ROWS;
+                break;
+            default:
+                menuType = MenuType.CHEST_3_ROWS;
+                break;
+        }
+        createInventory(menuType, langManager.getString(menuSection, "title"));
         setBackgroundButton(BackgroundMenu::getButton);
 
         this.addButton(new Button() {
@@ -52,7 +81,7 @@ public class LandExpansionMenu extends Menu {
 
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(22);
+                return Sets.newHashSet((rows * 9 - 1) / 2);
             }
 
             @Override
@@ -74,10 +103,23 @@ public class LandExpansionMenu extends Menu {
             }
         });
 
-        for (int i = 0; i < 45; i++) {
-            if (i == 22) continue;
-            addDirtButton(i);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < 9; col++) {
+                int slot = row * 9 + col;
+                if (slot == (rows * 9 - 1) / 2) continue;
+                if (isWithinRange(row, col)) {
+                    addDirtButton(slot);
+                }
+            }
         }
+    }
+
+    private boolean isWithinRange(int row, int col) {
+        int centerRow = rows / 2;
+        int centerCol = 4;
+        int deltaX = Math.abs(col - centerCol);
+        int deltaZ = Math.abs(row - centerRow);
+        return deltaX <= width && deltaZ <= height;
     }
 
     private void addDirtButton(int slot) {
@@ -176,12 +218,11 @@ public class LandExpansionMenu extends Menu {
         int chunkX = claim.getChunk().getX();
         int chunkZ = claim.getChunk().getZ();
 
-        int centerRow = 3;
-        int centerCol = 5;
+        int centerRow = rows / 2;
+        int centerCol = 4;
 
-        int row = (slot + 1) / 9 + 1;
-        int col = (slot + 1) % 9;
-        if (col == 0) col = 9;
+        int row = slot / 9;
+        int col = slot % 9;
 
         int deltaX = col - centerCol;
         int deltaZ = row - centerRow;

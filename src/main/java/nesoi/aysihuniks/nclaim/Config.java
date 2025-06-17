@@ -33,6 +33,8 @@ public class Config {
     public int claimExpiryDays;
     public int maxCoopPlayers;
     public int maxClaimCount;
+    public int expandMenuHeight;
+    public int expandMenuWidth;
     public List<String> blacklistedWorlds;
     public List<String> blacklistedRegions;
     public int autoSave;
@@ -76,6 +78,8 @@ public class Config {
         setEachLandBuyPrice(config.getDouble("claim_settings.expand_price", 2000));
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop", 3));
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
+        setExpandMenuHeight(config.getInt("claim_settings.expand_menu_height", 2));
+        setExpandMenuWidth(config.getInt("claim_settings.expand_menu_width", 2));
 
         setTimeExtensionPricePerMinute(config.getDouble("time_extension.price_per_minute", 10));
         setTimeExtensionPricePerHour(config.getDouble("time_extension.price_per_hour", 500));
@@ -112,6 +116,8 @@ public class Config {
             config.set("claim_settings.expand_price", getEachLandBuyPrice());
             config.set("claim_settings.max_coop", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
+            config.set("claim_settings.expand_menu_height", getExpandMenuHeight());
+            config.set("claim_settings.expand_menu_width", getExpandMenuWidth());
 
             config.set("time_extension.price_per_minute", getTimeExtensionPricePerMinute());
             config.set("time_extension.price_per_hour", getTimeExtensionPricePerHour());
