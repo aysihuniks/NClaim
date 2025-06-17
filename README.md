@@ -200,7 +200,8 @@ This project is licensed under the NESOI Plugin License v1.0.
 ## 📸 Screenshots
 
 Here are some screenshots from the plugin:
-
+![2025-06-17_15 36 48](https://github.com/user-attachments/assets/3dbfbaf5-a3a4-4dc5-98a4-45ab483742cd)
+![2025-06-17_15 37 52](https://github.com/user-attachments/assets/c5705bba-8e42-4877-b53c-4379fcd379a4)
 ![1](https://github.com/user-attachments/assets/20e6aeb3-5d69-490f-b67d-cae84d38d02a)
 ![2](https://github.com/user-attachments/assets/dc3c25c3-87c1-4539-bb88-5ca3fd8b0ce6)
 ![3](https://github.com/user-attachments/assets/4e5807ce-998f-4121-91c5-a4ceb1d17248)
