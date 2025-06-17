@@ -18,7 +18,7 @@ public class HelpCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.help") || !player.hasPermission("nclaim.admin") || !player.hasPermission("nclaim.use")) {
+        if (!player.hasPermission("nclaim.help")) {
             player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
@@ -29,6 +29,7 @@ public class HelpCommand extends BaseCommand {
             " {YELLOW}/nclaim balance {GRAY}- {WHITE}Show the player balance.",
             " {YELLOW}/nclaim about {GRAY}- {WHITE}Show information about this plugin.",
             " {YELLOW}/nclaim admin {GRAY}- {WHITE}Show all admin commands.",
+            " {YELLOW}/nclaim level {GRAY}- {WHITE}Show the level of the claim.",
             " {YELLOW}/nclaim help/? {GRAY}- {WHITE}Send this help messages.",
             " {YELLOW}/nclaim {GRAY}- {WHITE}Open the Claim menu.",
             ""

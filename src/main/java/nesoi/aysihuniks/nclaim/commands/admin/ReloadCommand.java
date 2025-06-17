@@ -17,7 +17,7 @@ public class ReloadCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.reload") || !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.reload")) {
             player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }

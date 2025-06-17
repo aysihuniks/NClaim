@@ -18,9 +18,15 @@ permissions:
       nclaim.reload: true
       nclaim.add: true
       nclaim.remove: true
-      nclaim.migrate: true
+      nclaim.change: true
       nclaim.set: true
+  nclaim.*:
+    default: false
+    children:
+      nclaim.admin: true
+      nclaim.bypass.*: true
   nclaim.bypass.*:
+    default: false
     children:
       nclaim.bypass.blacklisted_worlds: true
       nclaim.bypass.blacklisted_regions: true
@@ -33,12 +39,19 @@ permissions:
       nclaim.bypass.place: true
   nclaim.use:
     default: true
+    children:
+      nclaim.help: true
+      nclaim.balance: true
+      nclaim.buy: true
+      nclaim.level: true
   nclaim.help:
-    default: true
+    default: false
   nclaim.balance:
-    default: true
+    default: false
   nclaim.buy:
-    default: true
+    default: false
+  nclaim.level:
+    default: false
   nclaim.adminmenu:
     default: false
   nclaim.reload:
@@ -47,9 +60,9 @@ permissions:
     default: false
   nclaim.remove:
     default: false
-  nclaim.migrate:
-    default: false
   nclaim.set:
+    default: false
+  nclaim.change:
     default: false
   nclaim.bypass.blacklisted_worlds:
     default: false

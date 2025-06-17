@@ -31,7 +31,7 @@ public class AddCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.add") || !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.add")) {
             player.sendMessage(langManager.getString("command.permission.denied"));
             return true;
         }

@@ -18,7 +18,7 @@ public class MenuCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.admin") ||!player.hasPermission("nclaim.menu")) {
+        if (!player.hasPermission("nclaim.adminmenu")) {
             player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }

@@ -28,7 +28,7 @@ public class ChangeCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.change") || !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.change")) {
             player.sendMessage(langManager.getString("command.permission.denied"));
             return true;
         }

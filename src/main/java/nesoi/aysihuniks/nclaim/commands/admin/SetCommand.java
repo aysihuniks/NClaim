@@ -27,7 +27,7 @@ public class SetCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.set") || !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.set")) {
             player.sendMessage(langManager.getString("command.permission.denied"));
             return true;
         }

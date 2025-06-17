@@ -25,7 +25,7 @@ public class RemoveCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.remove") || !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.remove")) {
             player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }

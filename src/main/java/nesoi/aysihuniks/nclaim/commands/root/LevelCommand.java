@@ -18,6 +18,11 @@ public class LevelCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        if (!player.hasPermission("nclaim.level")) {
+            player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+            return true;
+        }
+
         if (args.length > 0 && args[0].equalsIgnoreCase("queue")) {
             NClaim.inst().getBlockValueManager().checkQueueStatus(player.getUniqueId());
             return true;

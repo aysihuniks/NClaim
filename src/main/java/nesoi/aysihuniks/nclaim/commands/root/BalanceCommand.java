@@ -19,7 +19,7 @@ public class BalanceCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.balance") || !player.hasPermission("nclaim.use")) {
+        if (!player.hasPermission("nclaim.balance")) {
             player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
