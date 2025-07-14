@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim.ui.claim.management;
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
@@ -24,23 +25,20 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class LandExpansionMenu extends Menu {
+public class LandExpansionMenu extends BaseMenu {
 
     private final @NotNull Claim claim;
     private final @NotNull Collection<Chunk> allClaimChunks;
     private final boolean admin;
-    private final LangManager langManager;
-    private final ConfigurationSection menuSection;
     private final int height;
     private final int width;
     private final int rows;
 
     public LandExpansionMenu(@NotNull Player player, @NotNull Claim claim, boolean admin) {
+        super("claim_expand_menu");
         this.claim = claim;
         this.allClaimChunks = claim.getAllChunks();
         this.admin = admin;
-        this.langManager = NClaim.inst().getLangManager();
-        this.menuSection = langManager.getSection("menu.expand_menu");
         this.height = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuHeight(), 3));
         this.width = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuWidth(), 3));
         this.rows = Math.min((height * 2 + 1), 6);
@@ -73,11 +71,10 @@ public class LandExpansionMenu extends Menu {
                 menuType = MenuType.CHEST_3_ROWS;
                 break;
         }
-        createInventory(menuType, langManager.getString(menuSection, "title"));
+        createInventory(menuType, getString("title"));
         setBackgroundButton(BackgroundMenu::getButton);
 
         this.addButton(new Button() {
-            final String configPath = "center";
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -86,9 +83,9 @@ public class LandExpansionMenu extends Menu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.BEDROCK)
-                        .name(langManager.getString(menuSection, configPath + ".display_name"))
-                        .lore(langManager.getStringList(menuSection, configPath + ".lore"))
+                return ItemCreator.of(claim.getClaimBlockType())
+                        .name(getString("center.display_name"))
+                        .lore(getStringList("center.lore"))
                         .get();
             }
 
@@ -170,8 +167,8 @@ public class LandExpansionMenu extends Menu {
             @Override
             public ItemStack getItem() {
                 double landPrice = NClaim.inst().getNconfig().getEachLandBuyPrice();
-                String displayName = langManager.getString(menuSection, configPath + ".display_name");
-                List<String> lore = new ArrayList<>(langManager.getStringList(menuSection, configPath + ".lore"));
+                String displayName = getString(configPath + ".display_name");
+                List<String> lore = new ArrayList<>(getStringList(configPath + ".lore"));
                 if (configPath.equals("expand")) {
                     lore.replaceAll(s -> s.replace("{price}", String.valueOf(landPrice)));
                 }
@@ -195,8 +192,8 @@ public class LandExpansionMenu extends Menu {
                     };
 
                     new ConfirmMenu(player,
-                            langManager.getString("menu.confirm_menu.expand_land.display_name"),
-                            langManager.getStringList("menu.confirm_menu.expand_land.lore")
+                            NClaim.inst().getGuiLangManager().getString("confirm_menu.children.claim_expand.display_name"),
+                            NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.claim_expand.lore")
                                     .stream()
                                     .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getEachLandBuyPrice())))
                                     .collect(Collectors.toList()),

@@ -143,7 +143,7 @@ public class HologramManager {
         lines.add(plugin.getLangManager().getString("hologram.title"));
         lines.add(plugin.getLangManager().getString("hologram.owner")
                 .replace("{owner}", "%nclaim_owner_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
-        lines.add(plugin.getLangManager().getString("hologram.time_left")
+        lines.add(plugin.getLangManager().getString("hologram.time_left.text")
                 .replace("{time_left}", "%nclaim_expiration_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
 
         int coopCount = claim.getCoopPlayers().size();

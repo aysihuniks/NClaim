@@ -18,8 +18,6 @@ import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.model.UserManager;
 import nesoi.aysihuniks.nclaim.service.*;
 import nesoi.aysihuniks.nclaim.utils.*;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.command.PluginCommand;
@@ -52,10 +50,12 @@ public final class NClaim extends JavaPlugin {
     private ClaimStorageManager claimStorageManager;
     private ClaimExpirationManager claimExpirationManager;
     private ClaimCoopManager claimCoopManager;
+    private ClaimBlockManager claimBlockManager;
+    private GuiLangManager guiLangManager;
     private HologramManager hologramManager;
     private ClaimVisualizerService claimVisualizerService;
     private ClaimSettingsManager claimSettingsManager;
-    private BlockValueManager blockValueManager;
+    private ClaimLevelManager blockValueManager;
     private HeadManager headManager;
     private MorePaperLib morePaperLib;
     private MySQLManager mySQLManager;
@@ -130,9 +130,9 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void loadConfigurations() {
-        File blocksFile = new File(getDataFolder(), "blocks.yml");
+        File blocksFile = new File(getDataFolder(), "block_levels.yml");
         if (!blocksFile.exists()) {
-            saveResource("blocks.yml", false);
+            saveResource("block_levels.yml", false);
         }
         blockValueManager.loadBlockValues();
     }
@@ -229,6 +229,7 @@ public final class NClaim extends JavaPlugin {
             }
         }
 
+        claimBlockManager = new ClaimBlockManager();
         blockValueManager.reloadBlockValues();
         hologramManager.forceCleanup();
 
@@ -252,13 +253,15 @@ public final class NClaim extends JavaPlugin {
             GeikFarmer.registerIntegration();
         }
 
-        blockValueManager = new BlockValueManager(this);
+        blockValueManager = new ClaimLevelManager(this);
         claimService = new ClaimService(this);
         claimStorageManager = new ClaimStorageManager(this);
         claimExpirationManager = new ClaimExpirationManager(this);
         claimCoopManager = new ClaimCoopManager(this);
         claimVisualizerService = new ClaimVisualizerService(this);
         claimSettingsManager = new ClaimSettingsManager(this);
+        claimBlockManager = new ClaimBlockManager();
+        guiLangManager = new GuiLangManager();
         langManager = new LangManager(this, configManager.getString("lang_file", "en-US"));
     }
 
@@ -466,13 +469,6 @@ public final class NClaim extends JavaPlugin {
         }
 
         instance = null;
-    }
-
-    // Utility methods
-    public static void sendActionBar(Player player, String message) {
-        if (message == null || message.isEmpty()) return;
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
-                TextComponent.fromLegacyText(HexUtil.parse(message)));
     }
 
     public static boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {

@@ -13,9 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.Util;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DMaterial;
 
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class AdminTimeManagementMenu extends BaseMenu {
     private final @NotNull Claim claim;
 
     public AdminTimeManagementMenu(@NotNull Player player, int days, int hours, int minutes, int timeUnit, @NotNull Claim claim) {
-        super("menu.admin.manage_time_menu");
+        super("admin_menu.time_management_menu");
         this.claim = claim;
         this.days = days;
         this.hours = hours;
@@ -110,7 +112,7 @@ public class AdminTimeManagementMenu extends BaseMenu {
                         ? "command.add.expiration_extended"
                         : "command.remove.expiration_subtracted";
 
-                player.sendMessage(langManager.getString(messageKey)
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString(messageKey)
                         .replace("{d}", String.valueOf(Math.abs(days)))
                         .replace("{h}", String.valueOf(Math.abs(hours)))
                         .replace("{m}", String.valueOf(Math.abs(minutes))));
@@ -130,7 +132,7 @@ public class AdminTimeManagementMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.OAK_DOOR)
-                        .name(langManager.getString("menu.back.display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString("back.display_name"))
                         .get();
             }
 
@@ -150,9 +152,9 @@ public class AdminTimeManagementMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 List<String> lore = new ArrayList<>(getStringList("select_time_unit.lore"));
-                lore.replaceAll(s -> s.replace("{days_status}", timeUnit == 0 ? "&eDays" : "&7Days")
-                        .replace("{hours_status}", timeUnit == 1 ? "&eHours" : "&7Hours")
-                        .replace("{minutes_status}", timeUnit == 2 ? "&eMinutes" : "&7Minutes"));
+                lore.replaceAll(s -> s.replace("{days_status}", timeUnit == 0 ? "&e" + getString("days_status") : "&7" + getString("days_status"))
+                        .replace("{hours_status}", timeUnit == 1 ? "&e" + getString("hours_status") : "&7" + getString("hours_status"))
+                        .replace("{minutes_status}", timeUnit == 2 ? "&e" + getString("minutes_status") : "&7" + getString("minutes_status")));
                 return ItemCreator.of(Material.CHAIN)
                         .name(getString("select_time_unit.display_name"))
                         .lore(lore)

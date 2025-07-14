@@ -20,7 +20,10 @@ claim_settings:
   max_count: 3        # Maximum number of claims per player
   buy_price: 1500     # Cost to create a new claim
   expand_price: 2000  # Cost to expand an existing claim by one chunk
-  max_coop: 3         # Maximum number of co-op players per claim
+  max_coop_count:     # Maximum number of co-op players per claim
+    default: 3
+    vip: 5
+  # Permissions will be need like this "nclaim.max_coop_count.default"
   expiry_days: 7      # Days until an inactive claim expires
 
 # Auto-Save Configuration

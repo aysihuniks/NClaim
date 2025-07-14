@@ -1,0 +1,20 @@
+claim_blocks:
+  DIAMOND_BLOCK: # Block type
+    display_name: "Diamond Block"
+    permission: "nclaim.claim_block.diamond_block" # Optional permission check
+    price: 1500
+    lore:
+      - ""
+      - "&eCost: {cost}/{need_balance}"
+      - ""
+      - "&eClick to purchase"
+  EMERALD_BLOCK:
+    display_name: "Emerald Block"
+    enabled: false # Optionally, if a false block doesn't show in gui, the default value is true.
+    price: 2000
+    lore:
+      - ""
+      - "&eCost: {cost}/{need_balance}"
+      -
+      - "&eClick to purchase"
+    # Automatically hooking the block price and player balance.

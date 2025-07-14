@@ -21,9 +21,7 @@ public class ClaimExpirationManager {
     public void startExpirationChecker() {
         long checkInterval = 5 * 60 * 20;
         
-        expirationTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            checkExpiredClaims();
-        }, checkInterval, checkInterval);
+        expirationTask = Bukkit.getScheduler().runTaskTimer(plugin, this::checkExpiredClaims, checkInterval, checkInterval);
     }
 
     public void stopExpirationChecker() {
@@ -67,15 +65,20 @@ public class ClaimExpirationManager {
         long diffMinutes = TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) % 60;
         long diffSeconds = TimeUnit.SECONDS.convert(diffInMillis, TimeUnit.MILLISECONDS) % 60;
 
+        String daySymbol = plugin.getLangManager().getString("hologram.time_left.d");
+        String hourSymbol = plugin.getLangManager().getString("hologram.time_left.h");
+        String minuteSymbol = plugin.getLangManager().getString("hologram.time_left.m");
+        String secondSymbol = plugin.getLangManager().getString("hologram.time_left.s");
+
         String timeLeft;
         if (diffDays > 0) {
-            timeLeft = String.format("%dd, %dh", diffDays, diffHours);
+            timeLeft = String.format("%d%s, %d%s", diffDays, daySymbol, diffHours, hourSymbol);
         } else if (diffHours > 0) {
-            timeLeft = String.format("%dh, %dm", diffHours, diffMinutes);
+            timeLeft = String.format("%d%s, %d%s", diffHours, hourSymbol, diffMinutes, minuteSymbol);
         } else if (diffMinutes > 0) {
-            timeLeft = String.format("%dm, %ds", diffMinutes, diffSeconds);
+            timeLeft = String.format("%d%s, %d%s", diffMinutes, minuteSymbol, diffSeconds, secondSymbol);
         } else {
-            timeLeft = String.format("%ds", diffSeconds);
+            timeLeft = String.format("%d%s", diffSeconds, secondSymbol);
         }
 
         String color;

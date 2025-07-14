@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,7 @@ import java.util.stream.Collectors;
 public class ClaimMainMenu extends BaseMenu {
 
     public ClaimMainMenu(Player player) {
-        super("menu.main_menu");
-
+        super("claim_menu");
         setupMenu(player);
         displayTo(player);
     }
@@ -46,7 +46,7 @@ public class ClaimMainMenu extends BaseMenu {
 
     private void addBuyClaimButton() {
         addButton(new Button() {
-            final String buttonPath = "buy_claim";
+
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -56,11 +56,11 @@ public class ClaimMainMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
 
-                List<String> lore = getStringList(buttonPath + ".lore");
+                List<String> lore = getStringList("buy_claim.lore");
                 lore.replaceAll(l -> l.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())));
                 
                 return ItemCreator.of(Material.EMERALD)
-                        .name(getString(buttonPath + ".display_name"))
+                        .name(getString("buy_claim.display_name"))
                         .lore(lore)
                         .get();
             }
@@ -88,8 +88,8 @@ public class ClaimMainMenu extends BaseMenu {
         };
 
         new ConfirmMenu(player,
-                langManager.getString("menu.confirm_menu.buy_claim.display_name"),
-                langManager.getStringList("menu.confirm_menu.buy_claim.lore")
+                NClaim.inst().getGuiLangManager().getString("confirm_menu",  "children.buy_new_claim.display_name"),
+                NClaim.inst().getGuiLangManager().getStringList("confirm_menu", "children.buy_new_claim.lore")
                         .stream()
                         .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())))
                         .collect(Collectors.toList()),
@@ -98,8 +98,6 @@ public class ClaimMainMenu extends BaseMenu {
 
     private void addManageClaimsButton() {
         addButton(new Button() {
-            final String buttonPath = "manage_claims";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(15);
@@ -108,8 +106,8 @@ public class ClaimMainMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.CHEST)
-                        .name(getString(buttonPath + ".display_name"))
-                        .lore(getStringList(buttonPath + ".lore"))
+                        .name(getString("manage_claims.display_name"))
+                        .lore(getStringList("manage_claims.lore"))
                         .get();
             }
 
@@ -126,15 +124,13 @@ public class ClaimMainMenu extends BaseMenu {
             new ClaimListMenu(player, 0);
         } else {
             player.closeInventory();
-            player.sendMessage(langManager.getString("claim.not_found"));
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_found"));
             MessageType.WARN.playSound(player);
         }
     }
 
     private void addAdminButton() {
         addButton(new Button() {
-            final String buttonPath = "admin";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(13);
@@ -143,8 +139,8 @@ public class ClaimMainMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.COMMAND_BLOCK)
-                        .name(getString(buttonPath + ".display_name"))
-                        .lore(getStringList(buttonPath + ".lore"))
+                        .name(getString("admin.display_name"))
+                        .lore(getStringList("admin.lore"))
                         .get();
             }
 

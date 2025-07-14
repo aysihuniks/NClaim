@@ -4,10 +4,12 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.HexUtil;
 import org.nandayo.dapi.Util;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.io.File;
 import java.io.InputStream;
@@ -125,6 +127,17 @@ public class LangManager {
         } catch (Exception e) {
             Util.log("&cFailed to save old language backup file. ");
             e.printStackTrace();
+        }
+    }
+
+    static public void sendSortedMessage(@NotNull Player player, String msg) {
+        if (msg == null || msg.isEmpty()) return;
+        String[] parts = msg.split("=");
+        if(parts.length < 2)  ChannelType.CHAT.send(player, msg);
+        switch (parts[0]) {
+            case "CHAT": ChannelType.CHAT.send(player, parts[1]);break;
+            case "ACTION_BAR": ChannelType.ACTION_BAR.send(player, parts[1]);break;
+            case "TITLE": ChannelType.TITLE.send(player, parts[1]);break;
         }
     }
 

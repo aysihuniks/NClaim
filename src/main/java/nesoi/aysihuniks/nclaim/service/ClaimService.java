@@ -22,6 +22,7 @@ import net.milkbowl.vault.economy.Economy;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.Util;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 
@@ -51,23 +52,23 @@ public class ClaimService {
 
     public void buyLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk) {
         if (claim.getChunk().equals(chunk)) {
-            player.sendMessage(plugin.getLangManager().getString("claim.land.already_own_chunk"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.already_own_chunk"));
             return;
         }
 
         String chunkKey = chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ();
         if (claim.getLands().contains(chunkKey)) {
-            player.sendMessage(plugin.getLangManager().getString("claim.land.already_own_land"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.already_own_land"));
             return;
         }
 
         if (!isAdjacentChunk(claim, chunk)) {
-            player.sendMessage(plugin.getLangManager().getString("claim.land.not_adjacent"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.not_adjacent"));
             return;
         }
 
         if (Claim.getClaim(chunk) != null) {
-            player.sendMessage(plugin.getLangManager().getString("claim.already_claimed"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
             return;
         }
 
@@ -78,7 +79,7 @@ public class ClaimService {
         Bukkit.getPluginManager().callEvent(buyLandEvent);
 
         if (buyLandEvent.isCancelled()) {
-            player.sendMessage(plugin.getLangManager().getString("claim.land.buy_cancelled"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.buy_cancelled"));
             return;
         }
 
@@ -95,7 +96,7 @@ public class ClaimService {
             plugin.getDatabaseManager().saveUser(user);
         }
 
-        player.sendMessage(plugin.getLangManager().getString("claim.land.expanded"));
+        ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.expanded"));
     }
 
     private boolean isAdjacentChunk(Claim claim, Chunk targetChunk) {
@@ -128,30 +129,30 @@ public class ClaimService {
 
     private boolean canCreateClaim(Player player, User user, Chunk chunk) {
         if (isInBlacklistedRegion(player.getLocation())) {
-            if (!player.hasPermission("nclaim.bypass.*") || !player.hasPermission("nclaim.bypass.blacklisted_regions")) {
-                player.sendMessage(plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
+            if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.blacklisted_regions")) {
+                ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
                 return false;
             }
         }
 
         if (user.getPlayerClaims().size() >= plugin.getNconfig().getMaxClaimCount(player)) {
-            player.sendMessage(plugin.getLangManager().getString("claim.max_reached"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.max_reached"));
             return false;
         }
 
         if (!player.hasPermission("nclaim.buy")) {
-            player.sendMessage(plugin.getLangManager().getString("command.permission_denied"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
             return false;
         }
 
         if (Claim.getClaim(chunk) != null) {
-            player.sendMessage(plugin.getLangManager().getString("claim.already_claimed"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
             return false;
         }
 
         if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(chunk.getWorld().getName())) {
-            if (!player.hasPermission("nclaim.bypass.*") || !player.hasPermission("nclaim.bypass.blacklisted_worlds")) {
-                player.sendMessage(plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
+            if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.blacklisted_worlds")) {
+                ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
                 return false;
             }
         }
@@ -172,11 +173,15 @@ public class ClaimService {
         String claimId = generateClaimId(chunk);
         Date createdAt = new Date();
         Date expiredAt = calculateExpirationDate();
-        Location bedrockLocation = player.getLocation().getBlock().getLocation();
+        Location claimBlockLocation = player.getLocation().getBlock().getLocation();
 
-        bedrockLocation.getBlock().setType(Material.BEDROCK);
+        Material defaultBlockType = Material.OBSIDIAN;
+        claimBlockLocation.getBlock().setType(defaultBlockType);
 
         long initialValue = plugin.getBlockValueManager().calculateChunkValue(chunk);
+
+        Set<Material> purchasedBlockTypes = new HashSet<>();
+        purchasedBlockTypes.add(defaultBlockType);
 
         Claim claim = new Claim(
                 claimId,
@@ -184,25 +189,27 @@ public class ClaimService {
                 createdAt,
                 expiredAt,
                 player.getUniqueId(),
-                bedrockLocation,
+                claimBlockLocation,
                 initialValue,
+                defaultBlockType,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 new HashMap<>(),
                 new HashMap<>(),
-                new ClaimSetting()
+                new ClaimSetting(),
+                purchasedBlockTypes
         );
         ClaimCreateEvent createEvent = new ClaimCreateEvent(player, claim);
         Bukkit.getPluginManager().callEvent(createEvent);
 
         if (createEvent.isCancelled()) {
-            player.sendMessage(plugin.getLangManager().getString("claim.buy_cancelled"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.buy_cancelled"));
             return;
         }
 
-        plugin.getHologramManager().createHologram(bedrockLocation);
+        plugin.getHologramManager().createHologram(claimBlockLocation);
         User.getUser(player.getUniqueId()).getPlayerClaims().add(claim);
-        player.sendMessage(plugin.getLangManager().getString("claim.received"));
+        ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.received"));
     }
 
     private String generateClaimId(Chunk chunk) {
@@ -229,7 +236,7 @@ public class ClaimService {
             }
         }
 
-        player.sendMessage(plugin.getLangManager().getString("command.balance.not_enough"));
+        ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.balance.not_enough"));
         return false;
     }
 

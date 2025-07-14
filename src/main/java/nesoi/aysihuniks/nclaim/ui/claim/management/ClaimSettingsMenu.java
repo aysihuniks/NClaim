@@ -43,7 +43,7 @@ public class ClaimSettingsMenu extends BaseMenu {
     );
 
     public ClaimSettingsMenu(Player player, Claim claim, int page) {
-        super("menu.settings_menu");
+        super("claim_settings_menu");
         this.claim = claim;
         this.page = page;
 
@@ -64,7 +64,7 @@ public class ClaimSettingsMenu extends BaseMenu {
 
     private void addNavigationButton() {
         addButton(new Button() {
-            final String buttonPath = page == 0 ? "menu.back" : "menu.previous_page";
+            final String buttonPath = page == 0 ? "back" : "previous_page";
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -74,7 +74,7 @@ public class ClaimSettingsMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
                         .get();
             }
 
@@ -92,7 +92,6 @@ public class ClaimSettingsMenu extends BaseMenu {
 
     private void addNextPageButton() {
         addButton(new Button() {
-            final String buttonPath = "menu.next_page";
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -102,7 +101,7 @@ public class ClaimSettingsMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.COMPASS)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                         .get();
             }
 
@@ -136,7 +135,7 @@ public class ClaimSettingsMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 boolean isEnabled = claim.getSettings().isEnabled(settingData.getSetting());
-                String status = isEnabled ? langManager.getString("menu.enabled") : langManager.getString("menu.disabled");
+                String status = guiLangManager.getString((isEnabled ? "enabled" : "disabled") + ".display_name");
                 List<String> lore = getStringList(buttonPath + ".lore");
                 lore.replaceAll(l -> l.replace("{status}", status));
 

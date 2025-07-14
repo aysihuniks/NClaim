@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CoopPermissionsMenu extends BaseMenu {
-    private final @NotNull OfflinePlayer coopPlayer;
+    private final @Nullable OfflinePlayer coopPlayer;
     private final @NotNull Claim claim;
     private final boolean admin;
     private final @Nullable PermissionCategory currentCategory;
@@ -51,8 +51,8 @@ public class CoopPermissionsMenu extends BaseMenu {
     }
 
 
-    public CoopPermissionsMenu(@NotNull Player player, @NotNull OfflinePlayer coopPlayer, @NotNull Claim claim, boolean admin, @Nullable PermissionCategory category) {
-        super("menu.permission_menu");
+    public CoopPermissionsMenu(@NotNull Player player, @Nullable OfflinePlayer coopPlayer, @NotNull Claim claim, boolean admin, @Nullable PermissionCategory category) {
+        super("manage_coop_player_permission_menu");
         this.coopPlayer = coopPlayer;
         this.claim = claim;
         this.admin = admin;
@@ -70,14 +70,13 @@ public class CoopPermissionsMenu extends BaseMenu {
         addPlayerInfoButton();
         addCategoryButtons();
         addPermissionButtons();
+        addTransferButton();
         addKickButton();
     }
 
     private void addBackButton() {
 
         addButton(new Button() {
-            final String buttonPath = currentCategory == null ? "menu.back" : "menu.previous_page";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(10);
@@ -86,7 +85,7 @@ public class CoopPermissionsMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(currentCategory == null ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString((currentCategory == null ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
 
@@ -106,7 +105,7 @@ public class CoopPermissionsMenu extends BaseMenu {
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(13);
+                return Sets.newHashSet(12);
             }
 
             @Override
@@ -145,12 +144,12 @@ public class CoopPermissionsMenu extends BaseMenu {
                 @Override
                 public ItemStack getItem() {
                     return ItemCreator.of(CATEGORY_ICONS.get(category))
-                            .name(langManager.getString("menu.permission_menu.categories." +
+                            .name(getString("categories." +
                                     category.name().toLowerCase() + ".display_name"))
                             .lore(Arrays.asList(
                                     "",
-                                    langManager.getString("menu.permission_menu.click_to_view"),
-                                    langManager.getString("menu.permission_menu.right_click_toggle")
+                                    getString("click_to_view"),
+                                    getString("right_click_toggle")
                             ))
                             .get();
                 }
@@ -200,7 +199,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                                     permission.name().toLowerCase() + ".display_name"))
                             .lore(Arrays.asList(
                                     "",
-                                    langManager.getString(isEnabled ? "menu.enabled" : "menu.disabled")
+                                    NClaim.inst().getGuiLangManager().getString(isEnabled ? "enabled" : "disabled")
                             ))
                             .hideFlag(ItemFlag.values())
                             .get();
@@ -305,6 +304,49 @@ public class CoopPermissionsMenu extends BaseMenu {
         }
     }
 
+    private void addTransferButton() {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(14);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.GOLDEN_HELMET)
+                        .name(getString("transfer.display_name"))
+                        .lore(getStringList("transfer.lore").stream().map(line -> line.replace("{player}", coopPlayer.getName())).collect(Collectors.toList()))
+                        .hideFlag(ItemFlag.HIDE_ATTRIBUTES)
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (coopPlayer == null) {
+                    player.sendMessage(NClaim.inst().getLangManager().getString("command.player.not_found"));
+                    return;
+                }
+
+                new ConfirmMenu(player,
+                        NClaim.inst().getGuiLangManager().getString("confirm_menu.children.transfer_claim.display_name"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.transfer_claim.lore").stream()
+                                .map(s -> s.replace("{player}", coopPlayer.getName()))
+                                .collect(Collectors.toList()),
+                        result -> {
+                            if ("confirmed".equals(result)) {
+                                player.closeInventory();
+                                claim.setOwner(coopPlayer.getUniqueId());
+                                player.sendMessage(NClaim.inst().getLangManager().getString("claim.transferred")
+                                        .replace("{target}", coopPlayer.getName()));
+                            } else if ("declined".equals(result)) {
+                                new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
+                            }
+                        });
+            }
+
+        });
+    }
+
     private void addKickButton() {
         addButton(new Button() {
             @Override
@@ -323,8 +365,8 @@ public class CoopPermissionsMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 new ConfirmMenu(player,
-                        langManager.getString("menu.confirm_menu.kick_coop.display_name"),
-                        langManager.getStringList("menu.confirm_menu.kick_coop.lore").stream()
+                        NClaim.inst().getGuiLangManager().getString("confirm_menu.children.kick_coop.display_name"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.kick_coop.lore").stream()
                                 .map(s -> s.replace("{player}", coopPlayer.getName()))
                                 .collect(Collectors.toList()),
                         result -> {

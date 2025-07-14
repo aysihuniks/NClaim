@@ -10,6 +10,7 @@ import nesoi.aysihuniks.nclaim.model.CoopPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class ClaimSettingsManager {
 
     public void toggleSetting(Claim claim, Player player, Setting setting) {
         if (!isAuthorized(claim, player)) {
-            player.sendMessage(plugin.getLangManager().getString("command.permission_denied"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
             return;
         }
 
@@ -29,7 +30,7 @@ public class ClaimSettingsManager {
         Bukkit.getPluginManager().callEvent(changeEvent);
 
         if (changeEvent.isCancelled()) {
-            player.sendMessage(plugin.getLangManager().getString("claim.setting_change_cancelled"));
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.setting_change_cancelled"));
             return;
         }
 

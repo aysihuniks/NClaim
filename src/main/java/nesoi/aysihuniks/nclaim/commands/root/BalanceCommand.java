@@ -7,20 +7,22 @@ import nesoi.aysihuniks.nclaim.model.User;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.message.ChannelType;
 
 public class BalanceCommand extends BaseCommand {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(NClaim.inst().getLangManager().getString("command.must_be_player"));
+            ChannelType.CHAT.send(sender, NClaim.inst().getLangManager().getString("command.must_be_player"));
             return true;
         }
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.balance")) {
-            player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+        if (!player.hasPermission("nclaim.balance") && !player.hasPermission("nclaim.use")) {
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
 
@@ -29,7 +31,7 @@ public class BalanceCommand extends BaseCommand {
                 ? User.getUser(player.getUniqueId()).getBalance()
                 : NClaim.inst().getEconomy().getBalance(player);
 
-        player.sendMessage(NClaim.inst().getLangManager().getString("command.balance.current").replace("{amount}", String.valueOf(balance)));
+        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.current").replace("{balance}", String.valueOf(balance)));
         return true;
     }
 }

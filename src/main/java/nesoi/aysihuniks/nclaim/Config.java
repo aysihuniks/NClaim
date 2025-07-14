@@ -76,7 +76,8 @@ public class Config {
         setMaxClaimCount(config.getInt("claim_settings.max_count", 3));
         setClaimBuyPrice(config.getDouble("claim_settings.buy_price", 1500));
         setEachLandBuyPrice(config.getDouble("claim_settings.expand_price", 2000));
-        setMaxCoopPlayers(config.getInt("claim_settings.max_coop", 3));
+        setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
+
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
         setExpandMenuHeight(config.getInt("claim_settings.expand_menu_height", 2));
         setExpandMenuWidth(config.getInt("claim_settings.expand_menu_width", 2));
@@ -114,7 +115,7 @@ public class Config {
             config.set("claim_settings.max_count", getMaxClaimCount());
             config.set("claim_settings.buy_price", getClaimBuyPrice());
             config.set("claim_settings.expand_price", getEachLandBuyPrice());
-            config.set("claim_settings.max_coop", getMaxCoopPlayers());
+            config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
             config.set("claim_settings.expand_menu_height", getExpandMenuHeight());
             config.set("claim_settings.expand_menu_width", getExpandMenuWidth());
@@ -144,6 +145,27 @@ public class Config {
         } catch (Exception e) {
             Util.log("&cFailed to save config.yml! " + e.getMessage());
         }
+    }
+
+    public int getMaxCoopPlayers(Player player) {
+        if (player.isOp() || player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.max_coop_count")) {
+            return Integer.MAX_VALUE;
+        }
+
+        int maxCoop = config.getInt("claim_settings.max_coop_count.default", 3);
+
+        if (config.isConfigurationSection("claim_settings.max_coop_count")) {
+            for (String key : config.getConfigurationSection("claim_settings.max_coop_count").getKeys(false)) {
+                if (!key.equals("default") && player.hasPermission("nclaim.maxcoop." + key)) {
+                    int value = config.getInt("claim_settings.max_coop_count." + key);
+                    if (value > maxCoop) {
+                        maxCoop = value;
+                    }
+                }
+            }
+        }
+
+        return maxCoop;
     }
 
 

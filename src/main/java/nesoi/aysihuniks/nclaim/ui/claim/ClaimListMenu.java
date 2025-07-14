@@ -34,7 +34,7 @@ public class ClaimListMenu extends BaseMenu {
     }
 
     public ClaimListMenu(@NotNull Player player, int page) {
-        super("menu.list_menu");
+        super("claim_list_menu");
         this.player = player;
         this.page = page;
 
@@ -56,7 +56,7 @@ public class ClaimListMenu extends BaseMenu {
 
     private void addNavigationButton() {
         addButton(new Button() {
-            final String buttonPath = page == 0 ? "menu.back" : "menu.previous_page";
+            final String buttonPath = page == 0 ? "back" : "previous_page";
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -66,7 +66,7 @@ public class ClaimListMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
                         .get();
             }
 
@@ -121,8 +121,6 @@ public class ClaimListMenu extends BaseMenu {
 
     private void addNextPageButton() {
         addButton(new Button() {
-            final String buttonPath = "next_page";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(16);
@@ -131,7 +129,7 @@ public class ClaimListMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.COMPASS)
-                        .name(getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                         .get();
             }
 
@@ -175,7 +173,7 @@ public class ClaimListMenu extends BaseMenu {
     }
 
     private void addClaimButton(Claim claim, int slot, boolean isOwner) {
-        String buttonPath = isOwner ? "your_claims" : "coop_claims";
+        String buttonPath = isOwner ? "own_claims" : "coop_claims";
         Chunk chunk = claim.getChunk();
 
         List<String> lore = new ArrayList<>(getStringList(buttonPath + ".lore"));

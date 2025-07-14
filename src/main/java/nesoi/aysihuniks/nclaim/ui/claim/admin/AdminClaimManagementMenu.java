@@ -1,6 +1,7 @@
 package nesoi.aysihuniks.nclaim.ui.claim.admin;
 
 import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
@@ -28,7 +29,7 @@ public class AdminClaimManagementMenu extends BaseMenu {
     private final @NotNull Claim claim;
 
     public AdminClaimManagementMenu(@NotNull Player player, @NotNull Claim claim) {
-        super("menu.admin.manage_claim_menu");
+        super("admin_menu.claim_management_menu");
         this.claim = claim;
 
         setupMenu();
@@ -50,7 +51,7 @@ public class AdminClaimManagementMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.OAK_DOOR)
-                        .name(langManager.getString("menu.back.display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString("back.display_name"))
                         .get();
             }
 
@@ -134,8 +135,8 @@ public class AdminClaimManagementMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.TNT)
-                        .name(getString("delete_claim.display_name"))
-                        .lore(getStringList("delete_claim.lore"))
+                        .name(NClaim.inst().getGuiLangManager().getString("claim_management_menu.delete.display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList("claim_management_menu.delete.lore"))
                         .get();
             }
 
@@ -150,8 +151,8 @@ public class AdminClaimManagementMenu extends BaseMenu {
                     }
                 };
 
-                new ConfirmMenu(player, langManager.getString("menu.confirm_menu.delete_claim.display_name"),
-                        langManager.getStringList("menu.confirm_menu.delete_claim.lore"), onFinish);
+                new ConfirmMenu(player, NClaim.inst().getGuiLangManager().getString("confirm_menu.children.delete_claim.display_name"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.delete_claim.lore"), onFinish);
             }
         });
     }

@@ -5,21 +5,23 @@ import nesoi.aysihuniks.nclaim.commands.BaseCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.HexUtil;
+import org.nandayo.dapi.message.ChannelType;
 
 public class HelpCommand extends BaseCommand {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(NClaim.inst().getLangManager().getString("command.must_be_player"));
+            ChannelType.CHAT.send(sender, NClaim.inst().getLangManager().getString("command.must_be_player"));
             return true;
         }
 
         Player player = (Player) sender;
 
         if (!player.hasPermission("nclaim.admin")) {
-            player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
 
@@ -45,7 +47,7 @@ public class HelpCommand extends BaseCommand {
         };
 
         for (String line : helpMessage) {
-            player.sendMessage(HexUtil.parse(line));
+            ChannelType.CHAT.send(player, HexUtil.parse(line));
         }
 
         return true;

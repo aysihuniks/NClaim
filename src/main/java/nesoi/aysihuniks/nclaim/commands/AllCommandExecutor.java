@@ -12,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(NClaim.inst().getLangManager().getString("command.must_be_player"));
+            ChannelType.CHAT.send(sender, NClaim.inst().getLangManager().getString("command.must_be_player"));
             return true;
         }
 
@@ -51,7 +52,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
             if (!player.hasPermission("nclaim.use")) {
-                player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
                 return true;
             }
             new ClaimMainMenu(player);
@@ -62,7 +63,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
 
         if (subCommand.equals("admin")) {
             if (!player.hasPermission("nclaim.admin")) {
-                player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
                 return true;
             }
 
@@ -77,7 +78,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
             if (adminCmd != null) {
                 return adminCmd.onCommand(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
             } else {
-                player.sendMessage(NClaim.inst().getLangManager().getString("command.wrong_usage"));
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.wrong_usage"));
                 return true;
             }
         }
@@ -87,7 +88,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
             return cmd.onCommand(sender, command, label, args);
         }
 
-        player.sendMessage(NClaim.inst().getLangManager().getString("command.wrong_usage"));
+        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.wrong_usage"));
         return true;
     }
 

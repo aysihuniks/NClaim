@@ -10,10 +10,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.nandayo.dapi.Util;
 
 import java.io.File;
@@ -22,6 +19,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class SQLiteManager implements DatabaseManager {
     private final HikariDataSource dataSource;
@@ -37,7 +35,7 @@ public class SQLiteManager implements DatabaseManager {
                 "CREATE TABLE IF NOT EXISTS claims (" +
                         "claim_id TEXT PRIMARY KEY, chunk_world TEXT, chunk_x INTEGER, chunk_z INTEGER, " +
                         "created_at TEXT DEFAULT CURRENT_TIMESTAMP, expired_at TEXT NULL, owner TEXT, " +
-                        "bedrock_location TEXT, lands TEXT, claim_value INTEGER DEFAULT 0)";
+                        "claim_block_location TEXT, lands TEXT, claim_value BIGINT DEFAULT 0, claim_block_type TEXT, purchased_blocks TEXT)";
 
         static final String CREATE_CLAIM_COOPS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claim_coops (" +
@@ -53,8 +51,9 @@ public class SQLiteManager implements DatabaseManager {
         static final String LOAD_ALL_USERS = "SELECT uuid, balance, skinTexture FROM users";
 
         static final String SAVE_CLAIM =
-                "INSERT OR REPLACE INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, " +
-                        "expired_at, owner, bedrock_location, lands, claim_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT OR REPLACE INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, " +
+            "expired_at, owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         static final String LOAD_CLAIM = "SELECT * FROM claims WHERE claim_id = ?";
         static final String LOAD_ALL_CLAIMS = "SELECT * FROM claims";
         static final String DELETE_CLAIM = "DELETE FROM claims WHERE claim_id = ?";
@@ -252,9 +251,16 @@ public class SQLiteManager implements DatabaseManager {
         stmt.setInt(4, claim.getChunk().getZ());
         stmt.setString(5, getTimestamp(claim.getCreatedAt()).toString());
         stmt.setString(6, getTimestamp(claim.getExpiredAt()).toString());
-        stmt.setString(7, claim.getOwner().toString());
-        stmt.setString(8, NClaim.serializeLocation(claim.getBedrockLocation()));
+        stmt.setString(7, String.valueOf(claim.getOwner()));
+        stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
         stmt.setString(9, gson.toJson(claim.getLands()));
+        stmt.setLong(10, claim.getClaimValue());
+        stmt.setString(11, claim.getClaimBlockType().name());
+
+        List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
+                .map(Material::name)
+                .collect(Collectors.toList());
+        stmt.setString(12, gson.toJson(purchasedBlockNames));
     }
 
     private void saveClaimCoops(Connection conn, Claim claim) throws SQLException {
@@ -339,7 +345,7 @@ public class SQLiteManager implements DatabaseManager {
         Date expiredAt = Timestamp.valueOf(rs.getString("expired_at"));
 
         UUID owner = UUID.fromString(rs.getString("owner"));
-        Location bedrockLocation = NClaim.deserializeLocation(rs.getString("bedrock_location"));
+        Location claimBlockLocation = NClaim.deserializeLocation(rs.getString("claim_block_location"));
         long claimValue = 0;
         try {
             claimValue = rs.getLong("claim_value");
@@ -353,6 +359,21 @@ public class SQLiteManager implements DatabaseManager {
         CoopData coopData = loadClaimCoops(conn, claimId);
         ClaimSetting settings = loadClaimSettings(conn, claimId);
 
+        Material claimBlockType = Material.valueOf(rs.getString("claim_block_type"));
+
+        Set<Material> purchasedBlocks = new HashSet<>();
+        String purchasedBlocksJson = rs.getString("purchased_blocks");
+        if (purchasedBlocksJson != null && !purchasedBlocksJson.isEmpty()) {
+            Type blockListType = new TypeToken<List<String>>(){}.getType();
+            List<String> blockNames = gson.fromJson(purchasedBlocksJson, blockListType);
+            for (String blockName : blockNames) {
+                try {
+                    purchasedBlocks.add(Material.valueOf(blockName));
+                } catch (IllegalArgumentException e) {
+                    Util.log("&cInvalid material in purchased blocks for claim " + claimId + ": " + blockName);
+                }
+            }
+        }
 
 
         return new Claim(
@@ -361,13 +382,15 @@ public class SQLiteManager implements DatabaseManager {
                 createdAt,
                 expiredAt,
                 owner,
-                bedrockLocation,
+                claimBlockLocation,
                 claimValue,
+                claimBlockType,
                 lands,
                 coopData.getCoopPlayers(),
                 coopData.getJoinDates(),
                 coopData.getPermissions(),
-                settings
+                settings,
+                purchasedBlocks
         );
     }
 

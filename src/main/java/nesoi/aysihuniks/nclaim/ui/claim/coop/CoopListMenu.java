@@ -19,9 +19,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.Util;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -38,7 +40,7 @@ public class CoopListMenu extends BaseMenu {
     };
 
     public CoopListMenu(Player player, @NotNull Claim claim, Boolean admin, int page) {
-        super("menu.manage_coop_menu");
+        super("claim_manage_coop_menu");
         this.claim = claim;
         this.admin = admin;
         this.page = page;
@@ -74,8 +76,6 @@ public class CoopListMenu extends BaseMenu {
 
     private void addNavigationButton() {
         addButton(new Button() {
-            final String buttonPath = page == 0 ? "menu.back" : "menu.previous_page";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(10);
@@ -84,7 +84,7 @@ public class CoopListMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString((page == 0 ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
 
@@ -106,8 +106,6 @@ public class CoopListMenu extends BaseMenu {
 
     private void addAddMemberButton() {
         addButton(new Button() {
-            final String buttonPath = "add_coop";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(13);
@@ -116,7 +114,7 @@ public class CoopListMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.NETHER_STAR)
-                        .name(getString(buttonPath + ".display_name"))
+                        .name(getString("add_coop.display_name"))
                         .get();
             }
 
@@ -129,17 +127,17 @@ public class CoopListMenu extends BaseMenu {
 
     private void handleAddMember(Player player) {
         MessageType.SEARCH_OPEN.playSound(player);
-        new AnvilManager(NClaim.inst(), player, "Enter a player name",
+        new AnvilManager(NClaim.inst(), player, getString("search_title"),
                 (text) -> {
                     if (text == null || text.isEmpty()) {
-                        player.sendMessage(langManager.getString("command.enter_a_player"));
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));
                         MessageType.FAIL.playSound(player);
                         player.closeInventory();
                         return;
                     }
 
                     if (text.equalsIgnoreCase(player.getName())) {
-                        player.sendMessage(langManager.getString("command.player.cant_add_self"));
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player.cant_add_self"));
                         MessageType.FAIL.playSound(player);
                         player.closeInventory();
                         return;
@@ -147,7 +145,7 @@ public class CoopListMenu extends BaseMenu {
 
                     Player target = Bukkit.getPlayerExact(text);
                     if (target == null) {
-                        player.sendMessage(langManager.getString("command.player.not_found")
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player.not_found")
                                 .replace("{target}", text));
                         MessageType.FAIL.playSound(player);
                         player.closeInventory();
@@ -169,8 +167,8 @@ public class CoopListMenu extends BaseMenu {
         };
 
         new ConfirmMenu(player,
-                langManager.getString("menu.confirm_menu.add_coop.display_name"),
-                langManager.getStringList("menu.confirm_menu.add_coop.lore")
+                NClaim.inst().getGuiLangManager().getString("confirm_menu.children.add_coop.display_name"),
+                NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.add_coop.lore")
                         .stream()
                         .map(s -> s.replace("{player}", targetName))
                         .collect(Collectors.toList()),
@@ -179,8 +177,6 @@ public class CoopListMenu extends BaseMenu {
 
     private void addNextPageButton() {
         addButton(new Button() {
-            final String buttonPath = "menu.next_page";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(16);
@@ -189,7 +185,7 @@ public class CoopListMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.COMPASS)
-                        .name(langManager.getString(buttonPath + ".display_name"))
+                        .name(getString("next_page.display_name"))
                         .get();
             }
 
@@ -206,10 +202,46 @@ public class CoopListMenu extends BaseMenu {
         int startIndex = page * coopSlots.length;
         int endIndex = Math.min(startIndex + coopSlots.length, coopPlayers.size());
 
+        Player owner = Bukkit.getPlayer(claim.getOwner());
+        int maxCoopSlots = owner != null ? NClaim.inst().getNconfig().getMaxCoopPlayers(owner) : 3;
+
         for (int i = startIndex, slotIndex = 0; i < endIndex; i++, slotIndex++) {
             addMemberButton(coopPlayers.get(i), slotIndex);
         }
+
+        for (int slot = 0; slot < coopSlots.length; slot++) {
+            if (startIndex + slot >= coopPlayers.size()) {
+                if (startIndex + slot < maxCoopSlots) {
+                    addEmptySlotButton(coopSlots[slot]);
+                } else {
+                    addLockedSlotButton(coopSlots[slot]);
+                }
+            }
+        }
     }
+
+    private void addLockedSlotButton(int slot) {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(slot);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.RED_STAINED_GLASS_PANE)
+                        .name(getString("locked_slot.display_name"))
+                        .lore(getStringList("locked_slot.lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.FAIL.playSound(player);
+            }
+        });
+    }
+
 
     private void addMemberButton(UUID coopPlayerUUID, int slotIndex) {
         final OfflinePlayer coopPlayer = Bukkit.getOfflinePlayer(coopPlayerUUID);
@@ -254,6 +286,30 @@ public class CoopListMenu extends BaseMenu {
             }
         });
     }
+
+    private void addEmptySlotButton(int slot) {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(slot);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                return ItemCreator.of(Material.WHITE_STAINED_GLASS_PANE)
+                        .name(getString("empty_slot.display_name"))
+                        .lore(getStringList("empty_slot.lore"))
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                MessageType.MENU_FORWARD.playSound(player);
+                handleAddMember(player);
+            }
+        });
+    }
+
 
     private boolean hasNextPage() {
         return (page + 1) * coopSlots.length < claim.getCoopPlayers().size();

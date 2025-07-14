@@ -10,16 +10,14 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.nandayo.dapi.Util;
 
 import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class MySQLManager implements DatabaseManager {
     private final HikariDataSource dataSource;
@@ -42,9 +40,11 @@ public class MySQLManager implements DatabaseManager {
         "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
         "expired_at TIMESTAMP NULL, " +
         "owner VARCHAR(36), " +
-        "bedrock_location TEXT, " +
+        "claim_block_location TEXT, " +
         "lands TEXT, " +
-        "claim_value BIGINT DEFAULT 0)";
+        "claim_value BIGINT DEFAULT 0," +
+        "claim_block_type VARCHAR(50)," +
+        "purchased_blocks TEXT)";
 
     private static final String CREATE_CLAIM_COOPS_TABLE =
         "CREATE TABLE IF NOT EXISTS claim_coops (" +
@@ -72,9 +72,12 @@ public class MySQLManager implements DatabaseManager {
 
     // Claims SQL
     private static final String SAVE_CLAIM =
-            "INSERT INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, expired_at, owner, bedrock_location, lands, claim_value) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE expired_at=?, owner=?, bedrock_location=?, lands=?, claim_value=?";
+        "INSERT INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, expired_at, " +
+        "owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+        "ON DUPLICATE KEY UPDATE " +
+        "expired_at=?, owner=?, claim_block_location=?, lands=?, claim_value=?, " +
+        "claim_block_type=?, purchased_blocks=?";
 
     private static final String SAVE_CLAIM_COOP = 
         "INSERT INTO claim_coops VALUES (?, ?, ?, ?) " +
@@ -223,15 +226,23 @@ public class MySQLManager implements DatabaseManager {
                 stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
                 stmt.setTimestamp(6, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
                 stmt.setString(7, claim.getOwner().toString());
-                stmt.setString(8, NClaim.serializeLocation(claim.getBedrockLocation()));
+                stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
                 stmt.setString(9, gson.toJson(claim.getLands()));
                 stmt.setLong(10, claim.getClaimValue());
+                stmt.setString(11, claim.getClaimBlockType().name());
 
-                stmt.setTimestamp(11, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
-                stmt.setString(12, claim.getOwner().toString());
-                stmt.setString(13, NClaim.serializeLocation(claim.getBedrockLocation()));
-                stmt.setString(14, gson.toJson(claim.getLands()));
-                stmt.setLong(15, claim.getClaimValue());
+                List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
+                        .map(Material::name)
+                        .collect(Collectors.toList());
+                stmt.setString(12, gson.toJson(purchasedBlockNames));
+
+                stmt.setTimestamp(13, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
+                stmt.setString(14, claim.getOwner().toString());
+                stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                stmt.setString(16, gson.toJson(claim.getLands()));
+                stmt.setLong(17, claim.getClaimValue());
+                stmt.setString(18, claim.getClaimBlockType().name());
+                stmt.setString(19, gson.toJson(purchasedBlockNames));
 
                 stmt.executeUpdate();
             }
@@ -243,6 +254,7 @@ public class MySQLManager implements DatabaseManager {
             Util.log("&cFailed to save claim: " + e.getMessage());
         }
     }
+
 
     public void saveClaimsBatch(List<Claim> claims) {
         try (Connection conn = getConnection()) {
@@ -258,15 +270,23 @@ public class MySQLManager implements DatabaseManager {
                         stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
                         stmt.setTimestamp(6, new Timestamp(claim.getExpiredAt().getTime()));
                         stmt.setString(7, claim.getOwner().toString());
-                        stmt.setString(8, NClaim.serializeLocation(claim.getBedrockLocation()));
+                        stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
                         stmt.setString(9, gson.toJson(claim.getLands()));
                         stmt.setLong(10, claim.getClaimValue());
+                        stmt.setString(11, claim.getClaimBlockType().name());
 
-                        stmt.setTimestamp(11, new Timestamp(claim.getExpiredAt().getTime()));
-                        stmt.setString(12, claim.getOwner().toString());
-                        stmt.setString(13, NClaim.serializeLocation(claim.getBedrockLocation()));
-                        stmt.setString(14, gson.toJson(claim.getLands()));
-                        stmt.setLong(15, claim.getClaimValue());
+                        List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
+                                .map(Material::name)
+                                .collect(Collectors.toList());
+                        stmt.setString(12, gson.toJson(purchasedBlockNames));
+
+                        stmt.setTimestamp(13, new Timestamp(claim.getExpiredAt().getTime()));
+                        stmt.setString(14, claim.getOwner().toString());
+                        stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                        stmt.setString(16, gson.toJson(claim.getLands()));
+                        stmt.setLong(17, claim.getClaimValue());
+                        stmt.setString(18, claim.getClaimBlockType().name());
+                        stmt.setString(19, gson.toJson(purchasedBlockNames));
 
                         stmt.executeUpdate();
                     }
@@ -286,7 +306,6 @@ public class MySQLManager implements DatabaseManager {
             Util.log("&cFailed to save claims batch: " + e.getMessage());
         }
     }
-
 
     private void saveClaimCoops(Connection conn, Claim claim) throws SQLException {
         try (PreparedStatement deleteStmt = conn.prepareStatement(DELETE_CLAIM_COOPS)) {
@@ -404,18 +423,27 @@ public class MySQLManager implements DatabaseManager {
         Date createdAt = new Date(rs.getTimestamp("created_at").getTime());
         Date expiredAt = new Date(rs.getTimestamp("expired_at").getTime());
         UUID owner = UUID.fromString(rs.getString("owner"));
-        Location bedrockLocation = NClaim.deserializeLocation(rs.getString("bedrock_location"));
-        long claimValue = 0;
-        try {
-            claimValue = rs.getLong("claim_value");
-        } catch (SQLException e) {
-            Util.log("&cFailed to read claim_value for claim " + claimId + ": " + e.getMessage());
+        Location claimBlockLocation = NClaim.deserializeLocation(rs.getString("claim_block_location"));
+        long claimValue = rs.getLong("claim_value");
+        Material claimBlockType = Material.valueOf(rs.getString("claim_block_type"));
+
+        Set<Material> purchasedBlocks = new HashSet<>();
+        String purchasedBlocksJson = rs.getString("purchased_blocks");
+        if (purchasedBlocksJson != null && !purchasedBlocksJson.isEmpty()) {
+            Type blockListType = new TypeToken<List<String>>(){}.getType();
+            List<String> blockNames = gson.fromJson(purchasedBlocksJson, blockListType);
+            for (String blockName : blockNames) {
+                try {
+                    purchasedBlocks.add(Material.valueOf(blockName));
+                } catch (IllegalArgumentException e) {
+                    Util.log("&cInvalid material in purchased blocks for claim " + claimId + ": " + blockName);
+                }
+            }
         }
 
         Type landType = new TypeToken<Collection<String>>(){}.getType();
         Collection<String> lands = gson.fromJson(rs.getString("lands"), landType);
 
-        // Load coops and settings
         CoopData coopData = loadClaimCoops(conn, claimId);
         ClaimSetting settings = loadClaimSettings(conn, claimId);
 
@@ -425,13 +453,15 @@ public class MySQLManager implements DatabaseManager {
                 createdAt,
                 expiredAt,
                 owner,
-                bedrockLocation,
+                claimBlockLocation,
                 claimValue,
+                claimBlockType,
                 lands,
                 coopData.getCoopPlayers(),
                 coopData.getJoinDates(),
                 coopData.getPermissions(),
-                settings
+                settings,
+                purchasedBlocks
         );
     }
 

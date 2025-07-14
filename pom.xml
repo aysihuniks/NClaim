@@ -6,7 +6,7 @@
 
     <groupId>nesoi.aysihuniks</groupId>
     <artifactId>NClaim</artifactId>
-    <version>2.0.1</version>
+    <version>2.1</version>
     <packaging>jar</packaging>
 
     <name>NClaim</name>
@@ -53,7 +53,20 @@
                                     <pattern>space.arim</pattern>
                                     <shadedPattern>nesoi.aysihuniks.libs.morepaperlib</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>net.wesjd.anvilgui</pattern>
+                                    <shadedPattern>nesoi.aysihuniks.libs.anvilgui</shadedPattern>
+                                </relocation>
                             </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludeDefaults>false</excludeDefaults>
+                                    <includes>
+                                        <include>net/wesjd/anvilgui/**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -136,7 +149,7 @@
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.10.5-SNAPSHOT</version>
+            <version>1.10.7-SNAPSHOT</version>
         </dependency>
         <!-- DAPI -->
         <dependency>
@@ -209,6 +222,13 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- XConomy -->
+        <dependency>
+            <groupId>com.github.YiC200333</groupId>
+            <artifactId>XConomyAPI</artifactId>
+            <version>2.25.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -71,6 +71,11 @@ claim:
   expired: "{prefix} &fBölgenin süresi doldu ve kaldırıldı &7(&e{x}&7, &e{z}&7)."
   setting_change_cancelled: "&cAyar değişikliği iptal edildi!"
   pvp_not_allowed: "{prefix} &cBu bölgede PvP'ye izin verilmiyor."
+  transferred: "&aClaim başarıyla &e{player} &aadlı oyuncuya devredildi"
+
+  block:
+    purchased: "{prefix} &aClaim bloğu başarıyla satın alındı: &e{block} &7(&6{price}$&7)"
+    changed: "{prefix} &aClaim bloğu değiştirildi: &c{old_block} &7-> &a{new_block}"
   level:
     calculating_started: "{prefix} &aBölge seviyeniz hesaplanıyor, lütfen bekleyin."
     calculating_in_progress: "{prefix} &cBaşka bir oyuncu bölge seviyesi hesaplıyor, lütfen bir dakika bekleyin"
@@ -98,16 +103,22 @@ claim:
     remove_cancelled: "&cOrtak oyuncu çıkarma iptal edildi!"
     permission_toggle_cancelled: "&cOrtak yetki değişikliği iptal edildi!"
 
-action_bar:
-  unclaimed_chunk: "&7Sahipsiz"
-  claimed_chunk: "&e{owner} &7- {pvp_status}"
+move:
+  unclaimed_chunk: "ACTION_BAR=&7Sahipsiz"
+  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
   pvp_enabled: "&cPvP"
   pvp_disabled: "&aPvP"
 
 hologram:
   title: "&6⚔ Korumalı Bölge ⚔"
   owner: "&fSahip: &e{owner}"
-  time_left: "&fKalan Süre: &e{time_left}"
+  time_left:
+    text: "&fKalan Süre: &e{time_left}"
+    d: "d"
+    h: "h"
+    m: "m"
+    s: "s"
+    # d,h,m,s Hologramdakı süre sembolleri olarak bilinirler. örn: "23d, 12h, 50m, 59s"
   coop_count: "&fOrtak Oyuncular: &e{coop_count}"
   total_size: "&fToplam Boyut: &e{total_size} &7parça"
   edit: "&eSağ tıkla ve özelleştir"

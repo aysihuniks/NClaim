@@ -20,7 +20,7 @@ import java.util.Set;
 public class AdminDashboardMenu extends BaseMenu {
 
     public AdminDashboardMenu(Player player) {
-        super("menu.admin.main_menu");
+        super("admin_menu.main_menu");
 
         setupMenu();
         displayTo(player);
@@ -34,8 +34,6 @@ public class AdminDashboardMenu extends BaseMenu {
 
     private void addManageClaimsButton() {
         addButton(new Button() {
-            final String buttonPath = "manage_claims";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(13);
@@ -44,13 +42,13 @@ public class AdminDashboardMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(NClaim.getMaterial(DMaterial.AMETHYST_BLOCK, DMaterial.SHULKER_BOX))
-                        .name(getString(buttonPath + ".display_name"))
-                        .lore(getStringList(buttonPath + ".lore"))
+                        .name(getString("manage_claims.display_name"))
+                        .lore(getStringList("manage_claims.lore"))
                         .get();
             }
 
             @Override
-            public void onClick(@NotNull Player player, ClickType clickType) {
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
                 new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
             }

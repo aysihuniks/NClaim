@@ -5,6 +5,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
+import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.utils.HeadManager;
@@ -14,45 +15,45 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.guimanager.Menu;
 import org.nandayo.dapi.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.object.DMaterial;
 
 import java.util.Set;
 
-public class ClaimManagementMenu extends Menu {
+public class ClaimManagementMenu extends BaseMenu {
     private final @NotNull Claim claim;
-    private final LangManager langManager;
-    private final ConfigurationSection menuSection;
-    private Player player;
+    private final Player player;
 
     public ClaimManagementMenu(Player player, @NotNull Claim claim) {
+        super("claim_management_menu");
         this.claim = claim;
         this.player = player;
-        this.langManager = NClaim.inst().getLangManager();
-        this.menuSection = langManager.getSection("menu.claim_menu");
         setupMenu();
         displayTo(player);
     }
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_3_ROWS, langManager.getString(menuSection, "title"));
+        createInventory(MenuType.CHEST_3_ROWS, getString("title"));
         setBackgroundButton(BackgroundMenu::getButton);
         
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(11);
+                return Sets.newHashSet(10);
             }
 
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.GRASS_BLOCK)
-                        .name(langManager.getString(menuSection, "manage_chunks.display_name"))
-                        .lore(langManager.getStringList(menuSection, "manage_chunks.lore"))
+                        .name(getString("expand.display_name"))
+                        .lore(getStringList("expand.lore"))
                         .get();
             }
 
@@ -65,14 +66,14 @@ public class ClaimManagementMenu extends Menu {
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(12);
+                return Sets.newHashSet(11);
             }
 
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.CLOCK)
-                        .name(langManager.getString(menuSection, "manage_expiry.display_name"))
-                        .lore(langManager.getStringList(menuSection, "manage_expiry.lore"))
+                        .name(getString("time.display_name"))
+                        .lore(getStringList("time.lore"))
                         .get();
             }
             @Override
@@ -85,14 +86,14 @@ public class ClaimManagementMenu extends Menu {
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(13);
+                return Sets.newHashSet(12);
             }
 
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(NClaim.inst().getHeadManager().createHead(player))
-                        .name(langManager.getString(menuSection, "manage_members.display_name"))
-                        .lore(langManager.getStringList(menuSection, "manage_members.lore"))
+                        .name(getString("coop.display_name"))
+                        .lore(getStringList("coop.lore"))
                         .get();
             }
 
@@ -106,14 +107,14 @@ public class ClaimManagementMenu extends Menu {
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(14);
+                return Sets.newHashSet(13);
             }
 
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.END_CRYSTAL)
-                        .name(langManager.getString(menuSection, "manage_settings.display_name"))
-                        .lore(langManager.getStringList(menuSection, "manage_settings.lore"))
+                        .name(getString("setting.display_name"))
+                        .lore(getStringList("setting.lore"))
                         .get();
             }
 
@@ -123,26 +124,46 @@ public class ClaimManagementMenu extends Menu {
                 new ClaimSettingsMenu(player, claim, 0);
             }
         });
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(14) ;
+            }
+
+            @Override
+            public @Nullable ItemStack getItem() {
+                return ItemCreator.of(NClaim.getMaterial(DMaterial.BUNDLE, DMaterial.SHULKER_BOX))
+                        .name(getString("type.display_name"))
+                        .lore(getStringList("type.lore"))
+                        .hideFlag(ItemFlag.values())
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                new ManageClaimBlockMenu(claim, player, 0);
+            }
+        });
 
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(15) ;
+                return Sets.newHashSet(16) ;
             }
 
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.TNT)
-                        .name(langManager.getString(menuSection, "delete.display_name"))
-                        .lore(langManager.getStringList(menuSection, "delete.lore"))
+                        .name(getString("delete.display_name"))
+                        .lore(getStringList("delete.lore"))
                         .get();
             }
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 new ConfirmMenu(player,
-                        langManager.getString("menu.confirm_menu.delete_claim.display_name"),
-                        langManager.getStringList("menu.confirm_menu.delete_claim.lore"),
+                        NClaim.inst().getGuiLangManager().getString("confirm_menu.children.delete_claim.display_name"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.delete_claim.lore"),
                         (result) -> {
                             if ("confirmed".equals(result)) {
                                 claim.remove(RemoveCause.UNCLAIM);

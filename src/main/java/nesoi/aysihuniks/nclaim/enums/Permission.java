@@ -1,7 +1,5 @@
 package nesoi.aysihuniks.nclaim.enums;
 
-import nesoi.aysihuniks.nclaim.NClaim;
-
 public enum Permission {
     // Block permissions
     BREAK_BLOCKS("Break normal blocks"),

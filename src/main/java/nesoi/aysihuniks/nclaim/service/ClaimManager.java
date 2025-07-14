@@ -16,6 +16,7 @@ import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,6 +30,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.Tag;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 
@@ -44,7 +46,7 @@ public class ClaimManager implements Listener {
         long lastMessageTime = messageCooldown.getOrDefault(playerUUID, 0L);
 
         if (currentTime - lastMessageTime >= 15000) {
-            player.sendMessage(message);
+            ChannelType.CHAT.send(player, message);
             messageCooldown.put(playerUUID, currentTime);
         }
     }
@@ -82,7 +84,7 @@ public class ClaimManager implements Listener {
         if (fromClaim != null && (!fromClaim.equals(toClaim))) {
             ClaimLeaveEvent leaveEvent = new ClaimLeaveEvent(player, fromClaim);
             Bukkit.getPluginManager().callEvent(leaveEvent);
-            NClaim.sendActionBar(player, plugin.getLangManager().getString("action_bar.unclaimed_chunk"));
+            LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.unclaimed_chunk"));
         }
 
         if (toClaim != null && (fromClaim == null || !fromClaim.equals(toClaim))) {
@@ -90,9 +92,9 @@ public class ClaimManager implements Listener {
             Bukkit.getPluginManager().callEvent(enterEvent);
 
             boolean isPvpEnabled = NClaim.inst().getClaimSettingsManager().isSettingEnabled(toClaim, Setting.CLAIM_PVP);
-            String pvpStatus = plugin.getLangManager().getString(isPvpEnabled ? "action_bar.pvp_enabled" : "action_bar.pvp_disabled");
+            String pvpStatus = plugin.getLangManager().getString(isPvpEnabled ? "move.pvp_enabled" : "move.pvp_disabled");
             OfflinePlayer owner = Bukkit.getOfflinePlayer(toClaim.getOwner());
-            NClaim.sendActionBar(player, plugin.getLangManager().getString("action_bar.claimed_chunk")
+            LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.claimed_chunk")
                     .replace("{owner}", owner.getName())
                     .replace("{pvp_status}", pvpStatus));
         }
@@ -189,8 +191,8 @@ public class ClaimManager implements Listener {
         Claim claim = Claim.getClaim(block.getChunk());
 
         if (claim != null) {
-            if (block.getType() == Material.BEDROCK) {
-                if (block.getLocation().equals(claim.getBedrockLocation())) {
+            if (block.getType() == claim.getClaimBlockType()) {
+                if (block.getLocation().equals(claim.getClaimBlockLocation())) {
                     if (!player.isSneaking()) {
                         event.setCancelled(true);
                     }
@@ -250,7 +252,8 @@ public class ClaimManager implements Listener {
         Claim claim = Claim.getClaim(block.getChunk());
         if (claim == null) return;
 
-        if (block.getType() == Material.BEDROCK && claim.getBedrockLocation().equals(block.getLocation())) {
+        // New claim block type check
+        if (block.getType() == claim.getClaimBlockType() && claim.getClaimBlockLocation().equals(block.getLocation())) {
             if (coopManager.isClaimOwner(claim, player)) {
                 if (player.isSneaking() && player.hasPermission("nclaim.admin")) {
                     new AdminClaimManagementMenu(player, claim);

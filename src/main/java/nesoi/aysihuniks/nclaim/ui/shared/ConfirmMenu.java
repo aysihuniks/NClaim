@@ -23,7 +23,7 @@ public class ConfirmMenu extends BaseMenu {
     private final Consumer<String> onFinish;
 
     public ConfirmMenu(Player player, String itemName, List<String> lore, Consumer<String> onFinish) {
-        super("menu.confirm_menu");
+        super("confirm_menu");
         
         this.itemName = itemName;
         this.lore = lore;
@@ -61,7 +61,6 @@ public class ConfirmMenu extends BaseMenu {
 
     private void addConfirmButton() {
         addButton(new Button() {
-            final String buttonPath = "confirm";
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -71,7 +70,7 @@ public class ConfirmMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.GREEN_DYE)
-                        .name(getString(buttonPath + ".display_name"))
+                        .name(getString("confirm.display_name"))
                         .get();
             }
 
@@ -85,8 +84,6 @@ public class ConfirmMenu extends BaseMenu {
 
     private void addDeclineButton() {
         addButton(new Button() {
-            final String buttonPath = "decline";
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(15);
@@ -95,7 +92,7 @@ public class ConfirmMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.RED_DYE)
-                        .name(getString(buttonPath + ".display_name"))
+                        .name(getString("decline.display_name"))
                         .get();
             }
 

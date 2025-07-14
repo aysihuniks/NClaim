@@ -15,9 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.Util;
 import org.nandayo.dapi.guimanager.Button;
 import org.nandayo.dapi.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +42,7 @@ public class AdminAllClaimMenu extends BaseMenu {
     private final List<Claim> selectedClaims;
 
     public AdminAllClaimMenu(Player player, OfflinePlayer target, boolean sortByNewest, int page, List<Claim> selectedClaims) {
-        super("menu.admin.all_claims_menu");
+        super("admin_menu.all_claims_menu");
         this.target = target;
         this.sortByNewest = sortByNewest;
         this.page = page;
@@ -75,9 +77,8 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                String navPath = page == 0 ? "menu.back" : "menu.previous_page";
                 return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(langManager.getString(navPath + ".display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString((page == 0 ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
 
@@ -199,7 +200,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 return ItemCreator.of(Material.COMPASS)
-                        .name(langManager.getString("menu.next_page.display_name"))
+                        .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                         .get();
             }
 
@@ -307,7 +308,7 @@ public class AdminAllClaimMenu extends BaseMenu {
         new AnvilManager(NClaim.inst(), player, "Enter a player name",
                 (text) -> {
                     if (text == null || text.isEmpty()) {
-                        player.sendMessage(langManager.getString("command.enter_a_player"));
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));
                         MessageType.FAIL.playSound(player);
                         player.closeInventory();
                         return;
@@ -330,14 +331,14 @@ public class AdminAllClaimMenu extends BaseMenu {
     }
 
     private void teleportToClaimSafely(Player player, Claim claim) {
-        Location bedrockLoc = claim.getBedrockLocation();
-        World world = bedrockLoc.getWorld();
+        Location claimBlockLocation = claim.getClaimBlockLocation();
+        World world = claimBlockLocation.getWorld();
         if (world == null) return;
 
         Location safeLoc = new Location(world,
-                bedrockLoc.getX() + 0.5,
-                bedrockLoc.getY() + 1,
-                bedrockLoc.getZ() + 0.5);
+                claimBlockLocation.getX() + 0.5,
+                claimBlockLocation.getY() + 1,
+                claimBlockLocation.getZ() + 0.5);
 
         while (safeLoc.getY() < world.getMaxHeight() && !safeLoc.getBlock().getType().isSolid()) {
             safeLoc.setY(safeLoc.getY() + 1);
@@ -347,8 +348,8 @@ public class AdminAllClaimMenu extends BaseMenu {
             safeLoc.setY(world.getHighestBlockYAt(safeLoc) + 1);
         }
 
-        if (safeLoc.getY() < bedrockLoc.getY()) {
-            safeLoc.setY(bedrockLoc.getY() + 1);
+        if (safeLoc.getY() < claimBlockLocation.getY()) {
+            safeLoc.setY(claimBlockLocation.getY() + 1);
         }
 
         Bukkit.getScheduler().runTaskLater(NClaim.inst(), () -> {

@@ -12,7 +12,7 @@ commands:
     usage: "/nclaim <help/?>"
 permissions:
   nclaim.admin:
-    default: op
+    default: false
     children:
       nclaim.adminmenu: true
       nclaim.reload: true
@@ -21,7 +21,7 @@ permissions:
       nclaim.change: true
       nclaim.set: true
   nclaim.*:
-    default: false
+    default: op
     children:
       nclaim.admin: true
       nclaim.bypass.*: true
@@ -31,6 +31,7 @@ permissions:
       nclaim.bypass.blacklisted_worlds: true
       nclaim.bypass.blacklisted_regions: true
       nclaim.bypass.max_claim_count: true
+      nclaim.bypass.max_coop_count: true
       nclaim.bypass.claim_buy_price: true
       nclaim.bypass.land_buy_price: true
       nclaim.bypass.pvp: true
@@ -44,13 +45,18 @@ permissions:
       nclaim.balance: true
       nclaim.buy: true
       nclaim.level: true
+      nclaim.maxcoop.default: true
   nclaim.help:
+    default: false
+  nclaim.maxcoop.default:
     default: false
   nclaim.balance:
     default: false
   nclaim.buy:
     default: false
   nclaim.level:
+    default: false
+  nclaim.manage_claim_block:
     default: false
   nclaim.adminmenu:
     default: false
@@ -69,6 +75,8 @@ permissions:
   nclaim.bypass.blacklisted_regions:
     default: false
   nclaim.bypass.max_claim_count:
+    default: false
+  nclaim.bypass.max_coop_count:
     default: false
   nclaim.bypass.claim_buy_price:
     default: false

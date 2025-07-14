@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 
@@ -50,7 +51,7 @@ public class ClaimCoopManager {
         Bukkit.getPluginManager().callEvent(addEvent);
 
         if (addEvent.isCancelled()) {
-            owner.sendMessage(plugin.getLangManager().getString("claim.coop.add_cancelled"));
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.add_cancelled"));
             return;
         }
 
@@ -60,15 +61,15 @@ public class ClaimCoopManager {
             plugin.getDatabaseManager().saveClaim(claim);
         }
 
-        owner.sendMessage(plugin.getLangManager().getString("claim.coop.added")
+        ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.added")
                 .replace("{coop}", coopPlayer.getName()));
-        coopPlayer.sendMessage(plugin.getLangManager().getString("claim.coop.joined")
+        ChannelType.CHAT.send(coopPlayer, plugin.getLangManager().getString("claim.coop.joined")
                 .replace("{owner}", owner.getName()));
     }
 
     public void removeCoopPlayer(Claim claim, Player owner, UUID coopUUID) {
         if (!isClaimOwner(claim, owner)) {
-            owner.sendMessage(plugin.getLangManager().getString("command.permission_denied"));
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("command.permission_denied"));
             return;
         }
 
@@ -76,7 +77,7 @@ public class ClaimCoopManager {
         Bukkit.getPluginManager().callEvent(removeEvent);
 
         if (removeEvent.isCancelled()) {
-            owner.sendMessage(plugin.getLangManager().getString("claim.coop.remove_cancelled"));
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.remove_cancelled"));
             return;
         }
 
@@ -89,10 +90,10 @@ public class ClaimCoopManager {
         Player coopPlayer = Bukkit.getPlayer(coopUUID);
         String coopName = coopPlayer != null ? coopPlayer.getName() : coopUUID.toString();
         if (coopPlayer != null) {
-            coopPlayer.sendMessage(plugin.getLangManager().getString("claim.coop.kicked")
+            ChannelType.CHAT.send(coopPlayer, plugin.getLangManager().getString("claim.coop.kicked")
                     .replace("{owner}", owner.getName()));
         }
-        owner.sendMessage(plugin.getLangManager().getString("claim.coop.removed")
+        ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.removed")
                 .replace("{coop}", coopName));
     }
 
@@ -110,7 +111,7 @@ public class ClaimCoopManager {
         if (toggleEvent.isCancelled()) {
             Player owner = Bukkit.getPlayer(claim.getOwner());
             if (owner != null) {
-                owner.sendMessage(plugin.getLangManager().getString("claim.coop.permission_toggle_cancelled"));
+                ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.permission_toggle_cancelled"));
             }
             return;
         }
@@ -138,7 +139,7 @@ public class ClaimCoopManager {
         if (toggleEvent.isCancelled()) {
             Player owner = Bukkit.getPlayer(claim.getOwner());
             if (owner != null) {
-                owner.sendMessage(plugin.getLangManager().getString("claim.coop.permission_category_toggle_cancelled"));
+                ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.permission_category_toggle_cancelled"));
             }
             return;
         }
@@ -170,24 +171,24 @@ public class ClaimCoopManager {
 
     private boolean canAddCoop(Claim claim, Player owner, Player coopPlayer) {
         if (!isClaimOwner(claim, owner)) {
-            owner.sendMessage(plugin.getLangManager().getString("claim.not_yours"));
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.not_yours"));
             return false;
         }
 
         UUID coopUUID = coopPlayer.getUniqueId();
         if (claim.getOwner().equals(coopUUID)) {
-            owner.sendMessage(plugin.getLangManager().getString("command.player.cant_add_self"));
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("command.player.cant_add_self"));
             return false;
         }
 
         if (isCoopPlayer(claim, coopUUID)) {
-            owner.sendMessage(plugin.getLangManager().getString("claim.coop.already_added")
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.already_added")
                     .replace("{coop}", coopPlayer.getName()));
             return false;
         }
 
-        if (claim.getCoopPlayers().size() >= plugin.getNconfig().getMaxCoopPlayers()) {
-            owner.sendMessage(plugin.getLangManager().getString("claim.coop.limit_reached"));
+        if (claim.getCoopPlayers().size() >= plugin.getNconfig().getMaxCoopPlayers(owner)) {
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.limit_reached"));
             return false;
         }
 

@@ -77,6 +77,10 @@ public class Expansion extends PlaceholderExpansion {
             return handleClaimInfo(params);
         }
 
+        if (params.equals("owner")) {
+            return handleCurrentChunkOwner(player);
+        }
+
         return null;
     }
 
@@ -229,6 +233,17 @@ public class Expansion extends PlaceholderExpansion {
         } catch (NumberFormatException e) {
             return new ChunkAndClaim(null, null, "Invalid coordinates");
         }
+    }
+
+    private @Nullable String handleCurrentChunkOwner(Player player) {
+        if (player == null) return null;
+        Chunk chunk = player.getLocation().getChunk();
+        Claim claim = Claim.getClaim(chunk);
+        if (claim == null) {
+            return "Not in a claimed chunk";
+        }
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
+        return owner.getName() != null ? owner.getName() : "Owner not found";
     }
 
 }

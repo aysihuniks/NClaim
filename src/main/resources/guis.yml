@@ -1,0 +1,619 @@
+
+# Confirmation Menus [✅] Section: 'confirm_menu'
+# Claim Menu [✅] Section: 'claim_menu' Full finished
+# Claim List Menu [✅] Section: 'claim_list_menu'
+# Claim Management Menu [✅] Section: 'claim_management_menu'
+# Claim Settings Menu [✅] Section: 'claim_settings_menu'
+# Claim Expand Menu [✅] AKA: LandExpansionMenu Section: 'claim_expand_menu'
+# Manage Claim Block Menu [❌] Section: 'claim_block_management_menu'
+# Claim Time Manage Menu [✅] Section: 'claim_time_management_menu'
+
+
+
+
+guis:
+  back:
+    display_name: "&eBack"
+  previous_page:
+    display_name: "&ePrevious Page"
+  next_page:
+    display_name: "&eNext Page"
+  enabled:
+    display_name: "&aEnabled"
+  disabled:
+    display_name: "&cDisabled"
+
+
+  # Claim Menu - When /nclaim is typed, it is the menu with operations such as buy claim
+  claim_menu:
+    title: "Claim Menu"
+    admin:
+      display_name: "&6Admin Menu"
+    buy_claim:
+      display_name: "&6Buy a Claim"
+      lore:
+        - ""
+        - "&fPurchase a new claim"
+        - "&7Cost: &e${price}"
+        - ""
+        - "&eClick to purchase"
+    manage_claims:
+      display_name: "&6Manage Claims"
+      lore:
+        - ""
+        - "&fManage your claims:"
+        - "&7• &fView all claims"
+        - "&7• &fModify settings"
+        - "&7• &fManage members"
+        - ""
+        - "&eClick to manage"
+
+
+  # Claim List Menu - The menu that opens after typing /nclaim and clicking the 'Manage Claims' button.
+  claim_list_menu:
+    title: "Claim List"
+    list_type:
+      display_name: "&6List Type"
+      all: "All"
+      player: "Player"
+      coop: "Co-op"
+    own_claims:
+      display_name: "&6Claim: &e{claim_id}"
+      lore:
+        - ""
+        - "&fWorld: &e{world}"
+        - "&fLocation: &e{coordinates}"
+        - "&fOwner: &e{owner}"
+        - ""
+        - "&7Click to manage"
+    coop_claims:
+      display_name: "&6Co-op Claim: &e{claim_id}"
+      lore:
+        - ""
+        - "&fWorld: &e{world}"
+        - "&fLocation: &e{coordinates}"
+        - "&fOwner: &e{owner}"
+        - ""
+        - "&7You can only view"
+
+  # Claim Management Menu - The menu that opens when interacting with the claim block.
+  claim_management_menu:
+    title: "Manage Claim"
+    expand:
+      display_name: "&6Expand Claim"
+      lore:
+        - ""
+        - "&fExpand your claim territory"
+        - "&7• &fAdd new chunks"
+        - "&7• &fView current chunks"
+        - ""
+        - "&eClick to manage"
+    time:
+      display_name: "&6Manage Expiration"
+      lore:
+        - ""
+        - "&fManage claim duration:"
+        - "&7• &fView expiration date"
+        - "&7• &fExtend claim time"
+        - ""
+        - "&eClick to manage"
+    coop:
+      display_name: "&6Manage Co-ops"
+      lore:
+        - ""
+        - "&fManage co-op members:"
+        - "&7• &fAdd/Remove members"
+        - "&7• &fModify permissions"
+        - ""
+        - "&eClick to manage"
+    setting:
+      display_name: "&6Claim Settings"
+      lore:
+        - ""
+        - "&fConfigure claim settings:"
+        - "&7• &fPermissions"
+        - "&7• &fProtections"
+        - "&7• &fAccess rules"
+        - ""
+        - "&eClick to configure"
+    type:
+      display_name: "&6Claim Block Type"
+      lore:
+        - ""
+        - "&fChange the type of your claim block"
+        - "&7• &fAffects only appearance"
+        - "&7• &fDoes not affect protections"
+        - ""
+        - "&eClick to change"
+    delete:
+      display_name: "&cDelete Claim"
+      lore:
+        - ""
+        - "&cWarning: &fThis will permanently delete"
+        - "&fyour claim without any refund"
+        - ""
+        - "&7Click to proceed"
+
+  # Claim Expand Menu - The menu that opens after interacting with the claim block and clicking the 'Expand Claim' button.
+  claim_expand_menu:
+    title: "Expand Claim"
+    center:
+      display_name: "&6Center Chunk"
+      lore:
+        - ""
+        - "&fThis is your claim's center chunk"
+    expand:
+      display_name: "&6Expand Claim"
+      lore:
+        - ""
+        - "&fExpand your claim"
+        - "&7Cost: &e${price}"
+        - ""
+        - "&eClick to purchase"
+    claimed:
+      display_name: "&aClaimed Chunk"
+      lore:
+        - ""
+        - "&fThis chunk is claimed"
+    not_adjacent:
+      display_name: "&cInvalid Chunk"
+      lore:
+        - ""
+        - "&fYou can only claim adjacent chunks"
+    claimed_another_player:
+      display_name: "&cClaimed by Another Player"
+      lore:
+        - ""
+        - "&fThis chunk belongs to someone else"
+
+  # Claim Time Management Menu - The menu that opens after interacting with the claim block and clicking the 'Manage Expiration' button.
+  claim_time_management_menu:
+    title: "Manage Time"
+    claim_info:
+      display_name: "&6Duration Info"
+      lore:
+        - ""
+        - "&fTime Remaining: &e{time_left}"
+        - "&fExpires: &e{expires_at}"
+    confirm:
+      display_name: "&aConfirm Changes"
+      lore:
+        - ""
+        - "&fNew duration:"
+        - "&7• &e{d} &fdays"
+        - "&7• &e{h} &fhours"
+        - "&7• &e{m} &fminutes"
+        - "&7Cost: &e${price}"
+    select_time_unit:
+      display_name: "&6Select Time Unit"
+      lore:
+        - ""
+        - "&f• {days_status}"
+        - "&f• {hours_status}"
+        - "&f• {minutes_status}"
+    days_status: "Days" # You cannot use color codes.
+    hours_status: "Hours"
+    minutes_status: "Minutes"
+    add_one:
+      display_name: "&a+1 {unit}"
+    add_six:
+      display_name: "&a+6 {unit}"
+    subtract_one:
+      display_name: "&c-1 {unit}"
+    subtract_six:
+      display_name: "&c-6 {unit}"
+
+  claim_manage_coop_menu:
+    title: "Co-op Members"
+    add_coop:
+      display_name: "&aAdd Member"
+    search_title: "Enter a player name"
+    empty_slot:
+      display_name: "&fEmpty Slot"
+      lore:
+        - ""
+        - "&eClick to add member"
+    locked_slot:
+      display_name: "&cLocked Slot"
+      lore:
+        - ""
+        - "&ePermission required"
+    coop_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fJoined: &7{date}"
+        - ""
+        - "&eClick to edit"
+      admin_lore:
+        - "&fPermissions: &a{yes}&7/&c{no}"
+        - ""
+        - "&eClick to modify"
+
+  manage_coop_player_permission_menu:
+    title: "Manage {player}"
+    click_to_view: "&eClick to view"
+    right_click_toggle: "&eRight-click to toggle all"
+    offline: "&7(Offline)"
+    player_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fJoined: &7{date}"
+        - ""
+        - "&7Manage permissions below"
+    transfer:
+      display_name: "&6Transfer Claim"
+      lore:
+        - ""
+        - "&7Transfer ownership of this claim"
+        - "&7to &e{player}"
+        - ""
+        - "&7This action cannot be undone!"
+        - ""
+        - "&eClick to transfer"
+    kick:
+      display_name: "&cKick Co-op"
+      lore:
+        - ""
+        - "&fKick this co-op"
+        - "&ffrom your claim"
+        - ""
+        - "&7Click to kick"
+    categories:
+      blocks:
+        display_name: "&6Block Permissions"
+      containers:
+        display_name: "&6Container Access"
+      redstone:
+        display_name: "&6Redstone Usage"
+      doors:
+        display_name: "&6Door Access"
+      workstations:
+        display_name: "&6Workstation Usage"
+      interactions:
+        display_name: "&6Interaction Rights"
+      liquids:
+        display_name: "&6Liquid Management"
+      entities:
+        display_name: "&6Entity Interactions"
+    permissions:
+      break_blocks:
+        display_name: "&fBreak Blocks"
+      break_spawner:
+        display_name: "&fBreak Spawners"
+      place_blocks:
+        display_name: "&fPlace Blocks"
+      place_spawner:
+        display_name: "&fPlace Spawners"
+      use_chest:
+        display_name: "&fUse Chests"
+      use_furnace:
+        display_name: "&fUse Furnaces"
+      use_barrel:
+        display_name: "&fUse Barrels"
+      use_shulker:
+        display_name: "&fUse Shulker Boxes"
+      use_hopper:
+        display_name: "&fUse Hoppers"
+      use_dispenser:
+        display_name: "&fUse Dispensers"
+      use_redstone:
+        display_name: "&fUse Redstone"
+      use_buttons:
+        display_name: "&fUse Buttons"
+      use_pressure_plates:
+        display_name: "&fUse Pressure Plates"
+      use_levers:
+        display_name: "&fUse Levers"
+      use_doors:
+        display_name: "&fUse Doors"
+      use_trapdoors:
+        display_name: "&fUse Trapdoors"
+      use_gates:
+        display_name: "&fUse Gates"
+      use_crafting:
+        display_name: "&fUse Crafting Tables"
+      use_enchanting:
+        display_name: "&fUse Enchanting Tables"
+      use_anvil:
+        display_name: "&fUse Anvils"
+      use_grindstone:
+        display_name: "&fUse Grindstones"
+      use_stonecutter:
+        display_name: "&fUse Stonecutters"
+      use_loom:
+        display_name: "&fUse Looms"
+      use_smithing:
+        display_name: "&fUse Smithing Tables"
+      use_cartography:
+        display_name: "&fUse Cartography Tables"
+      use_brewing:
+        display_name: "&fUse Brewing Stands"
+      use_bell:
+        display_name: "&fUse Bells"
+      use_beacon:
+        display_name: "&fUse Beacons"
+      use_jukebox:
+        display_name: "&fUse Jukeboxes"
+      use_noteblock:
+        display_name: "&fUse Note Blocks"
+      use_campfire:
+        display_name: "&fUse Campfires"
+      use_bed:
+        display_name: "&fUse Beds"
+      interact_armor_stand:
+        display_name: "&fUse Armor Stands"
+      interact_item_frame:
+        display_name: "&fUse Item Frames"
+      place_water:
+        display_name: "&fPlace Water"
+      place_lava:
+        display_name: "&fPlace Lava"
+      take_water:
+        display_name: "&fTake Water"
+      take_lava:
+        display_name: "&fTake Lava"
+      interact_villager:
+        display_name: "&fTrade with Villagers"
+      leash_mobs:
+        display_name: "&fLeash Mobs"
+      ride_entities:
+        display_name: "&fRide Entities"
+
+  claim_settings_menu:
+    title: "Claim Settings"
+    settings:
+      pvp:
+        display_name: "&6PvP"
+        lore:
+          - ""
+          - "&fAllow player combat in claim"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      tnt_explosions:
+        display_name: "&6TNT Damage"
+        lore:
+          - ""
+          - "&fAllow TNT to damage blocks"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      creeper_explosions:
+        display_name: "&6Creeper Damage"
+        lore:
+          - ""
+          - "&fAllow Creeper explosion damage"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      mob_attacks:
+        display_name: "&6Mob Combat"
+        lore:
+          - ""
+          - "&fAllow players to fight mobs"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      monster_spawning:
+        display_name: "&6Monster Spawning"
+        lore:
+          - ""
+          - "&fAllow monsters to spawn"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      animal_spawning:
+        display_name: "&6Animal Spawning"
+        lore:
+          - ""
+          - "&fAllow animals to spawn"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+      villager_interactions:
+        display_name: "&6Villager Trading"
+        lore:
+          - ""
+          - "&fAllow villager interactions"
+          - ""
+          - "&7Status: {status}"
+          - ""
+          - "&eClick to toggle"
+
+  claim_block_management_menu:
+    title: "Claim Block Type Management"
+
+
+  admin_menu:
+    main_menu:
+      title: "Admin Dashboard"
+      manage_claims:
+        display_name: "&6Manage All Claims"
+    all_claims_menu:
+      title: "All Claims"
+      reset_settings:
+        display_name: "&cReset Settings"
+      search_player:
+        display_name: "&aSearch Player"
+      sort_by_date:
+        display_name: "&aSort by Date"
+        lore:
+          - ""
+          - "&f• {newest_status}"
+          - "&f• {oldest_status}"
+      delete_selected:
+        display_name: "&cDelete Selected"
+      claim_items:
+        selected:
+          display_name: "&a{owner}'s Claim &7(Selected)"
+          lore:
+            - ""
+            - "&fCreated: &7{created_at}"
+            - "&fLocation: &7{world}, {coordinates}"
+            - "&fSize: &7{land_size} chunks"
+            - "&fCo-op Members: &7{coop_count}"
+            - "&fSettings: &a{yes}&7/&c{no}"
+            - ""
+            - "&eClick &7- &fManage"
+            - "&eShift Click &7- &fTeleport"
+            - "&eRight Click &7- &fDeselect"
+        unselected:
+          display_name: "&6{owner}'s Claim"
+          lore:
+            - ""
+            - "&fCreated: &7{created_at}"
+            - "&fLocation: &7{world}, {coordinates}"
+            - "&fSize: &7{land_size} chunks"
+            - "&fCo-op Members: &7{coop_count}"
+            - "&fSettings: &a{yes}&7/&c{no}"
+            - ""
+            - "&eClick &7- &fManage"
+            - "&eShift Click &7- &fTeleport"
+            - "&eRight Click &7- &fSelect"
+    claim_management_menu:
+      title: "{owner}'s Claim"
+      manage_coop:
+        display_name: "&6Manage Co-op"
+        lore:
+          - ""
+          - "&fManage co-op members:"
+          - "&7• &fView members"
+          - "&7• &fModify permissions"
+          - "&7• &fAdd/Remove members"
+          - ""
+          - "&eClick to manage"
+      manage_lands:
+        display_name: "&6Manage Lands"
+        lore:
+          - ""
+          - "&fManage claim territories:"
+          - "&7• &fView chunks"
+          - "&7• &fAdd/Remove chunks"
+          - ""
+          - "&eClick to manage"
+      manage_expiration:
+        display_name: "&6Manage Expiration"
+        lore:
+          - ""
+          - "&fManage claim duration:"
+          - "&7• &fView expiration"
+          - "&7• &fModify time"
+          - ""
+          - "&eClick to manage"
+    time_management_menu:
+      title: "{owner}'s Claim"
+      claim_info:
+        display_name: "&6Claim Information"
+        lore:
+          - ""
+          - "&fRemaining: &e{time_left}"
+          - "&fExpires: &e{expires_at}"
+      time_display:
+        display_name: "&e{d} &fdays &e{h} &fhours &e{m} &fminutes"
+      confirm:
+        display_name: "&aConfirm Changes"
+        lore:
+          - ""
+          - "&fNew Duration:"
+          - "&7• &e{d} &fdays"
+          - "&7• &e{h} &fhours"
+          - "&7• &e{m} &fminutes"
+      select_time_unit:
+        display_name: "&6Select Time Unit"
+        lore:
+          - ""
+          - "&f• {days_status}"
+          - "&f• {hours_status}"
+          - "&f• {minutes_status}"
+      days_status: "Days" # You cannot use color codes.
+      hours_status: "Hours"
+      minutes_status: "Minutes"
+      add_one:
+        display_name: "&a+1 {unit}"
+      add_six:
+        display_name: "&a+6 {unit}"
+      subtract_one:
+        display_name: "&c-1 {unit}"
+      subtract_six:
+        display_name: "&c-6 {unit}"
+  # Confirmation Menu - It is the menu that opens when there is a confirmation process.
+  confirm_menu:
+    title: "Confirm Action"
+    confirm:
+      display_name: "&aConfirm"
+    decline:
+      display_name: "&cDecline"
+    children:
+      buy_new_claim: # Book in the middle
+        display_name: "&6Buy a New Claim"
+        lore:
+          - ""
+          - "&fIf you approve this action:"
+          - "&7• &e${price} &fwill be deducted from your balance"
+          - "&7• &fYou will receive a &enew Claim"
+          - ""
+          - "&aClick to green dye for confirm purchase"
+          - "&cClick to red dye for cancel purchase"
+      claim_expand:
+        display_name: "&6Expand Claim"
+        lore:
+          - ""
+          - "&fIf you approve this action:"
+          - "&7• &fCost: &e${price}"
+          - "&7• &fSelected chunk will be added to your claim"
+          - ""
+          - "&aClick to green dye for confirm expansion"
+          - "&cClick to red dye for cancel expansion"
+      delete_claim:
+        display_name: "&6Delete Claim"
+        lore:
+          - ""
+          - "&cWarning: &fThis action will:"
+          - "&7• &fPermanently delete your claim"
+          - "&7• &fCannot be undone"
+          - ""
+          - "&aClick to green dye for confirm deletion"
+          - "&cClick to red dye for cancel deletion"
+      kick_coop:
+        display_name: "&6Remove Co-op"
+        lore:
+          - ""
+          - "&fThis action will:"
+          - "&7• &fRemove &e{player} &ffrom your claim"
+          - "&7• &fRevoke all their permissions"
+          - ""
+          - "&aClick to green dye for confirm removal"
+          - "&cClick to red dye for cancel removal"
+      add_coop:
+        display_name: "&6Add Co-op Member"
+        lore:
+          - ""
+          - "&fThis action will:"
+          - "&7• &fAdd &e{player} &fto your claim"
+          - "&7• &fGrant them co-op permissions"
+          - ""
+          - "&aClick to green dye for confirm addition"
+          - "&cClick to red dye for cancel addition"
+      transfer_claim:
+        display_name: "&6Transfer Claim"
+        lore:
+          - ""
+          - "&cWarning: &fThis action will:"
+          - "&7• &fTransfer ownership to &e{player}"
+          - "&7• &fRemove your access to this claim"
+          - "&7• &fCannot be undone"
+          - ""
+          - "&aClick to green dye for confirm transfer"
+          - "&cClick to red dye for cancel transfer"
+
+
+# DO NOT CHANGE!
+gui_version: "{version}"

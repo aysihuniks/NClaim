@@ -5,28 +5,30 @@ import nesoi.aysihuniks.nclaim.commands.BaseCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.nandayo.dapi.message.ChannelType;
 
 public class ReloadCommand extends BaseCommand {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be used by players.");
+            ChannelType.CHAT.send(sender, "This command can only be used by players.");
             return true;
         }
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.reload")) {
-            player.sendMessage(NClaim.inst().getLangManager().getString("command.permission_denied"));
+        if (!player.hasPermission("nclaim.reload") && !player.hasPermission("nclaim.admin")) {
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
 
         try {
             NClaim.inst().reloadPlugin();
-            player.sendMessage(NClaim.inst().getLangManager().getString("command.reload.success"));
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.reload.success"));
         } catch (Exception e) {
-            player.sendMessage(NClaim.inst().getLangManager().getString("command.reload.failed"));
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.reload.failed"));
             e.printStackTrace();
         }
 

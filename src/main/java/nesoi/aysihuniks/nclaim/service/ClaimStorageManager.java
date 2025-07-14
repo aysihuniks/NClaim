@@ -10,6 +10,7 @@ import nesoi.aysihuniks.nclaim.model.CoopData;
 import nesoi.aysihuniks.nclaim.model.CoopPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,6 +19,7 @@ import org.nandayo.dapi.Util;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ClaimStorageManager {
@@ -110,34 +112,51 @@ public class ClaimStorageManager {
             Date createdAt = NClaim.deserializeDate(section.getString(claimId + ".created_at"));
             Date expiredAt = NClaim.deserializeDate(section.getString(claimId + ".expired_at"));
             UUID owner = UUID.fromString(section.getString(claimId + ".owner", ""));
-            Location bedrockLocation = NClaim.deserializeLocation(section.getString(claimId + ".bedrock_location"));
+            Location claimBlockLocation = NClaim.deserializeLocation(section.getString(claimId + ".claim_block_location"));
             long claimValue = section.getLong(claimId + ".value", 0);
 
-            if (createdAt == null || expiredAt == null || bedrockLocation == null) return null;
+            String blockTypeName = section.getString(claimId + ".claim_block_type", "OBSIDIAN");
+            Material blockType = Material.matchMaterial(blockTypeName);
+            if (blockType == null) blockType = Material.OBSIDIAN;
+
+            if (createdAt == null || expiredAt == null || claimBlockLocation == null) return null;
 
             Collection<String> lands = section.getStringList(claimId + ".lands");
-
             CoopData coopData = loadCoopData(section.getConfigurationSection(claimId + ".coops"));
             ClaimSetting settings = loadClaimSettings(section.getConfigurationSection(claimId + ".settings"));
+
+            Set<Material> purchasedBlocks = new HashSet<>();
+            List<String> purchasedBlockNames = section.getStringList(claimId + ".purchased_blocks");
+            for (String blockName : purchasedBlockNames) {
+                try {
+                    Material material = Material.valueOf(blockName);
+                    purchasedBlocks.add(material);
+                } catch (IllegalArgumentException e) {
+                    Util.log("&cInvalid material in purchased blocks for claim " + claimId + ": " + blockName);
+                }
+            }
 
             return new Claim(claimId,
                     world.getChunkAt(x, z),
                     createdAt,
                     expiredAt,
                     owner,
-                    bedrockLocation,
+                    claimBlockLocation,
                     claimValue,
+                    blockType,
                     lands,
                     coopData.getCoopPlayers(),
                     coopData.getJoinDates(),
                     coopData.getPermissions(),
-                    settings);
+                    settings,
+                    purchasedBlocks);
 
         } catch (Exception e) {
             Util.log("&cError loading claim " + claimId + ": " + e.getMessage());
             return null;
         }
     }
+
 
     private CoopData loadCoopData(ConfigurationSection coopSection) {
         Collection<UUID> coopPlayers = new ArrayList<>();
@@ -195,14 +214,37 @@ public class ClaimStorageManager {
         return settings;
     }
 
+    public void saveClaim(Claim claim) {
+        if (plugin.getNconfig().isDatabaseEnabled()) {
+            plugin.getDatabaseManager().saveClaim(claim);
+            return;
+        }
+        File file = new File(plugin.getDataFolder(), "claims.yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+
+        saveClaim(config, claim);
+
+        try {
+            config.save(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void saveClaim(FileConfiguration config, Claim claim) {
         String ns = "chunks_claimed." + claim.getClaimId();
         config.set(ns + ".created_at", NClaim.serializeDate(claim.getCreatedAt()));
         config.set(ns + ".expired_at", NClaim.serializeDate(claim.getExpiredAt()));
         config.set(ns + ".owner", claim.getOwner().toString());
-        config.set(ns + ".bedrock_location", NClaim.serializeLocation(claim.getBedrockLocation()));
+        config.set(ns + ".claim_block_location", NClaim.serializeLocation(claim.getClaimBlockLocation()));
         config.set(ns + ".lands", claim.getLands());
         config.set(ns + ".value", claim.getClaimValue());
+        config.set(ns + ".claim_block_type", claim.getClaimBlockType().name());
+
+        List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
+                .map(Material::name)
+                .collect(Collectors.toList());
+        config.set(ns + ".purchased_blocks", purchasedBlockNames);
 
         for (UUID coopPlayerUUID : claim.getCoopPlayers()) {
             String coopPath = ns + ".coops." + coopPlayerUUID;
@@ -223,5 +265,4 @@ public class ClaimStorageManager {
                     claim.getSettings().isEnabled(setting));
         }
     }
-
 }
