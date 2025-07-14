@@ -224,12 +224,5 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
-        <!-- XConomy -->
-        <dependency>
-            <groupId>com.github.YiC200333</groupId>
-            <artifactId>XConomyAPI</artifactId>
-            <version>2.25.1</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 </project>
