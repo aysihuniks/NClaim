@@ -157,6 +157,7 @@ public final class NClaim extends JavaPlugin {
         nconfig = new Config(this).load().updateConfig();
         configManager = new ConfigManager(nconfig.get());
         langManager = new LangManager(this, configManager.getString("lang_file", "en-US"));
+        guiLangManager = new GuiLangManager();
 
         if (nconfig.isDatabaseEnabled()) {
             if (mySQLManager != null) {
