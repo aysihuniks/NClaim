@@ -265,11 +265,11 @@ public class AdminTimeManagementMenu extends BaseMenu {
     private String getTimeUnitString() {
         switch (timeUnit) {
             case 1:
-                return "Hours";
+                return getString("hours_status");
             case 2:
-                return "Minutes";
+                return getString("minutes_status");
             default:
-                return "Days";
+                return getString("days_status");
         }
     }
 

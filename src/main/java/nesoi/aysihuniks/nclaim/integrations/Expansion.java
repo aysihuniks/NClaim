@@ -240,10 +240,10 @@ public class Expansion extends PlaceholderExpansion {
         Chunk chunk = player.getLocation().getChunk();
         Claim claim = Claim.getClaim(chunk);
         if (claim == null) {
-            return "Not in a claimed chunk";
+            return NClaim.inst().getLangManager().getString("claim.no_owner");
         }
         OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
-        return owner.getName() != null ? owner.getName() : "Owner not found";
+        return owner.getName() != null ? owner.getName() : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
 }

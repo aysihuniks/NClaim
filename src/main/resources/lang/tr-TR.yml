@@ -60,6 +60,7 @@ command:
     failed: "{prefix} &cTaşıma başarısız. Lütfen konsolu kontrol edin."
 
 claim:
+  no_owner: "Claim sahibi bulunamadı." # Sahipsiz diye bilinir.
   max_reached: "{prefix} &cMaksimum bölge sınırına ulaştınız."
   not_found: "{prefix} &cHiçbir bölgeniz yok ve hiçbir bölgeye eklenmemişsiniz."
   in_blacklisted_region_or_world: "{prefix} &cBunu kara listedeki bir dünya veya bölgede yapamazsınız."

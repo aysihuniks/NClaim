@@ -60,6 +60,7 @@ command:
     failed: "{prefix} &cMigration failed. Please check the console."
 
 claim:
+  no_owner: "&cOwner not found." # Aka: Unclaimed
   max_reached: "{prefix} &cYou have reached the maximum claim limit."
   not_found: "{prefix} &cYou don't own any claims and aren't added to any claims."
   in_blacklisted_region_or_world: "{prefix} &cYou can't do that in a blacklisted world or region."
