@@ -299,8 +299,14 @@ guis:
         display_name: "&fUse Hoppers"
       use_dispenser:
         display_name: "&fUse Dispensers"
+      use_dropper:
+        display_name: "&fUse Dropper"
       use_redstone:
         display_name: "&fUse Redstone"
+      use_repeater:
+        display_name: "&fUse Repeater"
+      use_comparator:
+        display_name: "&fUse Comparator"
       use_buttons:
         display_name: "&fUse Buttons"
       use_pressure_plates:
