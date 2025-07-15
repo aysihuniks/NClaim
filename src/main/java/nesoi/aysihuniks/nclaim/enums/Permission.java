@@ -9,14 +9,18 @@ public enum Permission {
 
     // Container permissions
     USE_CHEST("Use chests"),
+    USE_TRAPPED_CHEST("Use trapped chests"),
     USE_FURNACE("Use furnaces"),
     USE_BARREL("Use barrels"),
     USE_SHULKER("Use shulker boxes"),
     USE_HOPPER("Use hoppers"),
-    USE_DISPENSER("Use dispensers/droppers"),
+    USE_DISPENSER("Use dispensers"),
+    USE_DROPPER("Use droppers"),
 
     // Redstone permissions
-    USE_REDSTONE("Use redstone, repeaters, comparators"),
+    USE_REDSTONE("Use redstone"),
+    USE_REPEATER("Use repeaters"),
+    USE_COMPARATOR("Use comparators"),
     USE_BUTTONS("Use buttons"),
     USE_PRESSURE_PLATES("Use pressure plates"),
     USE_LEVERS("Use levers"),
@@ -43,6 +47,7 @@ public enum Permission {
     USE_JUKEBOX("Use jukeboxes"),
     USE_NOTEBLOCK("Use note blocks"),
     USE_CAMPFIRE("Use campfires"),
+    USE_SOUL_CAMPFIRE("Use soul campfires"),
     USE_BED("Use beds"),
     INTERACT_ARMOR_STAND("Interact with armor stands"),
     INTERACT_ITEM_FRAME("Interact with item frames"),

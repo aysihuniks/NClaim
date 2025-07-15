@@ -112,7 +112,7 @@ public class CoopPermissionsMenu extends BaseMenu {
             public ItemStack getItem() {
                 String playerName = coopPlayer.isOnline() ? 
                     "&a" + coopPlayer.getName() : 
-                    "&7" + coopPlayer.getName() + getString("offline");
+                    "&7" + coopPlayer.getName() + " " + getString("offline");
 
                 List<String> lore = new ArrayList<>(getStringList("player_info.lore"));
                 lore.replaceAll(s -> s.replace("{date}", 
@@ -149,6 +149,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                             .lore(Arrays.asList(
                                     "",
                                     getString("click_to_view"),
+                                    "",
                                     getString("right_click_toggle")
                             ))
                             .get();
@@ -199,7 +200,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                                     permission.name().toLowerCase() + ".display_name"))
                             .lore(Arrays.asList(
                                     "",
-                                    NClaim.inst().getGuiLangManager().getString(isEnabled ? "enabled" : "disabled")
+                                    NClaim.inst().getGuiLangManager().getString(isEnabled ? "enabled.display_name" : "disabled.display_name")
                             ))
                             .hideFlag(ItemFlag.values())
                             .get();
@@ -238,8 +239,12 @@ public class CoopPermissionsMenu extends BaseMenu {
                 return Material.HOPPER;
             case USE_DISPENSER:
                 return Material.DISPENSER;
-            case USE_REDSTONE:
-                return Material.REDSTONE;
+            case USE_DROPPER:
+                return Material.DROPPER;
+            case USE_REPEATER:
+                return Material.REPEATER;
+            case USE_COMPARATOR:
+                return Material.COMPARATOR;
             case USE_BUTTONS:
                 return Material.STONE_BUTTON;
             case USE_PRESSURE_PLATES:

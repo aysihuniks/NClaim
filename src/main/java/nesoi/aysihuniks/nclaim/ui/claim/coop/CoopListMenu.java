@@ -274,7 +274,7 @@ public class CoopListMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(NClaim.inst().getHeadManager().createHead(coopPlayer))
                         .name(getString(buttonPath + ".display_name")
-                                .replace("{player}", coopPlayer.isOnline() ? "&a" + playerName : "&7" + playerName + " (Offline)"))
+                                .replace("{player}", coopPlayer.isOnline() ? "&a" + playerName : "&7" + playerName + " " + getString("offline")))
                         .lore(lore)
                         .get();
             }

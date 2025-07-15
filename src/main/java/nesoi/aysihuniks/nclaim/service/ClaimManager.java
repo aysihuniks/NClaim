@@ -270,8 +270,16 @@ public class ClaimManager implements Listener {
 
         Material type = block.getType();
 
-        if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
+        if (type == Material.CHEST) {
             if (!coopManager.hasPermission(player, claim, Permission.USE_CHEST)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
+
+        if (type == Material.TRAPPED_CHEST) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_TRAPPED_CHEST)) {
                 event.setCancelled(true);
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                 return;
@@ -302,7 +310,7 @@ public class ClaimManager implements Listener {
             }
         }
 
-        if (type == Material.DISPENSER || type == Material.DROPPER) {
+        if (type == Material.DISPENSER) {
             if (!coopManager.hasPermission(player, claim, Permission.USE_DISPENSER)) {
                 event.setCancelled(true);
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
@@ -310,8 +318,24 @@ public class ClaimManager implements Listener {
             }
         }
 
-        if (type == Material.REPEATER || type == Material.COMPARATOR) {
-            if (!coopManager.hasPermission(player, claim, Permission.USE_REDSTONE)) {
+        if (type == Material.DROPPER) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_DROPPER)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
+
+        if (type == Material.REPEATER) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_REPEATER)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
+
+        if (type == Material.COMPARATOR) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_COMPARATOR)) {
                 event.setCancelled(true);
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                 return;
@@ -470,8 +494,16 @@ public class ClaimManager implements Listener {
             }
         }
 
-        if (type == Material.CAMPFIRE || type == Material.SOUL_CAMPFIRE) {
+        if (type == Material.CAMPFIRE) {
             if (!coopManager.hasPermission(player, claim, Permission.USE_CAMPFIRE)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
+
+        if (type == Material.SOUL_CAMPFIRE) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_SOUL_CAMPFIRE)) {
                 event.setCancelled(true);
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                 return;

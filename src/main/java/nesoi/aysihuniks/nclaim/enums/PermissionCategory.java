@@ -15,10 +15,11 @@ public enum PermissionCategory {
     CONTAINERS("Container Permissions",
             Permission.USE_CHEST, Permission.USE_FURNACE,
             Permission.USE_BARREL, Permission.USE_SHULKER,
-            Permission.USE_HOPPER, Permission.USE_DISPENSER),
+            Permission.USE_HOPPER, Permission.USE_DISPENSER, Permission.USE_DROPPER),
             
     REDSTONE("Redstone Permissions",
-            Permission.USE_REDSTONE, Permission.USE_BUTTONS,
+            Permission.USE_REPEATER,
+            Permission.USE_COMPARATOR, Permission.USE_BUTTONS,
             Permission.USE_PRESSURE_PLATES, Permission.USE_LEVERS),
             
     DOORS("Door Permissions",

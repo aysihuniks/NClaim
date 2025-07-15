@@ -205,6 +205,7 @@ guis:
 
   claim_manage_coop_menu:
     title: "Co-op Members"
+    offline: "&7(Offline)"
     add_coop:
       display_name: "&aAdd Member"
     search_title: "Enter a player name"
