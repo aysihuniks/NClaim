@@ -5,7 +5,7 @@ api-version: '1.16'
 authors: [ aysihuniks ]
 description: Advanced Chunk Claim System
 depend: [PlaceholderAPI]
-softdepend: [Vault, DecentHolograms, FancyHolograms, SkinRestorer, WorldGuard, Farmer]
+softdepend: [Vault, DecentHolograms, FancyHolograms, SkinRestorer, WorldGuard, Farmer, AxSellwands]
 commands:
   nclaim:
     aliases: [ nc, claim ]
@@ -38,6 +38,7 @@ permissions:
       nclaim.bypass.interact: true
       nclaim.bypass.break: true
       nclaim.bypass.place: true
+      nclaim.bypass.axsellwand: true
   nclaim.use:
     default: true
     children:
@@ -89,6 +90,8 @@ permissions:
   nclaim.bypass.break:
     default: false
   nclaim.bypass.place:
+    default: false
+  nclaim.bypass.axsellwand:
     default: false
   nclaim.maxclaim:
     default: false

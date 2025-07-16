@@ -13,6 +13,7 @@ import nesoi.aysihuniks.nclaim.hologram.HologramManager;
 import nesoi.aysihuniks.nclaim.integrations.Expansion;
 import nesoi.aysihuniks.nclaim.integrations.GeikFarmer;
 import nesoi.aysihuniks.nclaim.integrations.Metrics;
+import nesoi.aysihuniks.nclaim.integrations.AxSellWand;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.model.UserManager;
@@ -299,7 +300,15 @@ public final class NClaim extends JavaPlugin {
         setupWorldGuard();
         setupPlaceholderAPI();
         setupVault();
+        setupAxsellwand();
         checkForUpdates();
+    }
+
+    private void setupAxsellwand() {
+        if (getServer().getPluginManager().getPlugin("Axsellwand") != null) {
+            getServer().getPluginManager().registerEvents(new AxSellWand(this), this);
+            Util.log("&aAxsellwand integration enabled successfully!");
+        }
     }
 
     private void setupHologramPlugin() {

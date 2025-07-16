@@ -143,18 +143,28 @@ public class Claim {
         }
 
         // Remove claim from the user's claims list
-        User.getUser(getOwner()).getPlayerClaims().remove(this);
-        User.saveUser(getOwner());
+        User ownerUser = User.getUser(getOwner());
+        if (ownerUser == null) {
+            User.loadUser(getOwner());
+            ownerUser = User.getUser(getOwner());
+        }
+        if (ownerUser != null) {
+            ownerUser.getPlayerClaims().remove(this);
+            User.saveUser(getOwner());
+        }
 
         // Remove claim from coop players
-        getCoopPlayers().stream()
-                .map(Bukkit::getPlayer)
-                .filter(Objects::nonNull)
-                .forEach(player -> {
-                    User user = User.getUser(player.getUniqueId());
-                    user.getCoopClaims().remove(this);
-                    User.saveUser(player.getUniqueId());
-                });
+        getCoopPlayers().forEach(uuid -> {
+            User coopUser = User.getUser(uuid);
+            if (coopUser == null) {
+                User.loadUser(uuid);
+                coopUser = User.getUser(uuid);
+            }
+            if (coopUser != null) {
+                coopUser.getCoopClaims().remove(this);
+                User.saveUser(uuid);
+            }
+        });
 
         // Visual effects
         world.spawnParticle(plugin.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), claimBlock, 1);
@@ -168,23 +178,35 @@ public class Claim {
     }
 
     public void setOwner(@NotNull UUID newOwner) {
-        // Remove an old owner from the user's claims list
-        User.getUser(getOwner()).getPlayerClaims().remove(this);
-        User.saveUser(getOwner());
+        UUID oldOwner = getOwner();
+        User oldOwnerUser = User.getUser(oldOwner);
+        if (oldOwnerUser == null) {
+            User.loadUser(oldOwner);
+            oldOwnerUser = User.getUser(oldOwner);
+        }
 
-        // Set a new claim owner
+        if (oldOwnerUser != null) {
+            oldOwnerUser.getPlayerClaims().remove(this);
+            User.saveUser(oldOwner);
+        }
+
         owner = newOwner;
 
-        // Add a new owner to the user's claims list
-        User.getUser(newOwner).getPlayerClaims().add(this);
-        User.saveUser(newOwner);
+        User newOwnerUser = User.getUser(newOwner);
+        if (newOwnerUser == null) {
+            User.loadUser(newOwner);
+            newOwnerUser = User.getUser(newOwner);
+        }
 
-        // Remove an old owner from coop players
+        if (newOwnerUser != null) {
+            newOwnerUser.getPlayerClaims().add(this);
+            User.saveUser(newOwner);
+        }
+
         getCoopPlayers().remove(newOwner);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
             plugin.getDatabaseManager().saveClaim(this);
         }
     }
-
 }
