@@ -68,51 +68,60 @@ src/
 
 ## 🔐 Permissions
 
-| Permission                         | Description                                                | Default   |
-|-------------------------------------|------------------------------------------------------------|-----------|
-| nclaim.use                         | Access basic plugin features                               | true      |
-| nclaim.help                        | Access help commands                                       | false     |
-| nclaim.balance                     | View claim balance                                         | false     |
-| nclaim.buy                         | Buy new claims                                             | false     |
-| nclaim.level                       | View claim levels and info                                 | false     |
-| nclaim.admin                       | Access all admin commands                                  | op        |
-| nclaim.adminmenu                   | Access admin menu                                          | false     |
-| nclaim.reload                      | Reload plugin configuration                                | false     |
-| nclaim.add                         | Add a new claim                                            | false     |
-| nclaim.remove                      | Remove an existing claim                                   | false     |
-| nclaim.set                         | Set claim parameters                                       | false     |
-| nclaim.change                      | Change plugin settings (language, blockvalue etc.)         | false     |
-| nclaim.bypass.*                    | Access all bypass permissions                              | false     |
-| nclaim.bypass.blacklisted_worlds   | Bypass world blacklist restriction                         | false     |
-| nclaim.bypass.blacklisted_regions  | Bypass region blacklist restriction                        | false     |
-| nclaim.bypass.max_claim_count      | Bypass maximum number of claims limit                      | false     |
-| nclaim.bypass.claim_buy_price      | Bypass claim purchase price                                | false     |
-| nclaim.bypass.land_buy_price       | Bypass land expansion price                                | false     |
-| nclaim.bypass.pvp                  | Bypass PvP restrictions in claims                          | false     |
-| nclaim.bypass.interact             | Bypass interaction restrictions in claims                  | false     |
-| nclaim.bypass.break                | Bypass block break restrictions in claims                  | false     |
-| nclaim.bypass.place                | Bypass block place restrictions in claims                  | false     |
-| nclaim.maxclaim.<amount>           | Set the maximum claim count for a player (permission node) | false     |
-| nclaim.*                           | All plugin permissions                                     | false     |
+> Version column shows the version in which the placeholder was added (e.g. 1.3.1 means added in 1.3.1 and above)
+
+| Permission                         | Description                                                          | Default   | Version |
+|------------------------------------|----------------------------------------------------------------------|-----------|---------|
+| nclaim.help                        | Access help commands                                                 | false     | 1.0     |
+| nclaim.balance                     | View claim balance                                                   | false     | 1.0     |
+| nclaim.buy                         | Buy new claims                                                       | false     | 1.0     |
+| nclaim.admin                       | Access all admin commands                                            | false     | 1.0     |
+| nclaim.reload                      | Reload plugin configuration                                          | false     | 1.0     |
+| nclaim.add                         | Access /nclaim admin add command                                     | false     | 1.0     |
+| nclaim.remove                      | Access /nclaim admin remove command                                  | false     | 1.0     |
+| nclaim.set                         | Access /nclaim admin set command                                     | false     | 1.0     |
+| nclaim.change                      | Change plugin settings (language, blockvalue etc.)                   | false     | 1.0     |
+| nclaim.bypass.*                    | Access all bypass permissions                                        | false     | 1.0     |
+| nclaim.bypass.claim_buy_price      | Bypass claim purchase price                                          | false     | 1.0     |
+| nclaim.bypass.land_buy_price       | Bypass land expansion price                                          | false     | 1.0     |
+| nclaim.bypass.max_claim_count      | Bypass maximum number of claims limit                                | false     | 1.3     |
+| nclaim.adminmenu                   | Access admin menu                                                    | false     | 1.3.1   |
+| nclaim.bypass.blacklisted_worlds   | Bypass world blacklist restriction                                   | false     | 2.0     |
+| nclaim.bypass.blacklisted_regions  | Bypass region blacklist restriction                                  | false     | 2.0     |
+| nclaim.bypass.pvp                  | Bypass PvP restrictions in claims                                    | false     | 2.0     |
+| nclaim.bypass.interact             | Bypass interaction restrictions in claims                            | false     | 2.0     |
+| nclaim.bypass.break                | Bypass block break restrictions in claims                            | false     | 2.0     |
+| nclaim.bypass.place                | Bypass block place restrictions in claims                            | false     | 2.0     |
+| nclaim.maxclaim.<amount>           | Set the maximum claim count for a player (permission node)           | false     | 2.0     |
+| nclaim.use                         | Access basic plugin features (buy a claim, manage claim etc.)        | true      | 2.0     |
+| nclaim.level                       | View claim levels and info                                           | false     | 2.0     |
+| nclaim.*                           | All plugin permissions                                               | op        | 2.0     |
+| nclaim.bypass.max_coop_count       | Bypass maximum number of claim coop player limit                     | false     | 2.1     |
+| nclaim.manage_claim_block          | Access open the claim block manager menu                             | false     | 2.1     |
+| nclaim.maxcoop.<amount>            | Set the maximum claim coop count for a claim owner (permission node) | false     | 2.1     |
+| nclaim.bypass.axsellwand           | Bypass AxSellWand usage restrictions in claims                       | false     | 2.1.4   |
 
 ---
 
 ## 🧩 Placeholders
 
-| Placeholder                                            | Description                                                                                   |
-|--------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `%nclaim_player_balance%`                              | Shows the player's balance (Vault or the plugin's own system)                                 |
-| `%nclaim_get_string_path%`                             | Gets a string value from `config.yml` (`path` = config key)                                   |
-| `%nclaim_get_int_path%`                                | Gets an integer value from `config.yml` (`path` = config key)                                 |
-| `%nclaim_get_boolean_path%`                            | Gets a boolean value from `config.yml` (`path` = config key)                                  |
-| `%nclaim_get_list_path_index%`                         | Gets a list value (by index) from `config.yml` (`path` = key, `index` = position)             |
-| `%nclaim_claim_main_value_world_chunkX_chunkZ%`        | Gets the value of the main claim chunk at given world, X, Z coordinates                       |
-| `%nclaim_claim_total_value_world_chunkX_chunkZ%`       | Gets the total value of all chunks in the claim at given world, X, Z coordinates              |
-| `%nclaim_block_value_material%`                        | Gets the configured value for the specified block material (e.g. `diamond_block`)             |
-| `%nclaim_expiration_world_chunkX_chunkZ%`              | Shows the expiration time for the claim at X, Z chunk in given world                          |
-| `%nclaim_owner_world_chunkX_chunkZ%`                   | Shows the owner of the claim at X, Z chunk in given world                                     |
-| `%nclaim_coop_count_world_chunkX_chunkZ%`              | Shows the co-op member count for the claim at X, Z chunk in given world                       |
-| `%nclaim_total_size_world_chunkX_chunkZ%`              | Shows the total chunk count for the claim at X, Z chunk in given world                        |
+> Version column shows the version in which the placeholder was added (e.g. 2.0 means added in 2.0 and above)
+
+| Placeholder                                            | Description                                                                          | Version              |
+|--------------------------------------------------------|--------------------------------------------------------------------------------------|----------------------|
+| `%nclaim_player_balance%`                              | Shows the player's balance (Vault or the plugin's own system)                        | 1.0                 |
+| `%nclaim_get_string_path%`                             | Gets a string value from `config.yml` (`path` = config key)                          | 1.0                 |
+| `%nclaim_get_int_path%`                                | Gets an integer value from `config.yml` (`path` = config key)                        | 1.0                 |
+| `%nclaim_get_boolean_path%`                            | Gets a boolean value from `config.yml` (`path` = config key)                         | 1.0                 |
+| `%nclaim_get_list_path_index%`                         | Gets a list value (by index) from `config.yml` (`path` = key, `index` = position)    | 1.0                 |
+| `%nclaim_expiration_world_chunkX_chunkZ%`              | Shows the expiration time for the claim at X, Z chunk in given world                 | 1.0                 |
+| `%nclaim_owner_world_chunkX_chunkZ%`                   | Shows the owner of the claim at X, Z chunk in given world                            | 1.0                 |
+| `%nclaim_coop_count_world_chunkX_chunkZ%`              | Shows the co-op member count for the claim at X, Z chunk in given world              | 1.0                 |
+| `%nclaim_total_size_world_chunkX_chunkZ%`              | Shows the total chunk count for the claim at X, Z chunk in given world               | 1.0                 |
+| `%nclaim_claim_main_value_world_chunkX_chunkZ%`        | Gets the block value of the main claim chunk at given world, X, Z coordinates        | 2.0                 |
+| `%nclaim_claim_total_value_world_chunkX_chunkZ%`       | Gets the total value of all chunks in the claim at given world, X, Z coordinates     | 2.0                 |
+| `%nclaim_block_value_material%`                        | Gets the configured value for the specified block material (e.g. `diamond_block`)    | 2.0                 |
+| `%nclaim_owner%`                                       | Shows the claim owner of the chunk where the player is                               | 2.1                 | 
 
 > Replace variables (like `path`, `index`, `world`, `chunkX`, `chunkZ`, `material`) with actual values.  
 > Example: `%nclaim_block_value_diamond_block%` or `%nclaim_get_list_blacklisted_worlds_0%` or `%nclaim_total_size_world_0_0%`
@@ -124,55 +133,63 @@ src/
 Here’s a sample from `config.yml`:
 
 ```yaml
-
+# World Restrictions
+# Configure which worlds and WorldGuard regions are restricted from claiming
 blacklisted_worlds:
-  - world  
-  - spawn   
-  - pvp     
+  - world   # Example: Main world
+  - spawn   # Example: Spawn world
+  - pvp     # Example: PvP arena world
 
 blacklisted_regions:
-  - spawnarea 
+  - spawnarea  # Example: spawn protection area
 
+# Claim Settings
 claim_settings:
-  max_count: 3        
-  buy_price: 1500    
-  expand_price: 2000 
-  max_coop: 3         
-  expiry_days: 7      
+  max_count: 3        # Maximum number of claims per player
+  buy_price: 1500     # Cost to create a new claim
+  expand_price: 2000  # Cost to expand an existing claim by one chunk
+  max_coop_count:     # Maximum number of co-op players per claim
+    default: 3
+    vip: 5
+  # Permissions will be need like this "nclaim.max_coop_count.default"
+  expiry_days: 7      # Days until an inactive claim expires
 
-auto_save: 30
+# Auto-Save Configuration
+auto_save: 30  # How often to save data (in minutes)
 
+# Time Extension Settings
 time_extension:
   price_per_minute: 25.0
   price_per_hour: 1500.0
   price_per_day: 5000.0
   tax_rate: 0.1
 
+# Database Configuration
+# Chooses between MySQL and SQLite for data storage
 database:
-  enable: true
-  type: mysql # or sqlite
+  enable: false  # Set to true to use database storage instead of YAML
+  type: "mysql"  # Options: "mysql" or "sqlite"
+
+  # SQLite Configuration
   sqlite:
-    file: database.db
+    file: database.db  # Database file name
+
+  # MySQL Configuration
   mysql:
     host: localhost
     port: 3306
     database: nclaim
     user: root
-    password: root
-    maximum_pool_size: 10
-    minimum_idle: 2
-    idle_timeout: 60000
-    max_lifetime: 1800000
-    connection_timeout: 30000
+    password: ""       # Replace with your database password
+    maximum_pool_size: 10  # Maximum number of connections in the pool
+    minimum_idle: 5        # Minimum number of idle connections
+    idle_timeout: 300000   # Time (ms) before an idle connection is closed (default: 5 minutes)
+    max_lifetime: 1800000  # Maximum lifetime (ms) of a connection (default: 30 minutes)
+    connection_timeout: 30000  # Time (ms) to wait for a connection (default: 30 seconds)
+
 ```
 
 You can fully customize claim prices, limits, language files, blacklisted worlds, and much more.
-
----
-
-## 🖼️ GUI & User Interface
-
-> NClaim comes with advanced in-game GUIs for both players and admins. Use `/nclaim` and related commands to open interactive menus for managing claims, co-op members, and more.
 
 ---
 
@@ -210,8 +227,6 @@ Here are some screenshots from the plugin:
 ![6](https://github.com/user-attachments/assets/3ac88a5b-df70-4cc4-be00-215d6eadbf3a)
 ![7](https://github.com/user-attachments/assets/7456bb35-bab1-4dda-93d6-b926b8790191)
 ![8](https://github.com/user-attachments/assets/a8770a50-4d63-4d09-a31e-a0d10aed1eec)
-
-
 
 
 **For more details, check the source code or request a special section for your use case!**
