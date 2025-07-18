@@ -142,6 +142,19 @@ public class Claim {
             world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, volume, 1);
         }
 
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            // Only notify and play sound for players in the same world as the claim
+            if (player.getWorld().equals(claimBlock.getWorld())) {
+                double distance = player.getLocation().distance(claimBlock);
+                float volume = (float) Math.max(0.2, 1 - (distance / 16.0));
+                world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, volume, 1);
+
+                ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.expired")
+                        .replace("{x}", String.valueOf(centerX))
+                        .replace("{z}", String.valueOf(centerZ)));
+            }
+        }
+
         // Remove claim from the user's claims list
         User ownerUser = User.getUser(getOwner());
         if (ownerUser == null) {
