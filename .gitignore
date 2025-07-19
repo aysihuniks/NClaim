@@ -1,0 +1,13 @@
+# IntelliJ IDEA project files
+.idea/
+**/*.iml
+
+# Build output folders
+**/out/
+**/target/
+
+# Maven generated files
+**/dependency-reduced-pom.xml
+
+# Don't ignore the .gitignore file itself
+!.gitignore

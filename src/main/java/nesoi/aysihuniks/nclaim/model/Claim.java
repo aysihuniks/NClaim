@@ -95,7 +95,15 @@ public class Claim {
                 .findFirst().orElse(null);
     }
 
+    private volatile boolean isBeingRemoved = false;
+
     public void remove(RemoveCause cause) {
+        if (isBeingRemoved) {
+            return;
+        }
+
+        isBeingRemoved = true;
+
         ClaimRemoveEvent removeEvent = new ClaimRemoveEvent(this, cause);
         Bukkit.getPluginManager().callEvent(removeEvent);
 
