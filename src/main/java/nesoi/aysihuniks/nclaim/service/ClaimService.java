@@ -72,6 +72,11 @@ public class ClaimService {
             return;
         }
 
+        if (!canCreateClaimOrExpandNearOtherClaims(player, chunk)) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
+            return;
+        }
+
         User user = User.getUser(player.getUniqueId());
         double landPrice = plugin.getNconfig().eachLandBuyPrice;
 
@@ -128,6 +133,13 @@ public class ClaimService {
     }
 
     private boolean canCreateClaim(Player player, User user, Chunk chunk) {
+        if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(chunk.getWorld().getName())) {
+            if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.blacklisted_worlds")) {
+                ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
+                return false;
+            }
+        }
+
         if (isInBlacklistedRegion(player.getLocation())) {
             if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.blacklisted_regions")) {
                 ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
@@ -135,8 +147,8 @@ public class ClaimService {
             }
         }
 
-        if (user.getPlayerClaims().size() >= plugin.getNconfig().getMaxClaimCount(player)) {
-            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.max_reached"));
+        if (Claim.getClaim(chunk) != null) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
             return false;
         }
 
@@ -145,15 +157,39 @@ public class ClaimService {
             return false;
         }
 
-        if (Claim.getClaim(chunk) != null) {
-            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.already_claimed"));
+        if (user.getPlayerClaims().size() >= plugin.getNconfig().getMaxClaimCount(player)) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.max_reached"));
             return false;
         }
 
-        if (NClaim.inst().getNconfig().getBlacklistedWorlds().contains(chunk.getWorld().getName())) {
-            if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.blacklisted_worlds")) {
-                ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.in_blacklisted_region_or_world"));
-                return false;
+        if (!canCreateClaimOrExpandNearOtherClaims(player, chunk)) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean canCreateClaimOrExpandNearOtherClaims(Player player, Chunk chunk) {
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        for (int x = chunkX - 1; x <= chunkX + 1; x++) {
+            for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
+                if (x == chunkX && z == chunkZ) {
+                    continue;
+                }
+
+                Chunk nearbyChunk = chunk.getWorld().getChunkAt(x, z);
+                Claim nearbyClaim = Claim.getClaim(nearbyChunk);
+
+                if (nearbyClaim != null) {
+                    // Eğer nearby claim bu oyuncuya ait değilse
+                    if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
+                        ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
+                        return false;
+                    }
+                }
             }
         }
 

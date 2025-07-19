@@ -60,6 +60,7 @@ command:
     failed: "{prefix} &cTaşıma başarısız. Lütfen konsolu kontrol edin."
 
 claim:
+  too_close_to_other_claim: "{prefix} &cBu bölgeye claim oluşturamazsınız! Başka bir oyuncunun claim'ine çok yakınsınız."
   no_owner: "Claim sahibi bulunamadı." # Sahipsiz diye bilinir.
   max_reached: "{prefix} &cMaksimum bölge sınırına ulaştınız."
   not_found: "{prefix} &cHiçbir bölgeniz yok ve hiçbir bölgeye eklenmemişsiniz."
