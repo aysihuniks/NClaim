@@ -7,17 +7,14 @@ import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.utils.LangManager;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.guimanager.Menu;
 import org.nandayo.dapi.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 
@@ -30,55 +27,24 @@ public class LandExpansionMenu extends BaseMenu {
     private final @NotNull Claim claim;
     private final @NotNull Collection<Chunk> allClaimChunks;
     private final boolean admin;
-    private final int height;
-    private final int width;
-    private final int rows;
 
     public LandExpansionMenu(@NotNull Player player, @NotNull Claim claim, boolean admin) {
         super("claim_expand_menu");
         this.claim = claim;
         this.allClaimChunks = claim.getAllChunks();
         this.admin = admin;
-        this.height = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuHeight(), 3));
-        this.width = Math.max(1, Math.min(NClaim.inst().getNconfig().getExpandMenuWidth(), 3));
-        this.rows = Math.min((height * 2 + 1), 6);
         setupMenu();
         displayTo(player);
     }
 
     private void setupMenu() {
-        MenuType menuType;
-        switch (rows) {
-            case 1:
-                menuType = MenuType.CHEST_1_ROW;
-                break;
-            case 2:
-                menuType = MenuType.CHEST_2_ROWS;
-                break;
-            case 3:
-                menuType = MenuType.CHEST_3_ROWS;
-                break;
-            case 4:
-                menuType = MenuType.CHEST_4_ROWS;
-                break;
-            case 5:
-                menuType = MenuType.CHEST_5_ROWS;
-                break;
-            case 6:
-                menuType = MenuType.CHEST_6_ROWS;
-                break;
-            default:
-                menuType = MenuType.CHEST_3_ROWS;
-                break;
-        }
-        createInventory(menuType, getString("title"));
+        createInventory(MenuType.CHEST_5_ROWS, getString("title"));
         setBackgroundButton(BackgroundMenu::getButton);
 
         this.addButton(new Button() {
-
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet((rows * 9 - 1) / 2);
+                return Sets.newHashSet(22);
             }
 
             @Override
@@ -100,23 +66,15 @@ public class LandExpansionMenu extends BaseMenu {
             }
         });
 
-        for (int row = 0; row < rows; row++) {
+        for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 9; col++) {
                 int slot = row * 9 + col;
-                if (slot == (rows * 9 - 1) / 2) continue;
-                if (isWithinRange(row, col)) {
-                    addDirtButton(slot);
-                }
+                if (slot == 22) continue;
+                if (slot == 0 || slot == 9 || slot == 18 || slot == 27 || slot == 36
+                        || slot == 8 || slot == 17 || slot == 26 || slot == 35 || slot == 44) continue;
+                addDirtButton(slot);
             }
         }
-    }
-
-    private boolean isWithinRange(int row, int col) {
-        int centerRow = rows / 2;
-        int centerCol = 4;
-        int deltaX = Math.abs(col - centerCol);
-        int deltaZ = Math.abs(row - centerRow);
-        return deltaX <= width && deltaZ <= height;
     }
 
     private void addDirtButton(int slot) {
@@ -222,7 +180,7 @@ public class LandExpansionMenu extends BaseMenu {
         int chunkX = claim.getChunk().getX();
         int chunkZ = claim.getChunk().getZ();
 
-        int centerRow = rows / 2;
+        int centerRow = 5 / 2;
         int centerCol = 4;
 
         int row = slot / 9;

@@ -33,8 +33,6 @@ public class Config {
     public int claimExpiryDays;
     public int maxCoopPlayers;
     public int maxClaimCount;
-    public int expandMenuHeight;
-    public int expandMenuWidth;
     public List<String> blacklistedWorlds;
     public List<String> blacklistedRegions;
     public int autoSave;
@@ -81,8 +79,6 @@ public class Config {
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
 
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
-        setExpandMenuHeight(config.getInt("claim_settings.expand_menu_height", 2));
-        setExpandMenuWidth(config.getInt("claim_settings.expand_menu_width", 2));
 
         setEnableTieredPricing(config.getBoolean("claim_settings.tiered_pricing.enable", false));
 
@@ -123,8 +119,6 @@ public class Config {
             config.set("claim_settings.expand_price", getEachLandBuyPrice());
             config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
-            config.set("claim_settings.expand_menu_height", getExpandMenuHeight());
-            config.set("claim_settings.expand_menu_width", getExpandMenuWidth());
 
             config.set("claim_settings.tiered_pricing.enable", isEnableTieredPricing());
 
