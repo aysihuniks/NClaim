@@ -20,6 +20,52 @@ claim_settings:
   max_count: 3        # Maximum number of claims per player
   buy_price: 1500     # Cost to create a new claim
   expand_price: 2000  # Cost to expand an existing claim by one chunk
+
+  # TIERED PRICING SYSTEM (Maximum 41 chunks)
+  tiered_pricing:
+    enable: false  # true = Tiered system ON, false = Old system (fixed price)
+
+    # HOW IT WORKS:
+    # Your claim starts with 1 chunk (main chunk)
+    # You can expand up to 41 chunks total
+    # Price increases with each tier
+
+    tiers:
+      # FIRST 5 CHUNKS FREE (2nd-6th chunks)
+      tier1:
+        min: 2          # Starting from the 2nd chunk
+        max: 6          # Up to 6th chunk
+        price: 0        # Free
+        # Total free: 5 chunks
+
+      # EASY LEVEL (7th-15th chunks)
+      tier2:
+        min: 7          # Starting from the 7th chunk
+        max: 15         # Up to 15th chunk
+        price: 500      # 500 coins per chunk
+        # Total: 9 chunks x 500 = 4,500 coins
+
+      # MEDIUM LEVEL (16th-25th chunks)
+      tier3:
+        min: 16         # Starting from the 16th chunk
+        max: 25         # Up to 25th chunk
+        price: 1000     # 1000 coins per chunk
+        # Total: 10 chunks x 1000 = 10,000 coins
+
+      # HARD LEVEL (26th-35th chunks)
+      tier4:
+        min: 26         # Starting from the 26th chunk
+        max: 35         # Up to 35th chunk
+        price: 2500     # 2500 coins per chunk
+        # Total: 10 chunks x 2500 = 25,000 coins
+
+      # EXPERT LEVEL (36th-41st chunks)
+      tier5:
+        min: 36         # Starting from the 36th chunk
+        max: 41         # Up to 41st chunk (MAX)
+        price: 5000     # 5000 coins per chunk
+        # Total: 6 chunks x 5000 = 30,000 coins
+
   max_coop_count:     # Maximum number of co-op players per claim
     default: 3
     vip: 5
@@ -52,7 +98,7 @@ database:
     port: 3306
     database: nclaim
     user: root
-    password: ""       # Replace with your database password
+    password: ""       # Replace it with your database password
     maximum_pool_size: 10  # Maximum number of connections in the pool
     minimum_idle: 5        # Minimum number of idle connections
     idle_timeout: 300000   # Time (ms) before an idle connection is closed (default: 5 minutes)

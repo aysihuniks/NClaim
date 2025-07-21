@@ -78,7 +78,7 @@ public class ClaimService {
         }
 
         User user = User.getUser(player.getUniqueId());
-        double landPrice = plugin.getNconfig().eachLandBuyPrice;
+        double landPrice = calculateLandPrice(claim);
 
         ClaimBuyLandEvent buyLandEvent = new ClaimBuyLandEvent(player, claim, chunk);
         Bukkit.getPluginManager().callEvent(buyLandEvent);
@@ -102,6 +102,17 @@ public class ClaimService {
         }
 
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.expanded"));
+    }
+
+    public double calculateLandPrice(@NotNull Claim claim) {
+        int currentChunkCount = 1 + claim.getLands().size();
+        int nextChunkNumber = currentChunkCount + 1;
+
+        if (nextChunkNumber > 41) {
+            return -1;
+        }
+
+        return plugin.getNconfig().getTieredPrice(nextChunkNumber);
     }
 
     private boolean isAdjacentChunk(Claim claim, Chunk targetChunk) {

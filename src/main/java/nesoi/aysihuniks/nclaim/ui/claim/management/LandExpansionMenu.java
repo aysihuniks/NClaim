@@ -166,7 +166,7 @@ public class LandExpansionMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                double landPrice = NClaim.inst().getNconfig().getEachLandBuyPrice();
+                double landPrice = calculateChunkPrice(thatChunk);
                 String displayName = getString(configPath + ".display_name");
                 List<String> lore = new ArrayList<>(getStringList(configPath + ".lore"));
                 if (configPath.equals("expand")) {
@@ -195,7 +195,7 @@ public class LandExpansionMenu extends BaseMenu {
                             NClaim.inst().getGuiLangManager().getString("confirm_menu.children.claim_expand.display_name"),
                             NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.claim_expand.lore")
                                     .stream()
-                                    .map(s -> s.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getEachLandBuyPrice())))
+                                    .map(s -> s.replace("{price}", String.valueOf(calculateChunkPrice(thatChunk))))
                                     .collect(Collectors.toList()),
                             onFinish);
                 } else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.LIME_WOOL || clickType.isRightClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {
@@ -204,6 +204,13 @@ public class LandExpansionMenu extends BaseMenu {
                 }
             }
         };
+    }
+
+    private double calculateChunkPrice(Chunk targetChunk) {
+        int currentChunkCount = 1 + claim.getLands().size();
+        int nextChunkNumber = currentChunkCount + 1;
+
+        return NClaim.inst().getNconfig().getTieredPrice(nextChunkNumber);
     }
 
     private boolean isAdjacentToClaim(@NotNull Chunk thatChunk) {

@@ -39,6 +39,8 @@ public class Config {
     public List<String> blacklistedRegions;
     public int autoSave;
 
+    private boolean enableTieredPricing;
+
     private boolean databaseEnabled;
     private String databaseType;
     private String sqliteFile;
@@ -82,6 +84,8 @@ public class Config {
         setExpandMenuHeight(config.getInt("claim_settings.expand_menu_height", 2));
         setExpandMenuWidth(config.getInt("claim_settings.expand_menu_width", 2));
 
+        setEnableTieredPricing(config.getBoolean("claim_settings.tiered_pricing.enable", false));
+
         setTimeExtensionPricePerMinute(config.getDouble("time_extension.price_per_minute", 10));
         setTimeExtensionPricePerHour(config.getDouble("time_extension.price_per_hour", 500));
         setTimeExtensionPricePerDay(config.getDouble("time_extension.price_per_day", 10000));
@@ -103,6 +107,8 @@ public class Config {
         setMaxLifetime(config.getLong("database.mysql.max_lifetime", 1800000));
         setConnectionTimeout(config.getLong("database.mysql.connection_timeout", 30000));
 
+        validateTierConfiguration();
+
         return this;
     }
 
@@ -119,6 +125,8 @@ public class Config {
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
             config.set("claim_settings.expand_menu_height", getExpandMenuHeight());
             config.set("claim_settings.expand_menu_width", getExpandMenuWidth());
+
+            config.set("claim_settings.tiered_pricing.enable", isEnableTieredPricing());
 
             config.set("time_extension.price_per_minute", getTimeExtensionPricePerMinute());
             config.set("time_extension.price_per_hour", getTimeExtensionPricePerHour());
@@ -145,6 +153,99 @@ public class Config {
         } catch (Exception e) {
             Util.log("&cFailed to save config.yml! " + e.getMessage());
         }
+    }
+
+    public double getTieredPrice(int chunkNumber) {
+        if (chunkNumber > 41) {
+            return -1;
+        }
+
+        if (!isEnableTieredPricing()) {
+            return getEachLandBuyPrice();
+        }
+
+        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
+            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
+                int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
+                int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
+                double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
+
+                if (minChunk > 41 || maxChunk > 41) {
+                    Util.log("&cWarning: Tier " + tierKey + " has chunk numbers above limit (41). Skipping...");
+                    continue;
+                }
+
+                if (chunkNumber >= minChunk && chunkNumber <= maxChunk) {
+                    return price;
+                }
+            }
+        }
+
+        return getEachLandBuyPrice();
+    }
+
+    public String getTierInfo() {
+        if (!isEnableTieredPricing()) {
+            return "§7Tiered pricing system is disabled. Fixed price: §a$" + String.format("%.2f", getEachLandBuyPrice());
+        }
+
+        StringBuilder info = new StringBuilder("§6=== Tiered Pricing System ===\n");
+
+        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
+            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
+                int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
+                int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
+                double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
+
+                // Skip invalid tiers
+                if (minChunk > 41 || maxChunk > 41) {
+                    info.append("§c").append(tierKey).append(": §cInvalid (exceeds 41 chunk limit)\n");
+                    continue;
+                }
+
+                String priceText = price > 0 ? "$" + String.format("%.0f", price) : "FREE";
+                info.append("§e").append(minChunk).append("-").append(maxChunk)
+                        .append(" chunks: §a").append(priceText).append(" per chunk\n");
+            }
+        }
+
+        return info.toString();
+    }
+
+    public boolean validateTierConfiguration() {
+        if (!isEnableTieredPricing()) {
+            return true;
+        }
+
+        boolean isValid = true;
+
+        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
+            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
+                int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
+                int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
+
+                if (minChunk > 41 || maxChunk > 41) {
+                    Util.log("&cError: Tier " + tierKey + " exceeds maximum chunk limit (41)!");
+                    isValid = false;
+                }
+
+                if (minChunk > maxChunk) {
+                    Util.log("&cError: Tier " + tierKey + " has min (" + minChunk + ") greater than max (" + maxChunk + ")!");
+                    isValid = false;
+                }
+
+                if (minChunk < 1) {
+                    Util.log("&cError: Tier " + tierKey + " has min chunk less than 1!");
+                    isValid = false;
+                }
+            }
+        }
+
+        if (!isValid) {
+            Util.log("&cTiered pricing system has configuration errors. Please fix your config.yml!");
+        }
+
+        return isValid;
     }
 
     public int getMaxCoopPlayers(Player player) {
