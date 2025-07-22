@@ -138,18 +138,6 @@ public class Claim {
         int centerX = getChunk().getX() * 16 + 8;
         int centerZ = getChunk().getZ() * 16 + 8;
 
-        // Notify online players and play effects
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.expired")
-                    .replace("{x}", String.valueOf(centerX))
-                    .replace("{z}", String.valueOf(centerZ)));
-
-            // Calculate and play sound with distance-based volume
-            double distance = player.getLocation().distance(claimBlock);
-            float volume = (float) Math.max(0.2, 1 - (distance / 16.0));
-            world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, volume, 1);
-        }
-
         for (Player player : Bukkit.getOnlinePlayers()) {
             // Only notify and play sound for players in the same world as the claim
             if (player.getWorld().equals(claimBlock.getWorld())) {
