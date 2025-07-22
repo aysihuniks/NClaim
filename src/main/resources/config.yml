@@ -21,13 +21,13 @@ claim_settings:
   buy_price: 1500     # Cost to create a new claim
   expand_price: 2000  # Cost to expand an existing claim by one chunk
 
-  # TIERED PRICING SYSTEM (Maximum 41 chunks)
+  # TIERED PRICING SYSTEM (Maximum 35 chunks)
   tiered_pricing:
     enable: false  # true = Tiered system ON, false = Old system (fixed price)
 
     # HOW IT WORKS:
     # Your claim starts with 1 chunk (main chunk)
-    # You can expand up to 41 chunks total
+    # You can expand up to 35 chunks total
     # Price increases with each tier
 
     tiers:
@@ -58,13 +58,6 @@ claim_settings:
         max: 35         # Up to 35th chunk
         price: 2500     # 2500 coins per chunk
         # Total: 10 chunks x 2500 = 25,000 coins
-
-      # EXPERT LEVEL (36th-41st chunks)
-      tier5:
-        min: 36         # Starting from the 36th chunk
-        max: 41         # Up to 41st chunk (MAX)
-        price: 5000     # 5000 coins per chunk
-        # Total: 6 chunks x 5000 = 30,000 coins
 
   max_coop_count:     # Maximum number of co-op players per claim
     default: 3

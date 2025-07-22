@@ -29,7 +29,6 @@ public class ClaimStorageManager {
 
     public void loadClaims() {
         if (isLoading) {
-            Util.log("&cClaims are already being loaded, skipping duplicate call.");
             return;
         }
 
@@ -46,7 +45,7 @@ public class ClaimStorageManager {
                     claim.setClaimValue(value);
                 }
 
-                Util.log("&eLoaded " + Claim.claims.size() + " claims from database.");
+                Util.log("&aLoaded " + Claim.claims.size() + " claims from database.");
                 return;
             }
 
@@ -67,7 +66,7 @@ public class ClaimStorageManager {
                 }
             }
 
-            Util.log("&eLoaded " + loadedCount + " claims from file.");
+            Util.log("&aLoaded " + loadedCount + " claims from file.");
 
         } finally {
             isLoading = false;
@@ -81,19 +80,25 @@ public class ClaimStorageManager {
                 Util.log("&eSaved " + Claim.claims.size() + " claims to database.");
             } catch (Exception e) {
                 Util.log("&cFailed to save claims to database: " + e.getMessage());
+                e.printStackTrace();
             }
             return;
         }
 
         FileConfiguration config = new YamlConfiguration();
         for (Claim claim : Claim.claims) {
-            saveClaim(config, claim);
+            try {
+                saveClaim(config, claim);
+            } catch (Exception e) {
+                Util.log("&cError saving claim " + claim.getClaimId() + ": " + e.getMessage());
+            }
         }
 
         try {
             File file = new File(plugin.getDataFolder(), "claims.yml");
             config.save(file);
         } catch (Exception e) {
+            Util.log("&cFailed to save claims.yml: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -152,11 +157,10 @@ public class ClaimStorageManager {
                     purchasedBlocks);
 
         } catch (Exception e) {
-            Util.log("&cError loading claim " + claimId + ": " + e.getMessage());
+            Util.log("&c[ERROR] Exception while loading claim " + claimId + ": " + e.getMessage());
             return null;
         }
     }
-
 
     private CoopData loadCoopData(ConfigurationSection coopSection) {
         Collection<UUID> coopPlayers = new ArrayList<>();

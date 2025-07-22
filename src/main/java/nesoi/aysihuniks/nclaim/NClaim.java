@@ -285,6 +285,7 @@ public final class NClaim extends JavaPlugin {
     private void registerEventHandlers() {
         getServer().getPluginManager().registerEvents(new UserManager(), this);
         getServer().getPluginManager().registerEvents(new ClaimManager(this, claimCoopManager), this);
+        getServer().getPluginManager().registerEvents(new WorldLoadHandler(this), this);
     }
 
     private void registerCommands() {
@@ -424,10 +425,6 @@ public final class NClaim extends JavaPlugin {
                 Claim.claims.clear();
                 Claim.claims.addAll(claims);
                 Util.log("&aLoaded " + claims.size() + " claims from database.");
-
-                if (claims.isEmpty()) {
-                    checkForMigrationOpportunity();
-                }
             } catch (Exception e) {
                 Util.log("&cFailed to load from database: " + e.getMessage());
                 claimStorageManager.loadClaims();
@@ -463,19 +460,64 @@ public final class NClaim extends JavaPlugin {
     public void onDisable() {
         stopTasks();
 
-        if (claimStorageManager != null) {
-            claimStorageManager.saveClaims();
+        if (!Claim.claims.isEmpty()) {
+            Util.log("&eUpdating claim values before save...");
+            for (Claim claim : Claim.claims) {
+                long claimValue = blockValueManager.calculateClaimValue(claim);
+                claim.setClaimValue(claimValue);
+            }
         }
 
-        for (Player player : getServer().getOnlinePlayers()) {
-            User.saveUser(player.getUniqueId());
+        if (nconfig.isDatabaseEnabled() && databaseManager != null) {
+            try {
+                databaseManager.saveClaimsBatch(new ArrayList<>(Claim.claims));
+                Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to database.");
+            } catch (Exception e) {
+                Util.log("&cFailed to save claims to database during shutdown: " + e.getMessage());
+                e.printStackTrace();
+
+                if (claimStorageManager != null) {
+                    try {
+                        claimStorageManager.saveClaims();
+                        Util.log("&eFallback: Saved claims to YAML file.");
+                    } catch (Exception yamlError) {
+                        Util.log("&cFallback YAML save also failed: " + yamlError.getMessage());
+                        yamlError.printStackTrace();
+                    }
+                }
+            }
+        } else if (claimStorageManager != null) {
+            try {
+                claimStorageManager.saveClaims();
+                Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to YAML file.");
+            } catch (Exception e) {
+                Util.log("&cFailed to save claims to YAML during shutdown: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
-        if (mySQLManager != null) {
-            mySQLManager.close();
+        try {
+            int userCount = 0;
+            for (Player player : getServer().getOnlinePlayers()) {
+                User.saveUser(player.getUniqueId());
+                userCount++;
+            }
+            if (userCount > 0) {
+                Util.log("&eSaved " + userCount + " user data.");
+            }
+        } catch (Exception e) {
+            Util.log("&cError saving user data: " + e.getMessage());
         }
-        if (sqLiteManager != null) {
-            sqLiteManager.close();
+
+        try {
+            if (mySQLManager != null) {
+                mySQLManager.close();
+            }
+            if (sqLiteManager != null) {
+                sqLiteManager.close();
+            }
+        } catch (Exception e) {
+            Util.log("&cError closing database connections: " + e.getMessage());
         }
 
         instance = null;

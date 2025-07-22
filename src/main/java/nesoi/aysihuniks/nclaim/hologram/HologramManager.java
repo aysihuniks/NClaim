@@ -7,12 +7,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.nandayo.dapi.HexUtil;
 import org.nandayo.dapi.Util;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,19 +27,16 @@ public class HologramManager {
     private static final double DECENT_HOLO_OFFSET = 3;
     private static final double FANCY_HOLO_OFFSET = 1.5;
     private HologramHandler hologramHandler;
+    private final Set<String> pendingWorlds = new HashSet<>();
+    private boolean initialCleanupDone = false;
 
     private static final Pattern HOLOGRAM_ID_PATTERN = Pattern.compile("claim_(.+)_(-?\\d+)_(-?\\d+)");
 
     public HologramManager(NClaim plugin) {
         this.plugin = plugin;
         initializeHologramHandler();
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                cleanupOrphanedHolograms();
-            }
-        }.runTaskLater(plugin, 20L * 3);
+        identifyPendingWorlds();
+        scheduleInitialCleanup();
     }
 
     private void initializeHologramHandler() {
@@ -46,25 +49,72 @@ public class HologramManager {
         }
     }
 
-    public void cleanupOrphanedHolograms() {
-        Util.log("&eStarting orphaned hologram cleanup... ");
+    private void identifyPendingWorlds() {
+        if (plugin.getNconfig().isDatabaseEnabled()) return;
 
-        List<String> allHologramIds = hologramHandler.getHologramIds();
-        int removedCount = 0;
+        File file = new File(plugin.getDataFolder(), "claims.yml");
+        if (!file.exists()) return;
 
-        for (String hologramId : allHologramIds) {
-            if (!hologramId.startsWith("claim_")) {
-                continue;
+        try {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+            ConfigurationSection section = config.getConfigurationSection("chunks_claimed");
+            if (section == null) return;
+
+            for (String claimId : section.getKeys(false)) {
+                String[] parts = claimId.split("_");
+                if (parts.length == 3) {
+                    String worldName = parts[0];
+                    if (Bukkit.getWorld(worldName) == null) {
+                        pendingWorlds.add(worldName);
+                    }
+                }
             }
 
+            if (!pendingWorlds.isEmpty()) {
+                Util.log("&eWaiting for " + pendingWorlds.size() + " worlds to load: " + pendingWorlds);
+            }
+
+        } catch (Exception e) {
+            Util.log("&cError identifying pending worlds: " + e.getMessage());
+        }
+    }
+
+    private void scheduleInitialCleanup() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                smartCleanupOrphanedHolograms();
+                initialCleanupDone = true;
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        validateAndRecreateHolograms();
+                    }
+                }.runTaskLater(plugin, 60L);
+            }
+        }.runTaskLater(plugin, 20L * 8);
+    }
+
+
+    public void smartCleanupOrphanedHolograms() {
+        List<String> allHologramIds = hologramHandler.getHologramIds();
+        int removedCount = 0;
+        int protectedCount = 0;
+
+        for (String hologramId : allHologramIds) {
+            if (!hologramId.startsWith("claim_")) continue;
+
             ChunkInfo chunkInfo = parseHologramId(hologramId);
-            if (chunkInfo == null) {
+            if (chunkInfo == null) continue;
+
+            if (pendingWorlds.contains(chunkInfo.worldName)) {
+                protectedCount++;
                 continue;
             }
 
             World world = Bukkit.getWorld(chunkInfo.worldName);
             if (world == null) {
-                Util.log("&cWorld not found, removing hologram: &f" + hologramId);
                 hologramHandler.deleteHologram(hologramId);
                 removedCount++;
                 continue;
@@ -74,36 +124,97 @@ public class HologramManager {
             Claim claim = Claim.getClaim(chunk);
 
             if (claim == null) {
-                Util.log("&aClaim not found, removing hologram: &f" + hologramId);
                 hologramHandler.deleteHologram(hologramId);
                 removedCount++;
             }
         }
 
-        Util.log("&aOrphaned hologram cleanup completed. Removed &f" + removedCount + " &aholograms.");
+        if (removedCount > 0 || protectedCount > 0) {
+            Util.log("&aHologram cleanup completed. Removed: " + removedCount + " | Protected: " + protectedCount);
+        }
     }
 
-    private ChunkInfo parseHologramId(String hologramId) {
-        Matcher matcher = HOLOGRAM_ID_PATTERN.matcher(hologramId);
-        if (!matcher.matches()) {
-            return null;
+    public void onWorldLoaded(String worldName) {
+        if (!pendingWorlds.contains(worldName)) return;
+
+        Util.log("&aPending world '" + worldName + "' loaded! Checking holograms...");
+        pendingWorlds.remove(worldName);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                createHologramsForWorld(worldName);
+            }
+        }.runTaskLater(plugin, 10L);
+    }
+
+    public void createHologramsForWorld(String worldName) {
+        World world = Bukkit.getWorld(worldName);
+        if (world == null) return;
+
+        int created = 0;
+        for (Claim claim : Claim.claims) {
+            if (claim.getChunk().getWorld().getName().equals(worldName)) {
+                String hologramId = getHologramId(claim.getChunk());
+
+                if (!hologramExists(hologramId)) {
+                    createHologramForClaim(claim);
+                    created++;
+                }
+            }
         }
 
-        try {
-            String worldName = matcher.group(1);
-            int x = Integer.parseInt(matcher.group(2));
-            int z = Integer.parseInt(matcher.group(3));
-            return new ChunkInfo(worldName, x, z);
-        } catch (NumberFormatException e) {
-            return null;
+        if (created > 0) {
+            Util.log("&aCreated " + created + " holograms for world '" + worldName + "'");
         }
+    }
+
+    public void validateAndRecreateHolograms() {
+        if (!initialCleanupDone) return;
+
+        int created = 0;
+        for (Claim claim : Claim.claims) {
+            String hologramId = getHologramId(claim.getChunk());
+
+            if (!hologramExists(hologramId)) {
+                createHologramForClaim(claim);
+                created++;
+            }
+        }
+
+        if (created > 0) {
+            Util.log("&aRecreated " + created + " missing holograms.");
+        }
+    }
+
+    public boolean hologramExists(String hologramId) {
+        return hologramHandler.getHologramIds().contains(hologramId);
+    }
+
+    public void createHologramForClaim(Claim claim) {
+        if (claim == null) return;
+
+        Location location = claim.getClaimBlockLocation();
+        if (location == null || location.getWorld() == null) return;
+
+        String hologramId = getHologramId(claim.getChunk());
+        hologramHandler.deleteHologram(hologramId); // Önce sil
+
+        List<String> lines = generateHologramLines(claim);
+        Location adjustedLocation = getAdjustedLocation(location.clone());
+
+        hologramHandler.createHologram(hologramId, adjustedLocation, lines);
+    }
+
+    public void cleanupOrphanedHolograms() {
+        smartCleanupOrphanedHolograms();
     }
 
     public void forceCleanup() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                cleanupOrphanedHolograms();
+                smartCleanupOrphanedHolograms();
             }
         }.runTaskAsynchronously(plugin);
     }
@@ -160,6 +271,24 @@ public class HologramManager {
         return lines.stream()
                 .map(HexUtil::parse)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private ChunkInfo parseHologramId(String hologramId) {
+        Matcher matcher = HOLOGRAM_ID_PATTERN.matcher(hologramId);
+        if (!matcher.matches()) return null;
+
+        try {
+            String worldName = matcher.group(1);
+            int x = Integer.parseInt(matcher.group(2));
+            int z = Integer.parseInt(matcher.group(3));
+            return new ChunkInfo(worldName, x, z);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public Set<String> getPendingWorlds() {
+        return new HashSet<>(pendingWorlds);
     }
 
     private static class ChunkInfo {
