@@ -425,6 +425,11 @@ public final class NClaim extends JavaPlugin {
                 Claim.claims.clear();
                 Claim.claims.addAll(claims);
                 Util.log("&aLoaded " + claims.size() + " claims from database.");
+
+                if (claims.isEmpty()) {
+                    checkForMigrationOpportunity();
+                }
+
             } catch (Exception e) {
                 Util.log("&cFailed to load from database: " + e.getMessage());
                 claimStorageManager.loadClaims();
@@ -641,7 +646,6 @@ public final class NClaim extends JavaPlugin {
         if (hasClaimData || hasUserData) {
             String dbType = nconfig.getDatabaseType().toUpperCase();
             Util.log("&eEmpty " + dbType + " database detected but YAML data exists.");
-            Util.log("&eYou can use '/nclaim migrate' command to migrate your data to database.");
         }
     }
 
