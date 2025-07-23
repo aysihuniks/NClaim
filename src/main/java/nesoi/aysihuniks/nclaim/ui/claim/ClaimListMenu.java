@@ -154,6 +154,7 @@ public class ClaimListMenu extends BaseMenu {
     }
 
     private List<Claim> getClaimsToShow() {
+        User.loadUser(player.getUniqueId()); // Force reload
         User user = User.getUser(player.getUniqueId());
         List<Claim> claims = new ArrayList<>();
         
