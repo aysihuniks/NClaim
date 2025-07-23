@@ -72,7 +72,7 @@ public class ClaimService {
             return;
         }
 
-        if (!canCreateClaimOrExpandNearOtherClaims(player, chunk)) {
+        if (!canClaimOrExpandNearOthers(player, chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
             return;
         }
@@ -173,7 +173,7 @@ public class ClaimService {
             return false;
         }
 
-        if (!canCreateClaimOrExpandNearOtherClaims(player, chunk)) {
+        if (!canClaimOrExpandNearOthers(player, chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
             return false;
         }
@@ -181,7 +181,7 @@ public class ClaimService {
         return true;
     }
 
-    private boolean canCreateClaimOrExpandNearOtherClaims(Player player, Chunk chunk) {
+    private boolean canClaimOrExpandNearOthers(Player player, Chunk chunk) {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
@@ -195,7 +195,6 @@ public class ClaimService {
                 Claim nearbyClaim = Claim.getClaim(nearbyChunk);
 
                 if (nearbyClaim != null) {
-                    // Eğer nearby claim bu oyuncuya ait değilse
                     if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
                         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
                         return false;

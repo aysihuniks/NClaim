@@ -14,7 +14,6 @@ import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
@@ -28,9 +27,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.Tag;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.nandayo.dapi.message.ChannelType;
+import org.nandayo.dapi.object.DEntityType;
 
 import java.util.*;
 
@@ -154,9 +153,10 @@ public class ClaimManager implements Listener {
         Location explodeLocation = event.getLocation();
         Claim explodeClaim = Claim.getClaim(explodeLocation.getChunk());
 
-        boolean isTNT = event.getEntityType() == EntityType.TNT ||
-                event.getEntityType() == EntityType.TNT_MINECART;
-        boolean isCreeper = event.getEntityType() == EntityType.CREEPER;
+        Entity explodingEntity = event.getEntity();
+
+        boolean isTNT = explodingEntity.getType() == NClaim.getEntityType(DEntityType.TNT, DEntityType.PRIMED_TNT) || explodingEntity.getType() == NClaim.getEntityType(DEntityType.MINECART_TNT, DEntityType.TNT_MINECART);
+        boolean isCreeper = explodingEntity.getType() == EntityType.CREEPER;
 
         List<Block> blocksToRemove = new ArrayList<>();
 
@@ -183,6 +183,23 @@ public class ClaimManager implements Listener {
         }
     }
 
+    @EventHandler
+    public void onCreatureSpawn(CreatureSpawnEvent event) {
+        Claim claim = Claim.getClaim(event.getLocation().getChunk());
+        if (claim == null) return;
+
+        if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL) {
+            if (event.getEntity() instanceof Monster) {
+                if (!plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MONSTER_SPAWNING)) {
+                    event.setCancelled(true);
+                }
+            } else {
+                if (!plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.ANIMAL_SPAWNING)) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockBreak(BlockBreakEvent event) {

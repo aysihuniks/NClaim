@@ -30,12 +30,10 @@ public class ClaimBlockManager {
         ConfigurationSection section = config.getConfigurationSection("claim_blocks");
         if (section != null) {
             for (String key : section.getKeys(false)) {
-                String materialKey = key.endsWith("_BLOCK") ? key : key + "_BLOCK";
-                Material mat = Material.matchMaterial(materialKey);
+                Material mat = Material.matchMaterial(key);
 
                 if (mat == null || !mat.isBlock()) {
                     Util.log("Invalid claim block material in config: " + key);
-                    Util.log("Material names must end with '_BLOCK' and be valid block materials!");
                     continue;
                 }
 

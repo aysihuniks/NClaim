@@ -22,6 +22,7 @@ import nesoi.aysihuniks.nclaim.utils.*;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.DAPI;
 import org.nandayo.dapi.HexUtil;
 import org.nandayo.dapi.Util;
+import org.nandayo.dapi.object.DEntityType;
 import org.nandayo.dapi.object.DMaterial;
 import org.nandayo.dapi.object.DParticle;
 import org.nandayo.dapi.object.DSound;
@@ -546,6 +548,11 @@ public final class NClaim extends JavaPlugin {
     public static Sound getSound(@NotNull DSound dSound, @NotNull DSound def) {
         Sound sound = dSound.parseSound();
         return sound != null ? sound : def.parseSound();
+    }
+
+    public static EntityType getEntityType(@NotNull DEntityType dEntityType, DEntityType def) {
+        EntityType entityType = dEntityType.get();
+        return entityType != null ? entityType : def.get();
     }
 
     static public String serializeDate(Date date) {

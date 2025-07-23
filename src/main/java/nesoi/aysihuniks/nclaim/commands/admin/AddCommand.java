@@ -88,7 +88,7 @@ public class AddCommand extends BaseCommand {
             }
 
             if (NClaim.inst().getBalanceSystem() == Balance.VAULT) {
-                NClaim.inst().getEconomy().depositPlayer(targetName, amount);
+                NClaim.inst().getEconomy().withdrawPlayer(targetPlayer, amount);
                 ChannelType.CHAT.send(targetPlayer, NClaim.inst().getLangManager().getString("command.add.target_added").replace("{amount}", String.valueOf(amount)).replace("{balance}", String.valueOf(NClaim.inst().getEconomy().getBalance(targetPlayer))));
                 ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.add.player_added").replace("{amount}", String.valueOf(amount)).replace("{target}", targetName));
             } else {
