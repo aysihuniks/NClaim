@@ -183,6 +183,43 @@ public class ClaimManager implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onMobAttackPlayer(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+
+        Entity damager = event.getDamager();
+        if (!(damager instanceof Monster)) return;
+
+        Player player = (Player) event.getEntity();
+        Claim claim = Claim.getClaim(player.getLocation().getChunk());
+        if (claim == null) return;
+
+        boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
+
+        if (!mobAttackingEnabled && !claim.getOwner().equals(player.getUniqueId()) && !claim.getCoopPlayers().contains(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerAttackMob(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Monster)) return;
+        if (!(event.getDamager() instanceof Player)) return;
+
+        Player damager = (Player) event.getDamager();
+
+        if (damager.hasPermission("nclaim.bypass.*") || damager.hasPermission("nclaim.bypass.mob_attacking")) return;
+
+        Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+        if (claim == null) return;
+
+        boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
+
+        if (!mobAttackingEnabled && !claim.getOwner().equals(damager.getUniqueId()) && !claim.getCoopPlayers().contains(damager.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         Claim claim = Claim.getClaim(event.getLocation().getChunk());
