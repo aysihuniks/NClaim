@@ -17,11 +17,13 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nandayo.dapi.ItemCreator;
-import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CoopPermissionsMenu extends BaseMenu {
@@ -36,21 +38,6 @@ public class CoopPermissionsMenu extends BaseMenu {
             37, 38, 39, 40, 41, 42, 43
     };
 
-    private static final Map<PermissionCategory, Material> CATEGORY_ICONS;
-    static {
-        Map<PermissionCategory, Material> map = new HashMap<>();
-        map.put(PermissionCategory.BLOCKS, Material.GRASS_BLOCK);
-        map.put(PermissionCategory.CONTAINERS, Material.CHEST);
-        map.put(PermissionCategory.REDSTONE, Material.REDSTONE);
-        map.put(PermissionCategory.DOORS, Material.OAK_DOOR);
-        map.put(PermissionCategory.WORKSTATIONS, Material.CRAFTING_TABLE);
-        map.put(PermissionCategory.INTERACTIONS, Material.LEVER);
-        map.put(PermissionCategory.LIQUIDS, Material.WATER_BUCKET);
-        map.put(PermissionCategory.ENTITIES, Material.VILLAGER_SPAWN_EGG);
-        CATEGORY_ICONS = Collections.unmodifiableMap(map);
-    }
-
-
     public CoopPermissionsMenu(@NotNull Player player, @Nullable OfflinePlayer coopPlayer, @NotNull Claim claim, boolean admin, @Nullable PermissionCategory category) {
         super("manage_coop_player_permission_menu");
         this.coopPlayer = coopPlayer;
@@ -62,9 +49,26 @@ public class CoopPermissionsMenu extends BaseMenu {
         displayTo(player);
     }
 
+    private void loadCategoryIcons() {
+        for (PermissionCategory category : PermissionCategory.values()) {
+            CATEGORY_ICONS.put(
+                    category,
+                    getMaterial("categories." + category.name().toLowerCase())
+            );
+        }
+    }
+
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
+    private final Map<PermissionCategory, ItemStack> CATEGORY_ICONS = new EnumMap<>(PermissionCategory.class);
+
     private void setupMenu() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer.getName()));
-        setBackgroundButton(BackgroundMenu::getButton);
+
+        loadCategoryIcons();
 
         addBackButton();
         addPlayerInfoButton();
@@ -84,7 +88,7 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(currentCategory == null ? Material.OAK_DOOR : Material.FEATHER)
+                return ItemCreator.of(currentCategory == null ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
                         .name(NClaim.inst().getGuiLangManager().getString((currentCategory == null ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
@@ -110,13 +114,13 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                String playerName = coopPlayer.isOnline() ? 
-                    "&a" + coopPlayer.getName() : 
-                    "&7" + coopPlayer.getName() + " " + getString("offline");
+                String playerName = coopPlayer.isOnline() ?
+                        "&a" + coopPlayer.getName() :
+                        "&7" + coopPlayer.getName() + " " + getString("offline");
 
                 List<String> lore = new ArrayList<>(getStringList("player_info.lore"));
-                lore.replaceAll(s -> s.replace("{date}", 
-                    NClaim.serializeDate(claim.getCoopPlayerJoinDate().get(coopPlayer.getUniqueId()))));
+                lore.replaceAll(s -> s.replace("{date}",
+                        NClaim.serializeDate(claim.getCoopPlayerJoinDate().get(coopPlayer.getUniqueId()))));
 
                 return ItemCreator.of(NClaim.inst().getHeadManager().createHead(coopPlayer))
                         .name(getString("player_info.display_name").replace("{player}", playerName))
@@ -144,8 +148,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 @Override
                 public ItemStack getItem() {
                     return ItemCreator.of(CATEGORY_ICONS.get(category))
-                            .name(getString("categories." +
-                                    category.name().toLowerCase() + ".display_name"))
+                            .name(getString("categories." + category.name().toLowerCase() + ".display_name"))
                             .lore(Arrays.asList(
                                     "",
                                     getString("click_to_view"),
@@ -168,7 +171,6 @@ public class CoopPermissionsMenu extends BaseMenu {
             });
         }
     }
-
 
     private void addPermissionButtons() {
         if (currentCategory == null) return;
@@ -202,7 +204,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                                     "",
                                     NClaim.inst().getGuiLangManager().getString(isEnabled ? "enabled.display_name" : "disabled.display_name")
                             ))
-                            .hideFlag(ItemFlag.values())
+                            .flags(ItemFlag.values())
                             .get();
                 }
 
@@ -217,95 +219,96 @@ public class CoopPermissionsMenu extends BaseMenu {
         }
     }
 
-
-    private Material getPermissionIcon(Permission permission) {
+    private ItemStack getPermissionIcon(Permission permission) {
         switch (permission) {
             case BREAK_BLOCKS:
-                return Material.DIAMOND_PICKAXE;
+                return getMaterial("permissions.break_blocks");
             case BREAK_SPAWNER:
+                return getMaterial("permissions.break_spawner");
             case PLACE_SPAWNER:
-                return Material.SPAWNER;
+                return getMaterial("permissions.place_spawner");
             case PLACE_BLOCKS:
-                return Material.GRASS_BLOCK;
+                return getMaterial("permissions.place_blocks");
             case USE_CHEST:
-                return Material.CHEST;
+                return getMaterial("permissions.use_chest");
             case USE_FURNACE:
-                return Material.FURNACE;
+                return getMaterial("permissions.use_furnace");
             case USE_BARREL:
-                return Material.BARREL;
+                return getMaterial("permissions.use_barrel");
             case USE_SHULKER:
-                return Material.SHULKER_BOX;
+                return getMaterial("permissions.use_shulker");
             case USE_HOPPER:
-                return Material.HOPPER;
+                return getMaterial("permissions.use_hopper");
             case USE_DISPENSER:
-                return Material.DISPENSER;
+                return getMaterial("permissions.use_dispenser");
             case USE_DROPPER:
-                return Material.DROPPER;
+                return getMaterial("permissions.use_dropper");
             case USE_REPEATER:
-                return Material.REPEATER;
+                return getMaterial("permissions.use_repeater");
             case USE_COMPARATOR:
-                return Material.COMPARATOR;
+                return getMaterial("permissions.use_comparator");
             case USE_BUTTONS:
-                return Material.STONE_BUTTON;
+                return getMaterial("permissions.use_buttons");
             case USE_PRESSURE_PLATES:
-                return Material.STONE_PRESSURE_PLATE;
+                return getMaterial("permissions.use_pressure_plates");
             case USE_LEVERS:
-                return Material.LEVER;
+                return getMaterial("permissions.use_levers");
             case USE_DOORS:
-                return Material.OAK_DOOR;
+                return getMaterial("permissions.use_doors");
             case USE_TRAPDOORS:
-                return Material.OAK_TRAPDOOR;
+                return getMaterial("permissions.use_trapdoors");
             case USE_GATES:
-                return Material.OAK_FENCE_GATE;
+                return getMaterial("permissions.use_gates");
             case USE_CRAFTING:
-                return Material.CRAFTING_TABLE;
+                return getMaterial("permissions.use_crafting");
             case USE_ENCHANTING:
-                return Material.ENCHANTING_TABLE;
+                return getMaterial("permissions.use_enchanting");
             case USE_ANVIL:
-                return Material.ANVIL;
+                return getMaterial("permissions.use_anvil");
             case USE_GRINDSTONE:
-                return Material.GRINDSTONE;
+                return getMaterial("permissions.use_grindstone");
             case USE_STONECUTTER:
-                return Material.STONECUTTER;
+                return getMaterial("permissions.use_stonecutter");
             case USE_LOOM:
-                return Material.LOOM;
+                return getMaterial("permissions.use_loom");
             case USE_SMITHING:
-                return Material.SMITHING_TABLE;
+                return getMaterial("permissions.use_smithing");
             case USE_CARTOGRAPHY:
-                return Material.CARTOGRAPHY_TABLE;
+                return getMaterial("permissions.use_cartographhy");
             case USE_BREWING:
-                return Material.BREWING_STAND;
+                return getMaterial("permissions.use_brewing");
             case USE_BELL:
-                return Material.BELL;
+                return getMaterial("permissions.use_bell");
             case USE_BEACON:
-                return Material.BEACON;
+                return getMaterial("permissions.use_beacon");
             case USE_JUKEBOX:
-                return Material.JUKEBOX;
+                return getMaterial("permissions.use_jukebox");
             case USE_NOTEBLOCK:
-                return Material.NOTE_BLOCK;
+                return getMaterial("permissions.use_noteblock");
             case USE_CAMPFIRE:
-                return Material.CAMPFIRE;
+                return getMaterial("permissions.use_campfire");
             case USE_BED:
-                return Material.RED_BED;
+                return getMaterial("permissions.use_bed");
             case INTERACT_ARMOR_STAND:
-                return Material.ARMOR_STAND;
+                return getMaterial("permissions.interact_armor_stand");
             case INTERACT_ITEM_FRAME:
-                return Material.ITEM_FRAME;
+                return getMaterial("permissions.interact_item_frame");
             case PLACE_WATER:
-                return Material.WATER_BUCKET;
+                return getMaterial("permissions.place_water");
             case PLACE_LAVA:
-                return Material.LAVA_BUCKET;
+                return getMaterial("permissions.place_lava");
             case TAKE_WATER:
+                return getMaterial("permissions.take_water");
             case TAKE_LAVA:
-                return Material.BUCKET;
+                return getMaterial("permissions.take_lava");
             case INTERACT_VILLAGER:
-                return Material.EMERALD;
+                return getMaterial("permissions.interact_villager");
             case LEASH_MOBS:
-                return Material.LEAD;
+                return getMaterial("permissions.leash_mobs");
             case RIDE_ENTITIES:
-                return Material.SADDLE;
+                return getMaterial("permissions.ride_entities");
             default:
-                return Material.BARRIER;
+                return new ItemStack(Material.BARRIER);
         }
     }
 
@@ -318,10 +321,10 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.GOLDEN_HELMET)
+                return ItemCreator.of(getMaterial("transfer"))
                         .name(getString("transfer.display_name"))
                         .lore(getStringList("transfer.lore").stream().map(line -> line.replace("{player}", coopPlayer.getName())).collect(Collectors.toList()))
-                        .hideFlag(ItemFlag.HIDE_ATTRIBUTES)
+                        .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .get();
             }
 
@@ -361,7 +364,7 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.BARRIER)
+                return ItemCreator.of(getMaterial("kick"))
                         .name(getString("kick.display_name"))
                         .lore(getStringList("kick.lore"))
                         .get();

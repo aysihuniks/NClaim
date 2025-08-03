@@ -2,27 +2,28 @@ package nesoi.aysihuniks.nclaim.ui.claim;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminDashboardMenu;
 import nesoi.aysihuniks.nclaim.model.User;
-import nesoi.aysihuniks.nclaim.utils.HeadManager;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.util.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ClaimMainMenu extends BaseMenu {
@@ -35,13 +36,17 @@ public class ClaimMainMenu extends BaseMenu {
 
     private void setupMenu(Player player) {
         createInventory(MenuType.CHEST_3_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
         addBuyClaimButton();
         addManageClaimsButton();
         
         if (player.hasPermission("nclaim.admin")) {
             addAdminButton();
         }
+    }
+
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
     }
 
     private void addBuyClaimButton() {
@@ -59,7 +64,7 @@ public class ClaimMainMenu extends BaseMenu {
                 List<String> lore = getStringList("buy_claim.lore");
                 lore.replaceAll(l -> l.replace("{price}", String.valueOf(NClaim.inst().getNconfig().getClaimBuyPrice())));
                 
-                return ItemCreator.of(Material.EMERALD)
+                return ItemCreator.of(getMaterial("buy_claim"))
                         .name(getString("buy_claim.display_name"))
                         .lore(lore)
                         .get();
@@ -105,7 +110,7 @@ public class ClaimMainMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.CHEST)
+                return ItemCreator.of(getMaterial("manage_claims"))
                         .name(getString("manage_claims.display_name"))
                         .lore(getStringList("manage_claims.lore"))
                         .get();
@@ -138,7 +143,7 @@ public class ClaimMainMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.COMMAND_BLOCK)
+                return ItemCreator.of(getMaterial("admin"))
                         .name(getString("admin.display_name"))
                         .lore(getStringList("admin.lore"))
                         .get();
@@ -146,7 +151,7 @@ public class ClaimMainMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                new AdminDashboardMenu(player);
+                new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
             }
         });
     }

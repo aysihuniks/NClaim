@@ -19,9 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.DAPI;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +38,7 @@ public class HeadManager {
     private static final long COOLDOWN_MS = 3600 * 1000;
 
     public HeadManager() {
-        version = DAPI.getInstance().getWrapper().getMinecraftVersion();
+        version = NClaim.inst().getWrapper().getVersion();
         skinsRestorer = getSkinsRestorerInstance();
         skinRestorerHooked = skinsRestorer != null;
         headProvider = skinRestorerHooked ? HeadProvider.SKINRESTORER : HeadProvider.NBTAPI;

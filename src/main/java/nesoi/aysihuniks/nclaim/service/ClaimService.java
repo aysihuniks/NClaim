@@ -21,8 +21,8 @@ import org.bukkit.entity.Player;
 import net.milkbowl.vault.economy.Economy;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.Util;
 import org.nandayo.dapi.message.ChannelType;
+import org.nandayo.dapi.util.Util;
 
 import java.util.*;
 
@@ -253,7 +253,9 @@ public class ClaimService {
             return;
         }
 
-        plugin.getHologramManager().createHologram(claimBlockLocation);
+        if (plugin.getHologramManager() != null) {
+            plugin.getHologramManager().createHologram(claimBlockLocation);
+        }
         User.getUser(player.getUniqueId()).getPlayerClaims().add(claim);
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.received"));
     }

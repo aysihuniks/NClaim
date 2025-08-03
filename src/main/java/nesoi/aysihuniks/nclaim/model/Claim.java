@@ -115,13 +115,11 @@ public class Claim {
             return;
         }
 
-        // Cache locations and objects to prevent multiple calls
         World world = getChunk().getWorld();
         Location claimBlock = getClaimBlockLocation();
 
         claimBlock.getBlock().setType(Material.AIR);
 
-        // Remove hologram
         String hologramId = "claim_" + world.getName() + "_" + getChunk().getX() + "_" + getChunk().getZ();
 
         if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
@@ -134,12 +132,10 @@ public class Claim {
             manager.getHologram(hologramId).ifPresent(manager::removeHologram);
         }
 
-        // Calculate center of chunk
         int centerX = getChunk().getX() * 16 + 8;
         int centerZ = getChunk().getZ() * 16 + 8;
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            // Only notify and play sound for players in the same world as the claim
             if (player.getWorld().equals(claimBlock.getWorld())) {
                 double distance = player.getLocation().distance(claimBlock);
                 float volume = (float) Math.max(0.2, 1 - (distance / 16.0));
@@ -151,7 +147,6 @@ public class Claim {
             }
         }
 
-        // Remove claim from the user's claims list
         User ownerUser = User.getUser(getOwner());
         if (ownerUser == null) {
             User.loadUser(getOwner());
@@ -162,7 +157,6 @@ public class Claim {
             User.saveUser(getOwner());
         }
 
-        // Remove claim from coop players
         getCoopPlayers().forEach(uuid -> {
             User coopUser = User.getUser(uuid);
             if (coopUser == null) {
@@ -175,7 +169,6 @@ public class Claim {
             }
         });
 
-        // Visual effects
         world.spawnParticle(plugin.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), claimBlock, 1);
         world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
 

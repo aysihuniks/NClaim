@@ -1,36 +1,34 @@
-
-# Confirmation Menus [✅] Section: 'confirm_menu'
-# Claim Menu [✅] Section: 'claim_menu' Full finished
-# Claim List Menu [✅] Section: 'claim_list_menu'
-# Claim Management Menu [✅] Section: 'claim_management_menu'
-# Claim Settings Menu [✅] Section: 'claim_settings_menu'
-# Claim Expand Menu [✅] AKA: LandExpansionMenu Section: 'claim_expand_menu'
-# Manage Claim Block Menu [❌] Section: 'claim_block_management_menu'
-# Claim Time Manage Menu [✅] Section: 'claim_time_management_menu'
-
-
-
-
 guis:
+  background_buttons: true
+  background_1:
+    display_name: "&8x"
+    material: "BLACK_STAINED_GLASS_PANE"
+  background_2:
+    display_name: "&8x"
+    material: "GRAY_STAINED_GLASS_PANE"
   back:
     display_name: "&eBack"
+    material: "OAK_DOOR"
   previous_page:
     display_name: "&ePrevious Page"
+    material: "FEATHER"
   next_page:
     display_name: "&eNext Page"
+    material: "COMPASS"
   enabled:
     display_name: "&aEnabled"
   disabled:
     display_name: "&cDisabled"
-
 
   # Claim Menu - When /nclaim is typed, it is the menu with operations such as buy claim
   claim_menu:
     title: "Claim Menu"
     admin:
       display_name: "&6Admin Menu"
+      material: "COMMAND_BLOCK"
     buy_claim:
       display_name: "&6Buy a Claim"
+      material: "EMERALD"
       lore:
         - ""
         - "&fPurchase a new claim"
@@ -39,6 +37,7 @@ guis:
         - "&eClick to purchase"
     manage_claims:
       display_name: "&6Manage Claims"
+      material: "CHEST"
       lore:
         - ""
         - "&fManage your claims:"
@@ -48,17 +47,18 @@ guis:
         - ""
         - "&eClick to manage"
 
-
   # Claim List Menu - The menu that opens after typing /nclaim and clicking the 'Manage Claims' button.
   claim_list_menu:
     title: "Claim List"
     list_type:
       display_name: "&6List Type"
+      material: "PAPER"
       all: "All"
       player: "Player"
       coop: "Co-op"
     own_claims:
       display_name: "&6Claim: &e{claim_id}"
+      material: "GRASS_BLOCK"
       lore:
         - ""
         - "&fWorld: &e{world}"
@@ -68,6 +68,7 @@ guis:
         - "&7Click to manage"
     coop_claims:
       display_name: "&6Co-op Claim: &e{claim_id}"
+      material: "OAK_SIGN"
       lore:
         - ""
         - "&fWorld: &e{world}"
@@ -81,6 +82,7 @@ guis:
     title: "Manage Claim"
     expand:
       display_name: "&6Expand Claim"
+      material: "GRASS_BLOCK"
       lore:
         - ""
         - "&fExpand your claim territory"
@@ -90,6 +92,7 @@ guis:
         - "&eClick to manage"
     time:
       display_name: "&6Manage Expiration"
+      material: "CLOCK"
       lore:
         - ""
         - "&fManage claim duration:"
@@ -99,6 +102,7 @@ guis:
         - "&eClick to manage"
     coop:
       display_name: "&6Manage Co-ops"
+      material: "TURTLE_HELMET"
       lore:
         - ""
         - "&fManage co-op members:"
@@ -108,6 +112,7 @@ guis:
         - "&eClick to manage"
     setting:
       display_name: "&6Claim Settings"
+      material: "END_CRYSTAL"
       lore:
         - ""
         - "&fConfigure claim settings:"
@@ -118,6 +123,7 @@ guis:
         - "&eClick to configure"
     type:
       display_name: "&6Claim Block Type"
+      material: "SHULKER_BOX"
       lore:
         - ""
         - "&fChange the type of your claim block"
@@ -127,12 +133,13 @@ guis:
         - "&eClick to change"
     delete:
       display_name: "&cDelete Claim"
+      material: "TNT"
       lore:
         - ""
         - "&cWarning: &fThis will permanently delete"
         - "&fyour claim without any refund"
         - ""
-        - "&7Click to proceed"
+        - "&eClick to proceed"
 
   # Claim Expand Menu - The menu that opens after interacting with the claim block and clicking the 'Expand Claim' button.
   claim_expand_menu:
@@ -144,6 +151,7 @@ guis:
         - "&fThis is your claim's center chunk"
     expand:
       display_name: "&6Expand Claim"
+      material: "BROWN_WOOL"
       lore:
         - ""
         - "&fExpand your claim"
@@ -152,16 +160,19 @@ guis:
         - "&eClick to purchase"
     claimed:
       display_name: "&aClaimed Chunk"
+      material: "GREEN_WOOL"
       lore:
         - ""
         - "&fThis chunk is claimed"
     not_adjacent:
       display_name: "&cInvalid Chunk"
+      material: "BLACK_WOOL"
       lore:
         - ""
         - "&fYou can only claim adjacent chunks"
     claimed_another_player:
       display_name: "&cClaimed by Another Player"
+      material: "RED_WOOL"
       lore:
         - ""
         - "&fThis chunk belongs to someone else"
@@ -171,12 +182,14 @@ guis:
     title: "Manage Time"
     claim_info:
       display_name: "&6Duration Info"
+      material: "ITEM_FRAME"
       lore:
         - ""
         - "&fTime Remaining: &e{time_left}"
         - "&fExpires: &e{expires_at}"
     confirm:
       display_name: "&aConfirm Changes"
+      material: "BLUE_ICE"
       lore:
         - ""
         - "&fNew duration:"
@@ -186,6 +199,7 @@ guis:
         - "&7Cost: &e${price}"
     select_time_unit:
       display_name: "&6Select Time Unit"
+      material: "CHAIN"
       lore:
         - ""
         - "&f• {days_status}"
@@ -196,26 +210,33 @@ guis:
     minutes_status: "Minutes"
     add_one:
       display_name: "&a+1 {unit}"
+      material: "LIME_CONCRETE"
     add_six:
       display_name: "&a+6 {unit}"
+      material: "GREEN_CONCRETE"
     subtract_one:
       display_name: "&c-1 {unit}"
+      material: "PINK_CONCRETE"
     subtract_six:
       display_name: "&c-6 {unit}"
+      material: "RED_CONCRETE"
 
   claim_manage_coop_menu:
     title: "Co-op Members"
     offline: "&7(Offline)"
     add_coop:
       display_name: "&aAdd Member"
+      material: "NETHER_STAR"
     search_title: "Enter a player name"
     empty_slot:
       display_name: "&fEmpty Slot"
+      material: "WHITE_STAINED_GLASS_PANE"
       lore:
         - ""
         - "&eClick to add member"
     locked_slot:
       display_name: "&cLocked Slot"
+      material: "RED_STAINED_GLASS_PANE"
       lore:
         - ""
         - "&ePermission required"
@@ -245,6 +266,7 @@ guis:
         - "&7Manage permissions below"
     transfer:
       display_name: "&6Transfer Claim"
+      material: "GOLDEN_HELMET"
       lore:
         - ""
         - "&7Transfer ownership of this claim"
@@ -255,6 +277,7 @@ guis:
         - "&eClick to transfer"
     kick:
       display_name: "&cKick Co-op"
+      material: "BARRIER"
       lore:
         - ""
         - "&fKick this co-op"
@@ -264,115 +287,165 @@ guis:
     categories:
       blocks:
         display_name: "&6Block Permissions"
+        material: "GRASS_BLOCK"
       containers:
         display_name: "&6Container Access"
+        material: "CHEST"
       redstone:
         display_name: "&6Redstone Usage"
+        material: "REDSTONE_WIRE"
       doors:
         display_name: "&6Door Access"
+        material: "OAK_DOOR"
       workstations:
         display_name: "&6Workstation Usage"
+        material: "CRAFTING_TABLE"
       interactions:
         display_name: "&6Interaction Rights"
+        material: "LEVER"
       liquids:
         display_name: "&6Liquid Management"
+        material: "WATER_BUCKET"
       entities:
         display_name: "&6Entity Interactions"
+        material: "VILLAGER_SPAWN_EGG"
     permissions:
       break_blocks:
         display_name: "&fBreak Blocks"
+        material: "DIAMOND_PICKAXE"
       break_spawner:
         display_name: "&fBreak Spawners"
+        material: "SPAWNER"
       place_blocks:
         display_name: "&fPlace Blocks"
+        material: "GRASS_BLOCK"
       place_spawner:
         display_name: "&fPlace Spawners"
+        material: "SPAWNER"
       use_chest:
         display_name: "&fUse Chests"
+        material: "CHEST"
       use_furnace:
         display_name: "&fUse Furnaces"
+        material: "FURNACE"
       use_barrel:
         display_name: "&fUse Barrels"
+        material: "BARREL"
       use_shulker:
         display_name: "&fUse Shulker Boxes"
+        material: "SHULKER_BOX"
       use_hopper:
         display_name: "&fUse Hoppers"
+        material: "HOPPER"
       use_dispenser:
         display_name: "&fUse Dispensers"
+        material: "DISPENSER"
       use_dropper:
         display_name: "&fUse Dropper"
-      use_redstone:
-        display_name: "&fUse Redstone"
+        material: "DROPPER"
       use_repeater:
         display_name: "&fUse Repeater"
+        material: "REPEATER"
       use_comparator:
         display_name: "&fUse Comparator"
+        material: "COMPARATOR"
       use_buttons:
         display_name: "&fUse Buttons"
+        material: "STONE_BUTTON"
       use_pressure_plates:
         display_name: "&fUse Pressure Plates"
+        material: "STONE_PRESSURE_PLATE"
       use_levers:
         display_name: "&fUse Levers"
+        material: "LEVER"
       use_doors:
         display_name: "&fUse Doors"
+        material: "OAK_DOOR"
       use_trapdoors:
         display_name: "&fUse Trapdoors"
+        material: "OAK_TRAPDOOR"
       use_gates:
         display_name: "&fUse Gates"
+        material: "OAK_FENCE_GATE"
       use_crafting:
         display_name: "&fUse Crafting Tables"
+        material: "CRAFTING_TABLE"
       use_enchanting:
         display_name: "&fUse Enchanting Tables"
+        material: "ENCHANTING_TABLE"
       use_anvil:
         display_name: "&fUse Anvils"
+        material: "ANVIL"
       use_grindstone:
         display_name: "&fUse Grindstones"
+        material: "GRINDSTONE"
       use_stonecutter:
         display_name: "&fUse Stonecutters"
+        material: "STONECUTTER"
       use_loom:
         display_name: "&fUse Looms"
+        material: "LOOM"
       use_smithing:
         display_name: "&fUse Smithing Tables"
+        material: "SMITHING_TABLE"
       use_cartography:
         display_name: "&fUse Cartography Tables"
+        material: "CARTOGRAPHY_TABLE"
       use_brewing:
         display_name: "&fUse Brewing Stands"
+        material: "BREWING_STAND"
       use_bell:
         display_name: "&fUse Bells"
+        material: "BELL"
       use_beacon:
         display_name: "&fUse Beacons"
+        material: "BEACON"
       use_jukebox:
         display_name: "&fUse Jukeboxes"
+        material: "JUKEBOX"
       use_noteblock:
         display_name: "&fUse Note Blocks"
+        material: "NOTE_BLOCK"
       use_campfire:
         display_name: "&fUse Campfires"
+        material: "CAMPFIRE"
       use_bed:
         display_name: "&fUse Beds"
+        material: "RED_BED"
       interact_armor_stand:
         display_name: "&fUse Armor Stands"
+        material: "ARMOR_STAND"
       interact_item_frame:
         display_name: "&fUse Item Frames"
+        material: "ITEM_FRAME"
       place_water:
         display_name: "&fPlace Water"
+        material: "WATER_BUCKET"
       place_lava:
         display_name: "&fPlace Lava"
+        material: "LAVA_BUCKET"
       take_water:
         display_name: "&fTake Water"
+        material: "WATER_BUCKET"
       take_lava:
         display_name: "&fTake Lava"
+        material: "LAVA_BUCKET"
       interact_villager:
         display_name: "&fTrade with Villagers"
+        material: "EMERALD"
       leash_mobs:
         display_name: "&fLeash Mobs"
+        material: "LEAD"
       ride_entities:
         display_name: "&fRide Entities"
+        material: "SADDLE"
 
   claim_settings_menu:
     title: "Claim Settings"
     settings:
       pvp:
         display_name: "&6PvP"
+        material: "DIAMOND_SWORD"
         lore:
           - ""
           - "&fAllow player combat in claim"
@@ -382,6 +455,7 @@ guis:
           - "&eClick to toggle"
       tnt_explosions:
         display_name: "&6TNT Damage"
+        material: "TNT"
         lore:
           - ""
           - "&fAllow TNT to damage blocks"
@@ -391,6 +465,7 @@ guis:
           - "&eClick to toggle"
       creeper_explosions:
         display_name: "&6Creeper Damage"
+        material: "CREEPER_SPAWN_EGG"
         lore:
           - ""
           - "&fAllow Creeper explosion damage"
@@ -400,6 +475,7 @@ guis:
           - "&eClick to toggle"
       mob_attacks:
         display_name: "&6Mob Combat"
+        material: "GOLDEN_APPLE"
         lore:
           - ""
           - "&fAllow players to fight mobs"
@@ -409,6 +485,7 @@ guis:
           - "&eClick to toggle"
       monster_spawning:
         display_name: "&6Monster Spawning"
+        material: "ZOMBIE_SPAWN_EGG"
         lore:
           - ""
           - "&fAllow monsters to spawn"
@@ -418,6 +495,7 @@ guis:
           - "&eClick to toggle"
       animal_spawning:
         display_name: "&6Animal Spawning"
+        material: "PIG_SPAWN_EGG"
         lore:
           - ""
           - "&fAllow animals to spawn"
@@ -427,6 +505,7 @@ guis:
           - "&eClick to toggle"
       villager_interactions:
         display_name: "&6Villager Trading"
+        material: "VILLAGER_SPAWN_EGG"
         lore:
           - ""
           - "&fAllow villager interactions"
@@ -438,29 +517,29 @@ guis:
   claim_block_management_menu:
     title: "Claim Block Type Management"
 
-
   admin_menu:
-    main_menu:
-      title: "Admin Dashboard"
-      manage_claims:
-        display_name: "&6Manage All Claims"
     all_claims_menu:
       title: "All Claims"
       reset_settings:
         display_name: "&cReset Settings"
+        material: "BOOK"
       search_player:
         display_name: "&aSearch Player"
+        material: "NETHER_STAR"
       sort_by_date:
         display_name: "&aSort by Date"
+        material: "GOLD_BLOCK"
         lore:
           - ""
           - "&f• {newest_status}"
           - "&f• {oldest_status}"
       delete_selected:
         display_name: "&cDelete Selected"
+        material: "BARRIER"
       claim_items:
         selected:
           display_name: "&a{owner}'s Claim &7(Selected)"
+          material: "YELLOW_STAINED_GLASS_PANE"
           lore:
             - ""
             - "&fCreated: &7{created_at}"
@@ -474,6 +553,7 @@ guis:
             - "&eRight Click &7- &fDeselect"
         unselected:
           display_name: "&6{owner}'s Claim"
+          material: "WHITE_STAINED_GLASS_PANE"
           lore:
             - ""
             - "&fCreated: &7{created_at}"
@@ -485,81 +565,20 @@ guis:
             - "&eClick &7- &fManage"
             - "&eShift Click &7- &fTeleport"
             - "&eRight Click &7- &fSelect"
-    claim_management_menu:
-      title: "{owner}'s Claim"
-      manage_coop:
-        display_name: "&6Manage Co-op"
-        lore:
-          - ""
-          - "&fManage co-op members:"
-          - "&7• &fView members"
-          - "&7• &fModify permissions"
-          - "&7• &fAdd/Remove members"
-          - ""
-          - "&eClick to manage"
-      manage_lands:
-        display_name: "&6Manage Lands"
-        lore:
-          - ""
-          - "&fManage claim territories:"
-          - "&7• &fView chunks"
-          - "&7• &fAdd/Remove chunks"
-          - ""
-          - "&eClick to manage"
-      manage_expiration:
-        display_name: "&6Manage Expiration"
-        lore:
-          - ""
-          - "&fManage claim duration:"
-          - "&7• &fView expiration"
-          - "&7• &fModify time"
-          - ""
-          - "&eClick to manage"
-    time_management_menu:
-      title: "{owner}'s Claim"
-      claim_info:
-        display_name: "&6Claim Information"
-        lore:
-          - ""
-          - "&fRemaining: &e{time_left}"
-          - "&fExpires: &e{expires_at}"
-      time_display:
-        display_name: "&e{d} &fdays &e{h} &fhours &e{m} &fminutes"
-      confirm:
-        display_name: "&aConfirm Changes"
-        lore:
-          - ""
-          - "&fNew Duration:"
-          - "&7• &e{d} &fdays"
-          - "&7• &e{h} &fhours"
-          - "&7• &e{m} &fminutes"
-      select_time_unit:
-        display_name: "&6Select Time Unit"
-        lore:
-          - ""
-          - "&f• {days_status}"
-          - "&f• {hours_status}"
-          - "&f• {minutes_status}"
-      days_status: "Days" # You cannot use color codes.
-      hours_status: "Hours"
-      minutes_status: "Minutes"
-      add_one:
-        display_name: "&a+1 {unit}"
-      add_six:
-        display_name: "&a+6 {unit}"
-      subtract_one:
-        display_name: "&c-1 {unit}"
-      subtract_six:
-        display_name: "&c-6 {unit}"
+
   # Confirmation Menu - It is the menu that opens when there is a confirmation process.
   confirm_menu:
     title: "Confirm Action"
     confirm:
       display_name: "&aConfirm"
+      material: "GREEN_DYE"
     decline:
       display_name: "&cDecline"
+      material: "RED_DYE"
+    center:
+      material: "BOOK"
     children:
-      buy_new_claim: # Book in the middle
+      buy_new_claim:
         display_name: "&6Buy a New Claim"
         lore:
           - ""
@@ -620,7 +639,6 @@ guis:
           - ""
           - "&aClick to green dye for confirm transfer"
           - "&cClick to red dye for cancel transfer"
-
 
 # DO NOT CHANGE!
 gui_version: "{version}"

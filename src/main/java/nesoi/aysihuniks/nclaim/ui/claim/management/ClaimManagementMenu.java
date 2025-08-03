@@ -3,55 +3,81 @@ package nesoi.aysihuniks.nclaim.ui.claim.management;
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.utils.HeadManager;
-import nesoi.aysihuniks.nclaim.utils.LangManager;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.guimanager.Menu;
-import org.nandayo.dapi.ItemCreator;
+import org.nandayo.dapi.guimanager.button.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
-import org.nandayo.dapi.object.DMaterial;
+import org.nandayo.dapi.util.Util;
 
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.function.Function;
 
 public class ClaimManagementMenu extends BaseMenu {
     private final @NotNull Claim claim;
     private final Player player;
+    private final boolean admin;
 
-    public ClaimManagementMenu(Player player, @NotNull Claim claim) {
+    public ClaimManagementMenu(Player player, @NotNull Claim claim, boolean admin) {
         super("claim_management_menu");
         this.claim = claim;
         this.player = player;
+        this.admin = admin;
         setupMenu();
         displayTo(player);
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     private void setupMenu() {
         createInventory(MenuType.CHEST_3_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
+
+        if (admin) {
+            addButton(new Button() {
+                @Override
+                public @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(10);
+                }
+
+                @Override
+                public @Nullable ItemStack getItem() {
+                    return ItemCreator.of(getMaterialFullPath("back"))
+                            .name(NClaim.inst().getGuiLangManager().getString("back.display_name"))
+                            .get();
+                }
+
+                @Override
+                public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
+                    new AdminAllClaimMenu(p, null, true, 0, new ArrayList<>());
+                }
+            });
+        }
         
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(10);
+                return admin ? Sets.newHashSet(12) : Sets.newHashSet(10);
             }
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.GRASS_BLOCK)
+                return ItemCreator.of(getMaterial("expand"))
                         .name(getString("expand.display_name"))
                         .lore(getStringList("expand.lore"))
                         .get();
@@ -60,18 +86,18 @@ public class ClaimManagementMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
-                new LandExpansionMenu(player, claim, false);
+                new LandExpansionMenu(player, claim, admin);
             }
         });
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(11);
+                return admin ? Sets.newHashSet(13) : Sets.newHashSet(11);
             }
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.CLOCK)
+                return ItemCreator.of(getMaterial("time"))
                         .name(getString("time.display_name"))
                         .lore(getStringList("time.lore"))
                         .get();
@@ -79,40 +105,41 @@ public class ClaimManagementMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
-                new TimeManagementMenu(player, 0,0,0,0, claim);
+                new TimeManagementMenu(player, 0,0,0,0, claim, admin);
             }
         });
 
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(12);
+                return admin ? Sets.newHashSet(14) : Sets.newHashSet(12);
             }
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(NClaim.inst().getHeadManager().createHead(player))
+                return ItemCreator.of(getMaterial("coop"))
                         .name(getString("coop.display_name"))
                         .lore(getStringList("coop.lore"))
+                        .flags(ItemFlag.values())
                         .get();
             }
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
-                new CoopListMenu(player, claim, false);
+                new CoopListMenu(player, claim, admin);
             }
         });
 
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(13);
+                return admin ? Sets.newHashSet(15) : Sets.newHashSet(13);
             }
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.END_CRYSTAL)
+                return ItemCreator.of(getMaterial("setting"))
                         .name(getString("setting.display_name"))
                         .lore(getStringList("setting.lore"))
                         .get();
@@ -121,39 +148,42 @@ public class ClaimManagementMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
-                new ClaimSettingsMenu(player, claim, 0);
-            }
-        });
-        addButton(new Button() {
-            @Override
-            public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(14) ;
-            }
-
-            @Override
-            public @Nullable ItemStack getItem() {
-                return ItemCreator.of(NClaim.getMaterial(DMaterial.BUNDLE, DMaterial.SHULKER_BOX))
-                        .name(getString("type.display_name"))
-                        .lore(getStringList("type.lore"))
-                        .hideFlag(ItemFlag.values())
-                        .get();
-            }
-
-            @Override
-            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                new ManageClaimBlockMenu(claim, player, 0);
+                new ClaimSettingsMenu(player, claim, 0, admin);
             }
         });
 
+        if (!admin) {
+            addButton(new Button() {
+                @Override
+                public @NotNull Set<Integer> getSlots() {
+                    return Sets.newHashSet(14);
+                }
+
+                @Override
+                public @Nullable ItemStack getItem() {
+                    return ItemCreator.of(getMaterial("type"))
+                            .name(getString("type.display_name"))
+                            .lore(getStringList("type.lore"))
+                            .flags(ItemFlag.values())
+                            .get();
+                }
+
+                @Override
+                public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                    new ManageClaimBlockMenu(claim, player, 0);
+                }
+            });
+        }
+
         addButton(new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {
-                return Sets.newHashSet(16) ;
+                return Sets.newHashSet(16);
             }
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.TNT)
+                return ItemCreator.of(getMaterial("delete"))
                         .name(getString("delete.display_name"))
                         .lore(getStringList("delete.lore"))
                         .get();
@@ -169,7 +199,7 @@ public class ClaimManagementMenu extends BaseMenu {
                                 claim.remove(RemoveCause.UNCLAIM);
                                 player.closeInventory();
                             } else if ("declined".equals(result)) {
-                                new ClaimManagementMenu(player, claim);
+                                new ClaimManagementMenu(player, claim, admin);
                             }
                         });
             }

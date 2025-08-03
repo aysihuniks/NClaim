@@ -6,7 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.HexUtil;
+import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.message.ChannelType;
 
 public class HelpCommand extends BaseCommand {

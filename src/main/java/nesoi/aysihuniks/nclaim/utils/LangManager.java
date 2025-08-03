@@ -7,8 +7,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nandayo.dapi.HexUtil;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.HexUtil;
+import org.nandayo.dapi.util.Util;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.io.File;
@@ -33,7 +33,7 @@ public class LangManager {
     }
 
     public final List<String> REGISTERED_LANGUAGES = new ArrayList<>();
-    private final List<String> DEFAULT_LANGUAGES = Arrays.asList("en-US","tr-TR");
+    private final List<String> DEFAULT_LANGUAGES = Arrays.asList("en-US","tr-TR", "fr-FR");
     private final String DEFAULT_LANGUAGE = "en-US";
     private FileConfiguration DEFAULT_LANGUAGE_CONFIG;
 

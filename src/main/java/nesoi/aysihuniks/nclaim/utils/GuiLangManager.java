@@ -1,17 +1,23 @@
 package nesoi.aysihuniks.nclaim.utils;
 
 import nesoi.aysihuniks.nclaim.NClaim;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 public class GuiLangManager {
 
     private final FileConfiguration guiConfig;
+    private final HeadManager headManager;
 
     public GuiLangManager() {
         File file = new File(NClaim.inst().getDataFolder(), "guis.yml");
@@ -19,6 +25,7 @@ public class GuiLangManager {
             NClaim.inst().saveResource("guis.yml", false);
         }
         this.guiConfig = YamlConfiguration.loadConfiguration(file);
+        this.headManager = NClaim.inst().getHeadManager();
     }
 
     public String getString(String section, String path) {
@@ -44,4 +51,63 @@ public class GuiLangManager {
         return guiConfig.getConfigurationSection("guis." + path);
     }
 
+    public Boolean getBoolean(String path) {
+        return guiConfig.getBoolean("guis." + path);
+    }
+
+    public ItemStack getMaterial(String section, String path) {
+        String materialName = guiConfig.getString("guis." + section + "." + path + ".material");
+        return resolveItemStack(materialName, "guis." + section + "." + path);
+    }
+
+    public ItemStack getMaterial(String fullPath) {
+        String materialName = guiConfig.getString("guis." + fullPath + ".material");
+        return resolveItemStack(materialName, "guis." + fullPath);
+    }
+
+    private ItemStack resolveItemStack(String materialName, String logPath) {
+        if (materialName == null) {
+            Util.log("Material not found for path: " + logPath + ". Using DIRT as default.");
+            return new ItemStack(Material.DIRT);
+        }
+
+        String matName = materialName;
+        Integer customModelData = null;
+
+        if (materialName.contains(":")) {
+            String[] split = materialName.split(":");
+            matName = split[0];
+            try {
+                customModelData = Integer.parseInt(split[1]);
+            } catch (NumberFormatException e) {
+                Util.log("Invalid custom model data '" + split[1] + "' for path: " + logPath + ". Ignoring custom model data.");
+            }
+        }
+
+        ItemStack item;
+        if (matName.toUpperCase().startsWith("HEAD")) {
+            String texture = matName.length() > 4 ? matName.substring(5) : "";
+            item = headManager.createHeadWithTexture(texture);
+        } else {
+            try {
+                Material material = Material.valueOf(matName.toUpperCase());
+                item = new ItemStack(material);
+            } catch (IllegalArgumentException e) {
+                Util.log("Invalid material name '" + matName + "' for path: " + logPath + ". Using DIRT as default. Error: " + e.getMessage());
+                item = new ItemStack(Material.DIRT);
+            }
+        }
+
+        if (customModelData != null) {
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                NamespacedKey customModelKey = new NamespacedKey(NClaim.inst(), "custom_model_data");
+
+                meta.getPersistentDataContainer().set(customModelKey, PersistentDataType.INTEGER, customModelData);
+                item.setItemMeta(meta);
+            }
+        }
+
+        return item;
+    }
 }

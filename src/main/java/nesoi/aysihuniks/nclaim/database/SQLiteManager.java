@@ -11,7 +11,7 @@ import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.*;
 import org.bukkit.*;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -25,9 +25,7 @@ public class SQLiteManager implements DatabaseManager {
     private final HikariDataSource dataSource;
     private final Gson gson;
 
-    // SQL statements as constants
     private static final class SQLStatements {
-        // Create tables
         static final String CREATE_USERS_TABLE =
                 "CREATE TABLE IF NOT EXISTS users (uuid TEXT PRIMARY KEY, balance REAL DEFAULT 0, skinTexture TEXT)";
 
@@ -45,7 +43,6 @@ public class SQLiteManager implements DatabaseManager {
         static final String CREATE_CLAIM_SETTINGS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claim_settings (claim_id TEXT PRIMARY KEY, settings TEXT)";
 
-        // CRUD operations
         static final String SAVE_USER = "INSERT OR REPLACE INTO users (uuid, balance, skinTexture) VALUES (?, ?, ?)";
         static final String LOAD_USER = "SELECT balance, skinTexture FROM users WHERE uuid = ?";
         static final String LOAD_ALL_USERS = "SELECT uuid, balance, skinTexture FROM users";
@@ -144,7 +141,6 @@ public class SQLiteManager implements DatabaseManager {
         return 0;
     }
 
-    // User operations
     @Override
     public void saveUser(User user) {
         try (Connection conn = getConnection();
@@ -203,7 +199,6 @@ public class SQLiteManager implements DatabaseManager {
         );
     }
 
-    // Claim operations
     @Override
     public void saveClaim(Claim claim) {
         try (Connection conn = getConnection()) {

@@ -1,0 +1,127 @@
+command:
+  must_be_player: '{prefix} &cVous devez être un joueur pour utiliser cette commande !'
+  permission_denied: '{prefix} &cVous n''avez pas la permission de faire cela !'
+  in_cooldown: '{prefix} &cVeuillez patienter un instant avant de réessayer.'
+  wrong_usage: '{prefix} &fBesoin d’aide ? Utilisez &e/nclaim <help/?> &fpour voir toutes les commandes disponibles.'
+  enter_a_valid_number: '{prefix} &cVeuillez entrer un nombre valide.'
+  enter_a_player: '{prefix} &cVeuillez entrer un nom de joueur.'
+  player_data_not_found: '{prefix} &cDonnées du joueur introuvables. &7Veuillez vous reconnecter et réessayer.'
+  invalid_material: '{prefix} &c{material} &cn’est pas un matériau valide.'
+  invalid_block_type: '{prefix} &c{block} &cn’est pas un type de bloc valide.'
+  not_in_claim: '{prefix} &cVous n’êtes dans aucune revendication.'
+  expiration_extended: '{prefix} &fExpiration de la revendication prolongée de &e{d} jours&f, &e{h} heures&f, &e{m} minutes pour &e{price}&f.'
+  level:
+    info: '{prefix} &fLa valeur totale de cette revendication est de &e{value} &7(pour &e{chunks} &7chunks)'
+  balance:
+    current: '{prefix} &fVous avez &e${balance} &fdans votre solde.'
+    not_enough: '{prefix} &cVous n''avez pas assez de fonds pour faire cela.'
+  player:
+    not_found: '{prefix} &c{target} introuvable.'
+    cant_add_self: '{prefix} &cVous ne pouvez pas vous ajouter vous-même.'
+  reload:
+    success: '{prefix} &aConfiguration rechargée avec succès.'
+    failed: '{prefix} &cÉchec du rechargement. Veuillez vérifier la console.'
+  set:
+    block_value_set: '{prefix} &fLa valeur de &e{block} &fa été réglée sur &e{value}&f.'
+    target_balance_set: '{prefix} &fVotre solde a été fixé à &e${balance} &fpar un administrateur.'
+    player_balance_set: '{prefix} &e{target}''s &fsolde a été fixé à &e${amount}&f.'
+  add:
+    target_added: '{prefix} &e${amount} &fa été ajouté à votre solde. &7(Total : &e${balance}&7)'
+    player_added: '{prefix} &e${amount} &fa été ajouté au solde de &e{target}&f.'
+    world_already_in_blacklist: '{prefix} &cLe monde &e{world} &cest déjà dans la liste noire.'
+    world_added_to_blacklist: '{prefix} &fLe monde &e{world} &fa été ajouté à la liste noire.'
+    region_already_in_blacklist: '{prefix} &cLa région &e{region} &cest déjà dans la liste noire.'
+    region_added_to_blacklist: '{prefix} &fLa région &e{region} &fa été ajoutée à la liste noire.'
+    expiration_extended: '{prefix} &fExpiration de la revendication prolongée de &e{d} jours&f, &e{h} heures&f, &e{m} minutes&f.'
+    block_value_added: '{prefix} &e{block} &fvaleur définie sur &e{value}&f.'
+    block_already_exists: '{prefix} &c{block} existe déjà dans la liste des valeurs.'
+  remove:
+    target_removed: '{prefix} &e${amount} &fa été retiré de votre solde. &7(Total : &e${balance}&7)'
+    player_removed: '{prefix} &e${amount} &fa été retiré du solde de &e{target}&f.'
+    not_in_blacklist: '{prefix} &c{world} ne figure pas dans la liste noire.'
+    world_removed_from_blacklist: '{prefix} &fLe monde &e{world} &fa été retiré de la liste noire.'
+    region_removed_from_blacklist: '{prefix} &fLa région &e{region} &fa été retirée de la liste noire.'
+    expiration_subtracted: '{prefix} &fExpiration de la revendication réduite de &e{d} jours&f, &e{h} heures&f, &e{m} minutes&f.'
+    block_not_found: '{prefix} &c{block} n''a pas été trouvé dans les valeurs de bloc.'
+    block_value_removed: '{prefix} &e{block} &fa été retiré des valeurs de bloc.'
+  change:
+    invalid_lang: '{prefix} &cVeuillez choisir une langue valide &7(ex : ''en-US'' ou ''tr-TR'')'
+    lang_changed: '{prefix} &fLa langue a été changée en &e{lang}&f.'
+    invalid_material: '{prefix} &cMatériau invalide : {material}'
+    invalid_value: '{prefix} &cValeur invalide ! Veuillez entrer un nombre positif.'
+    blockvalue_updated: '{prefix} &aValeur du bloc mise à jour : &e{material} &a{old_value} -> {new_value}'
+    blockvalue_added: '{prefix} &aNouvelle valeur de bloc ajoutée : &e{material} &a= {value}'
+    blockvalue_not_changed: '{prefix} &aLa valeur du bloc n''a pas changé car l''ancienne et la nouvelle valeur sont identiques.'
+  migrate:
+    database_disabled: '{prefix} &cLa connexion à la base de données est désactivée dans la config.'
+    completed: '{prefix} &aMigration terminée avec succès.'
+    database_not_connected: '{prefix} &cBase de données non connectée, veuillez vérifier votre configuration.'
+    backup_created: '{prefix} &aSauvegarde des fichiers créée avec succès.'
+    failed: '{prefix} &cMigration échouée. Veuillez vérifier la console.'
+
+claim:
+  too_close_to_other_claim: '{prefix} &cVous ne pouvez pas revendiquer ce chunk ! Trop proche d''une autre revendication.'
+  no_owner: 'Propriétaire introuvable.' # Alias : Non réclamé
+  max_reached: '{prefix} &cVous avez atteint votre limite maximale de revendications.'
+  not_found: '{prefix} &cVous ne possédez aucune revendication et n''êtes ajouté à aucune.'
+  in_blacklisted_region_or_world: '{prefix} &cAction impossible dans un monde ou une région en liste noire.'
+  not_yours: '{prefix} &cCette revendication ne vous appartient pas.'
+  buy_cancelled: '{prefix} &cAchat de la revendication annulé.'
+  already_claimed: '{prefix} &cCe chunk est déjà revendiqué !'
+  received: '{prefix} &aVous avez reçu la revendication avec succès.'
+  removed: '{prefix} &fLa revendication de ce chunk a été supprimée.'
+  expired: '{prefix} &fLa revendication a expiré et a été supprimée &7(&e{x}&7, &e{z}&7).'
+  setting_change_cancelled: '&cChangement de paramètre annulé !'
+  pvp_not_allowed: '{prefix} &cLe PvP n’est pas autorisé dans cette revendication.'
+  transferred: '&aRevendication transférée avec succès à &e{player}'
+  block:
+    purchased: '{prefix} &aBloc de revendication acheté : &e{block} &7(&e{price}$&7)'
+    changed: '{prefix} &aBloc de revendication changé : &c{old_block} &7-> &2{new_block}'
+  level:
+    calculating_started: '{prefix} &aLe calcul du niveau de votre revendication a commencé, veuillez patienter.'
+    calculating_in_progress: '{prefix} &cUn autre joueur calcule le niveau, veuillez patienter.'
+    calculating_in_queue: '{prefix} &fIl y a &7{count} &fpersonnes en file de calcul.'
+    calculating_in_queue_position: '{prefix} &fVotre position est &7{position}&f.'
+    queue_is_empty: '{prefix} &fLa file est vide.'
+    your_already_in_queue: '{prefix} &fVous êtes déjà en file.'
+  time:
+    no_time_selected: '{prefix} &cAucun temps sélectionné pour augmenter.'
+  land:
+    already_own_chunk: '{prefix} &cVous possédez déjà ce chunk !'
+    already_own_land: '{prefix} &cVous possédez déjà cette terre !'
+    not_adjacent: '{prefix} &cVous ne pouvez étendre qu''à des chunks adjacents !'
+    expanded: '{prefix} &aNouveau chunk ajouté à votre revendication.'
+    buy_cancelled: '{prefix} &cAchat de terrain annulé.'
+  coop:
+    limit_reached: '{prefix} &cVous ne pouvez avoir que &e{0} &cjoueurs en coop !'
+    already_added: '{prefix} &c{coop} est déjà dans la liste de coop.'
+    added: '{prefix} &e{coop} &fa été ajouté à votre revendication.'
+    removed: '{prefix} &e{coop} &fa été retiré de votre revendication.'
+    kicked: '{prefix} &fVous avez été retiré de la revendication de &e{owner}.'
+    joined: '{prefix} &fVous avez rejoint la revendication de &e{owner}.'
+    not_in_list: '{prefix} &c{0} &cn’est pas dans la liste de coop.'
+    add_cancelled: '&cAjout de joueur en coop annulé !'
+    remove_cancelled: '&cSuppression de joueur en coop annulée !'
+    permission_toggle_cancelled: '&cChangement de permission coop annulé !'
+
+move:
+  unclaimed_chunk: "ACTION_BAR=&7Non revendiqué"
+  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
+  pvp_enabled: '&cPvP'
+  pvp_disabled: '&aPvP'
+
+hologram:
+  title: '&6⚔ Zone Protégée ⚔'
+  owner: '&fPropriétaire : &e{owner}'
+  time_left:
+    text: '&fTemps restant : &e{time_left}'
+    d: "j"
+    h: "h"
+    m: "m"
+    s: "s"
+  coop_count: '&fJoueurs en coop : &e{coop_count}'
+  total_size: '&fTaille totale : &e{total_size} &7chunks'
+  edit: '&eClic droit pour éditer'
+
+# NE PAS CHANGER!
+lang_version: "{version}"

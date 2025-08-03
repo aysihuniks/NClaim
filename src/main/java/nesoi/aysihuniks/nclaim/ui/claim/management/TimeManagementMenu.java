@@ -5,7 +5,6 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminTimeManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
@@ -14,16 +13,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.ItemCreator;
-import org.nandayo.dapi.Util;
-import org.nandayo.dapi.guimanager.Button;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.util.ItemCreator;
+import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 public class TimeManagementMenu extends BaseMenu {
     private int days;
@@ -31,22 +32,28 @@ public class TimeManagementMenu extends BaseMenu {
     private int minutes;
     private int timeUnit;
     private final @NotNull Claim claim;
+    private boolean admin;
 
-    public TimeManagementMenu(@NotNull Player player, int days, int hours, int minutes, int timeUnit, @NotNull Claim claim) {
+    public TimeManagementMenu(@NotNull Player player, int days, int hours, int minutes, int timeUnit, @NotNull Claim claim, boolean admin) {
         super("claim_time_management_menu");
         this.claim = claim;
         this.days = days;
         this.hours = hours;
         this.minutes = minutes;
         this.timeUnit = timeUnit;
+        this.admin = admin;
 
         setupMenu();
         displayTo(player);
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     private void setupMenu() {
         createInventory(MenuType.CHEST_5_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
 
         addButton(new Button() {
             @Override
@@ -153,7 +160,7 @@ public class TimeManagementMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_BACK.playSound(player);
-                new ClaimManagementMenu(player, claim);
+                new ClaimManagementMenu(player, claim, admin);
             }
         });
 
@@ -179,7 +186,7 @@ public class TimeManagementMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 timeUnit = (timeUnit + 1) % 3;
                 MessageType.MENU_REFRESH.playSound(player);
-                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim);
+                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
         });
 
@@ -211,7 +218,7 @@ public class TimeManagementMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 adjustTime(1);
                 MessageType.VALUE_INCREASE.playSound(player);
-                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim);
+                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
         });
 
@@ -233,7 +240,7 @@ public class TimeManagementMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 adjustTime(6);
                 MessageType.VALUE_INCREASE.playSound(player);
-                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim);
+                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
         });
 
@@ -255,7 +262,7 @@ public class TimeManagementMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 adjustTime(-1);
                 MessageType.VALUE_DECREASE.playSound(player);
-                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim);
+                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
         });
 
@@ -277,7 +284,7 @@ public class TimeManagementMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 adjustTime(-6);
                 MessageType.VALUE_DECREASE.playSound(player);
-                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim);
+                new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
         });
     }
@@ -295,13 +302,13 @@ public class TimeManagementMenu extends BaseMenu {
 
     private void adjustTime(int amount) {
         switch (timeUnit) {
-            case 0: // Days
+            case 0:
                 days = Math.max(0, days + amount);
                 break;
-            case 1: // Hours
+            case 1:
                 hours = Math.max(0, hours + amount);
                 break;
-            case 2: // Minutes
+            case 2:
                 minutes = Math.max(0, minutes + amount);
                 break;
         }

@@ -1,3 +1,6 @@
+decentY: 2.4
+fancyY: 3.0
+
 # NClaim Configuration File
 
 # General Settings
@@ -14,6 +17,39 @@ blacklisted_worlds:
 
 blacklisted_regions:
   - spawnarea  # Example: spawn protection area
+
+# Hologram Settings
+# These settings allow you to customize the color of the "Time Left" field in claim holograms, perfect for matching your server's theme!
+#
+# How does it work?
+# - Each threshold defines a time condition and a color.
+# - threshold: Time condition (e.g., "day >= 2", "day < 1", "minute <= 5")
+# - color: Color code (e.g., "&a", "&e", "&c", hex: "<#FF0000>")
+#
+# Thresholds are checked in order; the first matching one is used.
+# Example:
+#   - threshold: "day >= 2"   -> If days left is 2 or more, use &a (green)
+#   - threshold: "day >= 1"   -> If days left is 1 or more, use &e (yellow)
+#   - threshold: "day < 1"    -> If days left is less than 1, use &c (red)
+#
+# Add as many thresholds/colors as you like for your server!
+# Tip:
+# You don't need to shut down and restart the server or use a full reload to process the thresholds;
+# you can apply them in-game by simply using the /nclaim admin reload command.
+hologram_settings:
+  show_title: true             # Show title in hologram?
+  show_owner: true             # Show owner name in hologram?
+  show_time_left: true         # Show time left in hologram?
+  show_coop_count: true        # Show co-op player count in hologram?
+  show_total_size: true        # Show total claim size in hologram?
+  show_edit: true              # Show edit text in hologram?
+  time_left_thresholds:
+    - threshold: "day >= 2"
+      color: "&a"
+    - threshold: "day >= 1"
+      color: "&e"
+    - threshold: "day < 1"
+      color: "&c"
 
 # Claim Settings
 claim_settings:
@@ -62,7 +98,7 @@ claim_settings:
   max_coop_count:     # Maximum number of co-op players per claim
     default: 3
     vip: 5
-  # Permissions will be need like this "nclaim.max_coop_count.default"
+  # Permissions will be need like this "nclaim.maxcoop.default"
   expiry_days: 7      # Days until an inactive claim expires
 
 # Auto-Save Configuration

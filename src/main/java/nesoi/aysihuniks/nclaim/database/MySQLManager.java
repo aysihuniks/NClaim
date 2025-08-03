@@ -11,7 +11,7 @@ import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.*;
 import org.bukkit.*;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.lang.reflect.Type;
 import java.sql.*;
@@ -24,8 +24,7 @@ public class MySQLManager implements DatabaseManager {
     @Getter private final String database;
     private final Gson gson;
 
-    // Create tables SQL
-    private static final String CREATE_USERS_TABLE = 
+    private static final String CREATE_USERS_TABLE =
         "CREATE TABLE IF NOT EXISTS users (" +
         "uuid VARCHAR(36) NOT NULL PRIMARY KEY, " +
         "balance DOUBLE DEFAULT 0, " +
@@ -59,7 +58,6 @@ public class MySQLManager implements DatabaseManager {
         "claim_id VARCHAR(100) PRIMARY KEY, " +
         "settings TEXT)";
 
-    // Users SQL
     private static final String SAVE_USER =
         "INSERT INTO users (uuid, balance, skinTexture) VALUES (?, ?, ?) " +
         "ON DUPLICATE KEY UPDATE balance = ?, skinTexture = ?";
@@ -70,7 +68,6 @@ public class MySQLManager implements DatabaseManager {
     private static final String LOAD_ALL_USERS = 
         "SELECT uuid, balance, skinTexture FROM users";
 
-    // Claims SQL
     private static final String SAVE_CLAIM =
         "INSERT INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, expired_at, " +
         "owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +

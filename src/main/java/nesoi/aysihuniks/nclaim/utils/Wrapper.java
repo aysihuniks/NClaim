@@ -15,7 +15,7 @@ public class Wrapper {
 
     public Wrapper(NClaim plugin) {
         this.plugin = plugin;
-        version = DAPI.getInstance().getWrapper().getMinecraftVersion();
+        version = org.nandayo.dapi.util.Wrapper.getMinecraftVersion();
     }
     
     public void playSound(@NotNull Player player, @NotNull Sound sound, float volume, float pitch) {

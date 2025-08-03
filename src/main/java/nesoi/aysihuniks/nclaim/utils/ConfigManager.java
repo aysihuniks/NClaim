@@ -45,6 +45,10 @@ public class ConfigManager {
         return config.getLong(key, defaultValue);
     }
 
+    public double getDouble(String key, double defaultValue) {
+        return config.getDouble(key, defaultValue);
+    }
+
     public boolean getBoolean(String key, boolean defaultValue) {
         return config.getBoolean(key, defaultValue);
     }

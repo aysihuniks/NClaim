@@ -30,12 +30,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.DAPI;
-import org.nandayo.dapi.HexUtil;
-import org.nandayo.dapi.Util;
 import org.nandayo.dapi.object.DEntityType;
 import org.nandayo.dapi.object.DMaterial;
 import org.nandayo.dapi.object.DParticle;
 import org.nandayo.dapi.object.DSound;
+import org.nandayo.dapi.util.HexUtil;
+import org.nandayo.dapi.util.Util;
 import space.arim.morepaperlib.MorePaperLib;
 
 import java.io.File;
@@ -47,7 +47,6 @@ import java.util.*;
 public final class NClaim extends JavaPlugin {
     private static NClaim instance;
 
-    // Services
     private Wrapper wrapper;
     private ClaimService claimService;
     private ClaimStorageManager claimStorageManager;
@@ -67,19 +66,13 @@ public final class NClaim extends JavaPlugin {
     @Getter
     private static Economy econ = null;
 
-    // Managers
     private LangManager langManager;
     private ConfigManager configManager;
 
-    // Configuration
     private Config nconfig;
     private Balance balanceSystem;
     private static Economy economy;
 
-    // DAPI Instance
-    private DAPI dapi;
-
-    // Auto-save BukkitTask
     private BukkitTask autoSaveTask;
 
     public static NClaim inst() {
@@ -127,8 +120,7 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void initializeDAPI() {
-        dapi = new DAPI(this);
-        dapi.registerMenuListener();
+        DAPI.registerMenuListener();
         setupHexColors();
     }
 
@@ -235,7 +227,9 @@ public final class NClaim extends JavaPlugin {
 
         claimBlockManager = new ClaimBlockManager();
         blockValueManager.reloadBlockValues();
-        hologramManager.forceCleanup();
+        if (hologramManager != null) {
+            hologramManager.forceCleanup();
+        }
 
         startTasks();
 
@@ -274,6 +268,7 @@ public final class NClaim extends JavaPlugin {
             Util.log("&cNo supported hologram plugin found (DecentHolograms or FancyHolograms). Disabling hologram functionality.");
             return;
         }
+
         try {
             hologramManager = new HologramManager(this);
             Util.log("&aHologramManager initialized successfully!");
@@ -459,7 +454,7 @@ public final class NClaim extends JavaPlugin {
         colors.put("{PURPLE}", "<#8D77AB>");
         colors.put("{prefix}", "&8[<#fa8443>NClaim&8]&r");
 
-        HexUtil.placeholders.putAll(colors);
+        HexUtil.PLACEHOLDERS.putAll(colors);
         Util.PREFIX = "&8[<#fa8443>NClaim&8]&r ";
     }
 
@@ -611,7 +606,6 @@ public final class NClaim extends JavaPlugin {
         return world.getChunkAt(Integer.parseInt(chunkParts[1]), Integer.parseInt(chunkParts[2]));
     }
 
-    // Database Migration
     private void setupDatabase() {
         if (nconfig.isDatabaseEnabled()) {
             try {
@@ -656,17 +650,13 @@ public final class NClaim extends JavaPlugin {
         }
     }
 
-    // Vault
     public Economy getEconomy() {
         return econ;
     }
 
-    // Checker
     public void checkForUpdates() {
         if (configManager.getBoolean("check_for_updates", true)) {
-            // SPIGOT RESOURCE ID
-            int resourceId = 122527;
-            new UpdateChecker(this, resourceId).getVersion(version -> {
+            new UpdateChecker(this, 122527).getVersion(version -> {
                 if (this.getDescription().getVersion().equals(version)) {
                     Util.log("&aPlugin is up-to-date.");
                 } else {

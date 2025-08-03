@@ -5,7 +5,6 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Chunk;
@@ -14,12 +13,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.guimanager.button.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.util.Util;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class LandExpansionMenu extends BaseMenu {
@@ -37,9 +40,13 @@ public class LandExpansionMenu extends BaseMenu {
         displayTo(player);
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     private void setupMenu() {
         createInventory(MenuType.CHEST_5_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
 
         this.addButton(new Button() {
             @Override
@@ -58,11 +65,7 @@ public class LandExpansionMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_BACK.playSound(player);
-                if (!admin) {
-                    new ClaimManagementMenu(player, claim);
-                } else {
-                    new AdminClaimManagementMenu(player, claim);
-                }
+                new ClaimManagementMenu(player, claim, admin);
             }
         });
 
@@ -82,40 +85,40 @@ public class LandExpansionMenu extends BaseMenu {
         Claim thatClaim = Claim.getClaim(thatChunk);
 
         String configPath;
-        Material material;
+        ItemStack material;
         boolean clickable = false;
 
         if (admin) {
             if (thatClaim == null) {
                 configPath = "expand";
-                material = Material.BROWN_WOOL;
+                material = getMaterial("expand");
             } else {
                 configPath = "claimed";
-                material = Material.LIME_WOOL;
+                material = getMaterial("claimed");
             }
             clickable = true;
         } else {
             if (!isAdjacentToClaim(thatChunk)) {
                 configPath = "not_adjacent";
-                material = Material.BLACK_WOOL;
+                material = getMaterial("not_adjacent");
             } else if (thatClaim == null) {
                 configPath = "expand";
-                material = Material.BROWN_WOOL;
+                material = getMaterial("expand");
                 clickable = true;
             } else if (claim.getLands().contains(NClaim.serializeChunk(thatChunk))) {
                 configPath = "claimed";
-                material = Material.LIME_WOOL;
+                material = getMaterial("claimed");
                 clickable = true;
             } else {
                 configPath = "claimed_another_player";
-                material = Material.RED_WOOL;
+                material = getMaterial("claimed_another_player");
             }
         }
 
         addButton(createButton(slot, configPath, material, thatChunk, clickable));
     }
 
-    private Button createButton(int slot, String configPath, Material material, Chunk thatChunk, boolean clickable) {
+    private Button createButton(int slot, String configPath, ItemStack material, Chunk thatChunk, boolean clickable) {
         return new Button() {
             @Override
             public @NotNull Set<Integer> getSlots() {

@@ -7,7 +7,7 @@ import eu.decentsoftware.holograms.api.holograms.HologramManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;

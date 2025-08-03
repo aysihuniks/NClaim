@@ -12,8 +12,7 @@ import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimLeaveEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
-import nesoi.aysihuniks.nclaim.model.Claim;
+ import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
@@ -306,16 +305,11 @@ public class ClaimManager implements Listener {
         Claim claim = Claim.getClaim(block.getChunk());
         if (claim == null) return;
 
-        // New claim block type check
         if (block.getType() == claim.getClaimBlockType() && claim.getClaimBlockLocation().equals(block.getLocation())) {
             if (coopManager.isClaimOwner(claim, player)) {
-                if (player.isSneaking() && player.hasPermission("nclaim.admin")) {
-                    new AdminClaimManagementMenu(player, claim);
-                } else {
-                    new ClaimManagementMenu(player, claim);
-                }
+                new ClaimManagementMenu(player, claim, false);
             } else if (player.hasPermission("nclaim.admin")) {
-                new AdminClaimManagementMenu(player, claim);
+                new ClaimManagementMenu(player, claim, true);
             }
             return;
         }

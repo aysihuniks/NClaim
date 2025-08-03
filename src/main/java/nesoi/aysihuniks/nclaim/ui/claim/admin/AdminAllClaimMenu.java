@@ -5,6 +5,8 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
+import nesoi.aysihuniks.nclaim.ui.claim.ClaimMainMenu;
+import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
@@ -15,16 +17,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.Util;
-import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.guimanager.button.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.message.ChannelType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AdminAllClaimMenu extends BaseMenu {
@@ -52,9 +53,13 @@ public class AdminAllClaimMenu extends BaseMenu {
         displayTo(player);
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     private void setupMenu() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
 
         addNavigationButton();
         addSortButton();
@@ -77,7 +82,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
+                return ItemCreator.of(page == 0 ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
                         .name(NClaim.inst().getGuiLangManager().getString((page == 0 ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
@@ -86,7 +91,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_BACK.playSound(player);
                 if (page == 0) {
-                    new AdminDashboardMenu(player);
+                    new ClaimMainMenu(player);
                 } else {
                     new AdminAllClaimMenu(player, target, sortByNewest, page - 1, selectedClaims);
                 }
@@ -107,7 +112,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                 lore.replaceAll(s -> s.replace("{newest_status}", sortByNewest ? "&eNewest First" : "&7Newest First")
                         .replace("{oldest_status}", !sortByNewest ? "&eOldest First" : "&7Oldest First"));
 
-                return ItemCreator.of(Material.GOLD_BLOCK)
+                return ItemCreator.of(getMaterial("sort_by_date"))
                         .name(getString("sort_by_date.display_name"))
                         .lore(lore)
                         .get();
@@ -129,7 +134,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.NETHER_STAR)
+                return ItemCreator.of(getMaterial("search_player"))
                         .name(getString("search_player.display_name"))
                         .get();
             }
@@ -151,7 +156,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                 @Override
                 public ItemStack getItem() {
-                    return ItemCreator.of(Material.BOOK)
+                    return ItemCreator.of(getMaterial("reset_settings"))
                             .name(getString("reset_settings.display_name"))
                             .get();
                 }
@@ -174,7 +179,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                 @Override
                 public ItemStack getItem() {
-                    return ItemCreator.of(Material.BARRIER)
+                    return ItemCreator.of(getMaterial("delete_selected"))
                             .name(getString("delete_selected.display_name"))
                             .get();
                 }
@@ -199,7 +204,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.COMPASS)
+                return ItemCreator.of(getMaterialFullPath("next_page"))
                         .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                         .get();
             }
@@ -224,7 +229,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
     private List<Claim> getFilteredClaims() {
         return Claim.getClaims().stream()
-                .filter(claim -> claim != null && claim.getClaimId() != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(
                         Claim::getClaimId,
                         claim -> claim,
@@ -269,8 +274,8 @@ public class AdminAllClaimMenu extends BaseMenu {
                         .replace("{no}", String.valueOf(disabledSettings)));
 
                 return ItemCreator.of(selectedClaims.contains(claim) 
-                        ? Material.YELLOW_STAINED_GLASS_PANE 
-                        : Material.WHITE_STAINED_GLASS_PANE)
+                        ? getMaterial("claim_items.selected")
+                        : getMaterial("claim_items.unselected"))
                         .name(getString(section + ".display_name")
                                 .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown"))
                         .lore(lore)
@@ -295,7 +300,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             }
             new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
         } else if (clickType == ClickType.LEFT) {
-            new AdminClaimManagementMenu(player, claim);
+            new ClaimManagementMenu(player, claim, true);
         } else if (clickType == ClickType.SHIFT_LEFT) {
             player.closeInventory();
             teleportToClaimSafely(player, claim);

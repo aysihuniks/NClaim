@@ -13,11 +13,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.guimanager.button.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class ClaimListMenu extends BaseMenu {
     private static @NotNull ListType currentListType = ListType.ALL;
@@ -44,7 +47,6 @@ public class ClaimListMenu extends BaseMenu {
 
     private void setupMenu() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
         addNavigationButton();
         addListTypeButton();
         addClaimButtons();
@@ -52,6 +54,11 @@ public class ClaimListMenu extends BaseMenu {
         if (hasNextPage()) {
             addNextPageButton();
         }
+    }
+
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
     }
 
     private void addNavigationButton() {
@@ -65,7 +72,7 @@ public class ClaimListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
+                return ItemCreator.of(page == 0 ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
                         .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
                         .get();
             }
@@ -85,7 +92,7 @@ public class ClaimListMenu extends BaseMenu {
 
     private void addListTypeButton() {
         addButton(new Button() {
-            final String buttonPath = "list_type";
+
 
             @Override
             public @NotNull Set<Integer> getSlots() {
@@ -100,8 +107,8 @@ public class ClaimListMenu extends BaseMenu {
                 lore.add(formatListTypeEntry(ListType.PLAYER, "player"));
                 lore.add(formatListTypeEntry(ListType.COOP, "coop"));
 
-                return ItemCreator.of(Material.PAPER)
-                        .name(getString(buttonPath + ".display_name"))
+                return ItemCreator.of(getMaterial("list_type"))
+                        .name(getString("list_type.display_name"))
                         .lore(lore)
                         .get();
             }
@@ -128,7 +135,7 @@ public class ClaimListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.COMPASS)
+                return ItemCreator.of(getMaterialFullPath("next_page"))
                         .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                         .get();
             }
@@ -154,7 +161,7 @@ public class ClaimListMenu extends BaseMenu {
     }
 
     private List<Claim> getClaimsToShow() {
-        User.loadUser(player.getUniqueId()); // Force reload
+        User.loadUser(player.getUniqueId());
         User user = User.getUser(player.getUniqueId());
         List<Claim> claims = new ArrayList<>();
         
@@ -182,7 +189,7 @@ public class ClaimListMenu extends BaseMenu {
                 .replace("{coordinates}", NClaim.getCoordinates(chunk))
                 .replace("{owner}", Bukkit.getOfflinePlayer(claim.getOwner()).getName()));
 
-        ItemStack item = ItemCreator.of(isOwner ? Material.GRASS_BLOCK : Material.OAK_SIGN)
+        ItemStack item = ItemCreator.of(isOwner ? getMaterial("own_claims") : getMaterial("coop_claims"))
                 .name(getString(buttonPath + ".display_name")
                         .replace("{claim_id}", claim.getClaimId()))
                 .lore(lore)
@@ -201,7 +208,7 @@ public class ClaimListMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if (isOwner) new ClaimManagementMenu(player, claim);
+                if (isOwner) new ClaimManagementMenu(player, claim, false);
             }
         });
     }

@@ -18,14 +18,17 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nandayo.dapi.ItemCreator;
-import org.nandayo.dapi.guimanager.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
+import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DParticle;
 import org.nandayo.dapi.object.DSound;
 
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ManageClaimBlockMenu extends BaseMenu {
@@ -64,9 +67,13 @@ public class ManageClaimBlockMenu extends BaseMenu {
         displayTo(player);
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     private void setup() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
 
         List<ClaimBlockManager.ClaimBlockInfo> blockInfos = allowedBlocks();
         int start = page * BLOCK_SLOTS.length;
@@ -96,13 +103,18 @@ public class ManageClaimBlockMenu extends BaseMenu {
                             playerBalance = User.getUser(player.getUniqueId()).getBalance();
                         }
 
+                        DecimalFormat df = new DecimalFormat("#.##");
 
                         List<String> updatedLore = info.lore.stream()
                                 .map(line -> {
                                     if (line.contains("{cost}") || line.contains("{need_balance}")) {
                                         String balanceColor = playerBalance >= info.price ? "&a" : "&c";
-                                        return line.replace("{cost}", String.valueOf(info.price))
-                                                .replace("{need_balance}", balanceColor + String.valueOf(Math.min(playerBalance, info.price)));
+
+                                        String formattedPrice = df.format(info.price);
+                                        String formattedNeededBalance = df.format(Math.min(playerBalance, info.price));
+
+                                        return line.replace("{cost}", formattedPrice)
+                                                .replace("{need_balance}", balanceColor + formattedNeededBalance);
                                     }
                                     return line;
                                 })
@@ -112,7 +124,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                     if (claim.getClaimBlockType() == info.material) {
                         creator.enchant(Enchantment.MENDING, 1);
-                        creator.hideFlag(ItemFlag.values());
+                        creator.flags(ItemFlag.values());
                     }
                     return creator.get();
                 }
@@ -188,7 +200,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                 @Override
                 public @Nullable ItemStack getItem() {
-                    return ItemCreator.of(Material.ARROW)
+                    return ItemCreator.of(getMaterialFullPath("next_page"))
                             .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
                             .get();
                 }
@@ -202,6 +214,8 @@ public class ManageClaimBlockMenu extends BaseMenu {
         }
 
         addButton(new Button() {
+            final String buttonPath = page == 0 ? "back" : "previous_page";
+
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(PREV_PAGE_SLOT);
@@ -209,8 +223,8 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
             @Override
             public @Nullable ItemStack getItem() {
-                return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
-                        .name(NClaim.inst().getGuiLangManager().getString("previous_page.display_name"))
+                return ItemCreator.of(getMaterialFullPath(buttonPath))
+                        .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
                         .get();
             }
 
@@ -218,7 +232,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
             public void onClick(@NotNull Player clicker, @NotNull ClickType clickType) {
                 MessageType.MENU_BACK.playSound(player);
                 if (page == 0) {
-                    new ClaimManagementMenu(player, claim);
+                    new ClaimManagementMenu(player, claim, false);
                 } else {
                     new ManageClaimBlockMenu(claim, clicker, page - 1);
                 }

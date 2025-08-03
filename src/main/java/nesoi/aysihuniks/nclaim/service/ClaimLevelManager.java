@@ -14,7 +14,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.io.File;

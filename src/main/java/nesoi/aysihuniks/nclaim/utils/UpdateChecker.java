@@ -2,7 +2,7 @@ package nesoi.aysihuniks.nclaim.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;

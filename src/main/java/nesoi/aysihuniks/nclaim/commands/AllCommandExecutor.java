@@ -25,13 +25,11 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
     private final HashMap<String, BaseCommand> adminCommands = new HashMap<>();
 
     public AllCommandExecutor() {
-        // Root commands
         commands.put("about", new AboutCommand());
         commands.put("balance", new BalanceCommand());
         commands.put("help", new HelpCommand());
         commands.put("level", new LevelCommand());
 
-        // Admin commands
         adminCommands.put("add", new AddCommand());
         adminCommands.put("change", new ChangeCommand());
         adminCommands.put("menu", new MenuCommand());

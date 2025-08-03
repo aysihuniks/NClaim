@@ -2,12 +2,15 @@ package nesoi.aysihuniks.nclaim.commands.admin;
 
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.commands.BaseCommand;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminDashboardMenu;
+import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MenuCommand extends BaseCommand {
 
@@ -25,7 +28,7 @@ public class MenuCommand extends BaseCommand {
             return true;
         }
 
-        new AdminDashboardMenu(player);
+        new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
         return true;
     }
 }

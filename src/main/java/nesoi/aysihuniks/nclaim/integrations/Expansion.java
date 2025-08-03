@@ -186,11 +186,10 @@ public class Expansion extends PlaceholderExpansion {
         }
 
         String prefix = parts[0];
-        if (prefix.equals("total") || prefix.equals("coop_count")) {
-            if (parts.length < 5) {
-                return "Invalid format for " + prefix;
-            }
-            prefix = prefix + "_" + parts[1];
+        if ("coop".equals(prefix) && "count".equals(parts[1])) {
+            prefix = "coop_count";
+        } else if ("total".equals(prefix) && "size".equals(parts[1])) {
+            prefix = "total_size";
         }
 
         int worldIndex = parts.length - 3;

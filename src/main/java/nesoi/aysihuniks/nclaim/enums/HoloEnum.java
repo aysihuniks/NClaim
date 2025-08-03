@@ -1,7 +1,7 @@
 package nesoi.aysihuniks.nclaim.enums;
 
 import org.bukkit.Bukkit;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 public enum HoloEnum {
     DECENT_HOLOGRAM,

@@ -1,5 +1,6 @@
 package nesoi.aysihuniks.nclaim.hologram;
 
+import nesoi.aysihuniks.nclaim.Config;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.model.Claim;
@@ -11,8 +12,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.nandayo.dapi.HexUtil;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.HexUtil;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ import java.util.regex.Pattern;
 
 public class HologramManager {
     private final NClaim plugin;
-    private static final double DECENT_HOLO_OFFSET = 3;
-    private static final double FANCY_HOLO_OFFSET = 1.5;
+    private static final double DECENT_HOLO_OFFSET = NClaim.inst().getConfigManager().getDouble("decentY", 0.0);
+    private static final double FANCY_HOLO_OFFSET = NClaim.inst().getConfigManager().getDouble("fancyY", 0.0);
     private HologramHandler hologramHandler;
     private final Set<String> pendingWorlds = new HashSet<>();
     private boolean initialCleanupDone = false;
@@ -157,7 +158,7 @@ public class HologramManager {
             if (claim.getChunk().getWorld().getName().equals(worldName)) {
                 String hologramId = getHologramId(claim.getChunk());
 
-                if (!hologramExists(hologramId)) {
+                if (hologramExists(hologramId)) {
                     createHologramForClaim(claim);
                     created++;
                 }
@@ -176,7 +177,7 @@ public class HologramManager {
         for (Claim claim : Claim.claims) {
             String hologramId = getHologramId(claim.getChunk());
 
-            if (!hologramExists(hologramId)) {
+            if (hologramExists(hologramId)) {
                 createHologramForClaim(claim);
                 created++;
             }
@@ -188,20 +189,20 @@ public class HologramManager {
     }
 
     public boolean hologramExists(String hologramId) {
-        return hologramHandler.getHologramIds().contains(hologramId);
+        return !hologramHandler.getHologramIds().contains(hologramId);
     }
 
     public void createHologramForClaim(Claim claim) {
         if (claim == null) return;
 
         Location location = claim.getClaimBlockLocation();
-        if (location == null || location.getWorld() == null) return;
+        if (location.getWorld() == null) return;
 
         String hologramId = getHologramId(claim.getChunk());
-        hologramHandler.deleteHologram(hologramId); // Önce sil
+        hologramHandler.deleteHologram(hologramId);
 
         List<String> lines = generateHologramLines(claim);
-        Location adjustedLocation = getAdjustedLocation(location.clone());
+        Location adjustedLocation = getCenteredLocation(location.clone(), lines.size());
 
         hologramHandler.createHologram(hologramId, adjustedLocation, lines);
     }
@@ -226,7 +227,7 @@ public class HologramManager {
 
         String hologramId = getHologramId(chunk);
         List<String> lines = generateHologramLines(claim);
-        Location adjustedLocation = getAdjustedLocation(location.clone());
+        Location adjustedLocation = getCenteredLocation(location.clone(), lines.size());
 
         deleteHologram(chunk);
         hologramHandler.createHologram(hologramId, adjustedLocation, lines);
@@ -237,10 +238,21 @@ public class HologramManager {
         hologramHandler.deleteHologram(hologramId);
     }
 
-    private Location getAdjustedLocation(Location location) {
-        double offset = HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM ?
+    private Location getCenteredLocation(Location location, int lineCount) {
+        double baseOffset = HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM ?
                 DECENT_HOLO_OFFSET : FANCY_HOLO_OFFSET;
-        return location.add(0.5, offset, 0.5);
+        double lineSpacing = getLineSpacing();
+        double totalHeight = (lineCount - 1) * lineSpacing;
+        double centeredOffset = baseOffset + (totalHeight / 2);
+        return location.add(0.5, centeredOffset, 0.5);
+    }
+
+    private double getLineSpacing() {
+        if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
+            return 0.3;
+        } else {
+            return 0.25;
+        }
     }
 
     private String getHologramId(Chunk chunk) {
@@ -251,22 +263,45 @@ public class HologramManager {
         List<String> lines = new ArrayList<>();
         Chunk chunk = claim.getChunk();
 
-        lines.add(plugin.getLangManager().getString("hologram.title"));
-        lines.add(plugin.getLangManager().getString("hologram.owner")
-                .replace("{owner}", "%nclaim_owner_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
-        lines.add(plugin.getLangManager().getString("hologram.time_left.text")
-                .replace("{time_left}", "%nclaim_expiration_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+        Config config = NClaim.inst().getNconfig();
 
-        int coopCount = claim.getCoopPlayers().size();
-        if (coopCount > 0) {
-            lines.add(plugin.getLangManager().getString("hologram.coop_count")
-                    .replace("{coop_count}", "%nclaim_coop_count_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+        if (config.isShowHologramTitle()) {
+            lines.add(plugin.getLangManager().getString("hologram.title"));
         }
 
-        lines.add(plugin.getLangManager().getString("hologram.total_size")
-                .replace("{total_size}", "%nclaim_total_size_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
-        lines.add("");
-        lines.add(plugin.getLangManager().getString("hologram.edit"));
+        if (config.isShowHologramOwner()) {
+            lines.add(plugin.getLangManager().getString("hologram.owner")
+                    .replace("{owner}", "%nclaim_owner_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+
+        }
+
+        if (config.isShowHologramTimeLeft()) {
+            lines.add(plugin.getLangManager().getString("hologram.time_left.text")
+                    .replace("{time_left}", "%nclaim_expiration_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+
+        }
+
+        if (config.isShowHologramCoopCount()) {
+            lines.add(plugin.getLangManager().getString("hologram.coop_count")
+                    .replace("{coop_count}", "%nclaim_coop_count_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+
+        }
+
+        if (config.isShowHologramTotalSize()) {
+            lines.add(plugin.getLangManager().getString("hologram.total_size")
+                    .replace("{total_size}", "%nclaim_total_size_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+
+        }
+
+        long shownLineCount = lines.stream().filter(s -> !s.isEmpty()).count();
+        if (shownLineCount > 1) {
+            lines.add("");
+        }
+
+        if (config.isShowHologramEdit()) {
+            lines.add(plugin.getLangManager().getString("hologram.edit"));
+        }
+
 
         return lines.stream()
                 .map(HexUtil::parse)

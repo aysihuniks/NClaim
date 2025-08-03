@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.TimeLeftThreshold;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
-import org.nandayo.dapi.HexUtil;
+import org.nandayo.dapi.util.HexUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -81,16 +82,26 @@ public class ClaimExpirationManager {
             timeLeft = String.format("%d%s", diffSeconds, secondSymbol);
         }
 
-        String color;
-        if (diffDays >= 2) {
-            color = "{GREEN}";
-        } else if (diffDays >= 1) {
-            color = "{YELLOW}";
-        } else {
-            color = "{RED}";
-        }
+        long secondsLeft = Math.max(0, diffInMillis / 1000);
+        String color = getTimeLeftColor(secondsLeft);
 
         return HexUtil.parse(color + timeLeft);
+    }
+
+    public String getTimeLeftColor(long secondsLeft) {
+        for (TimeLeftThreshold t : plugin.getNconfig().getTimeLeftThresholds()) {
+            long userValue = NClaim.inst().getNconfig().getTimeUnitValue(secondsLeft, t.getUnit());
+            boolean match = false;
+            switch (t.getOperator()) {
+                case ">=": match = userValue >= t.getValue(); break;
+                case "<=": match = userValue <= t.getValue(); break;
+                case "<":  match = userValue < t.getValue(); break;
+                case ">":  match = userValue > t.getValue(); break;
+                case "==": match = userValue == t.getValue(); break;
+            }
+            if (match) return t.getColor();
+        }
+        return "&7";
     }
 
     public boolean isExpired(Claim claim) {

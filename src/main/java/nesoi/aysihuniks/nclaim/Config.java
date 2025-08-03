@@ -2,12 +2,13 @@ package nesoi.aysihuniks.nclaim;
 
 import lombok.Getter;
 import lombok.Setter;
+import nesoi.aysihuniks.nclaim.model.TimeLeftThreshold;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -27,17 +28,23 @@ public class Config {
         this.plugin = plugin;
     }
 
-    public String defaultLanguage;
-    public double claimBuyPrice;
-    public double eachLandBuyPrice;
-    public int claimExpiryDays;
-    public int maxCoopPlayers;
-    public int maxClaimCount;
-    public List<String> blacklistedWorlds;
-    public List<String> blacklistedRegions;
-    public int autoSave;
-
+    private String defaultLanguage;
+    private double claimBuyPrice;
+    private double eachLandBuyPrice;
     private boolean enableTieredPricing;
+    private int claimExpiryDays;
+    private int maxCoopPlayers;
+    private int maxClaimCount;
+    private List<String> blacklistedWorlds;
+    private List<String> blacklistedRegions;
+    private int autoSave;
+
+    private boolean showHologramTitle;
+    private boolean showHologramOwner;
+    private boolean showHologramTimeLeft;
+    private boolean showHologramCoopCount;
+    private boolean showHologramTotalSize;
+    private boolean showHologramEdit;
 
     private boolean databaseEnabled;
     private String databaseType;
@@ -61,6 +68,7 @@ public class Config {
     public FileConfiguration get() {
         return config;
     }
+    private List<TimeLeftThreshold> timeLeftThresholds = new java.util.ArrayList<>();
 
     public Config load() {
         File file = new File(plugin.getDataFolder(), "config.yml");
@@ -76,11 +84,16 @@ public class Config {
         setMaxClaimCount(config.getInt("claim_settings.max_count", 3));
         setClaimBuyPrice(config.getDouble("claim_settings.buy_price", 1500));
         setEachLandBuyPrice(config.getDouble("claim_settings.expand_price", 2000));
+        setEnableTieredPricing(config.getBoolean("claim_settings.tiered_pricing.enable", false));
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
-
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
 
-        setEnableTieredPricing(config.getBoolean("claim_settings.tiered_pricing.enable", false));
+        setShowHologramTitle(config.getBoolean("hologram_settings.show_title", true));
+        setShowHologramOwner(config.getBoolean("hologram_settings.show_owner", true));
+        setShowHologramTimeLeft(config.getBoolean("hologram_settings.show_time_left", true));
+        setShowHologramCoopCount(config.getBoolean("hologram_settings.show_coop_count", true));
+        setShowHologramTotalSize(config.getBoolean("hologram_settings.show_total_size", true));
+        setShowHologramEdit(config.getBoolean("hologram_settings.show_edit", true));
 
         setTimeExtensionPricePerMinute(config.getDouble("time_extension.price_per_minute", 10));
         setTimeExtensionPricePerHour(config.getDouble("time_extension.price_per_hour", 500));
@@ -104,6 +117,7 @@ public class Config {
         setConnectionTimeout(config.getLong("database.mysql.connection_timeout", 30000));
 
         validateTierConfiguration();
+        loadTimeLeftThresholds();
 
         return this;
     }
@@ -119,6 +133,13 @@ public class Config {
             config.set("claim_settings.expand_price", getEachLandBuyPrice());
             config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
+
+            config.set("hologram_settings.show_title", isShowHologramTitle());
+            config.set("hologram_settings.show_owner", isShowHologramOwner());
+            config.set("hologram_settings.show_time_left", isShowHologramTimeLeft());
+            config.set("hologram_settings.show_coop_count", isShowHologramCoopCount());
+            config.set("hologram_settings.show_total_size", isShowHologramTotalSize());
+            config.set("hologram_settings.show_edit", isShowHologramEdit());
 
             config.set("claim_settings.tiered_pricing.enable", isEnableTieredPricing());
 
@@ -149,8 +170,39 @@ public class Config {
         }
     }
 
+    public void loadTimeLeftThresholds() {
+        timeLeftThresholds.clear();
+        if (config.isList("hologram_settings.time_left_thresholds")) {
+            List<?> rawList = config.getList("hologram_settings.time_left_thresholds");
+            for (Object obj : rawList) {
+                if (!(obj instanceof java.util.Map)) continue;
+                java.util.Map<?, ?> map = (java.util.Map<?, ?>) obj;
+                String thresholdStr = String.valueOf(map.get("threshold"));
+                String color = String.valueOf(map.get("color"));
+                String[] parts = thresholdStr.split(" ");
+                if (parts.length != 3) continue;
+                TimeLeftThreshold t = new TimeLeftThreshold();
+                t.unit = parts[0].trim();
+                t.operator = parts[1].trim();
+                t.value = Integer.parseInt(parts[2].trim());
+                t.color = color;
+                timeLeftThresholds.add(t);
+            }
+        }
+    }
+
+    public static long getTimeUnitValue(long seconds, String unit) {
+        switch (unit) {
+            case "day": return seconds / 86400;
+            case "hour": return seconds / 3600;
+            case "minute": return seconds / 60;
+            case "second": return seconds;
+            default: return seconds;
+        }
+    }
+
     public double getTieredPrice(int chunkNumber) {
-        if (chunkNumber > 41) {
+        if (chunkNumber > 35) {
             return -1;
         }
 
@@ -164,8 +216,8 @@ public class Config {
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
                 double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
 
-                if (minChunk > 41 || maxChunk > 41) {
-                    Util.log("&cWarning: Tier " + tierKey + " has chunk numbers above limit (41). Skipping...");
+                if (minChunk > 35 || maxChunk > 35) {
+                    Util.log("&cWarning: Tier " + tierKey + " has chunk numbers above limit (35). Skipping...");
                     continue;
                 }
 
@@ -176,34 +228,6 @@ public class Config {
         }
 
         return getEachLandBuyPrice();
-    }
-
-    public String getTierInfo() {
-        if (!isEnableTieredPricing()) {
-            return "§7Tiered pricing system is disabled. Fixed price: §a$" + String.format("%.2f", getEachLandBuyPrice());
-        }
-
-        StringBuilder info = new StringBuilder("§6=== Tiered Pricing System ===\n");
-
-        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
-            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
-                int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
-                int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
-                double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
-
-                // Skip invalid tiers
-                if (minChunk > 41 || maxChunk > 41) {
-                    info.append("§c").append(tierKey).append(": §cInvalid (exceeds 41 chunk limit)\n");
-                    continue;
-                }
-
-                String priceText = price > 0 ? "$" + String.format("%.0f", price) : "FREE";
-                info.append("§e").append(minChunk).append("-").append(maxChunk)
-                        .append(" chunks: §a").append(priceText).append(" per chunk\n");
-            }
-        }
-
-        return info.toString();
     }
 
     public boolean validateTierConfiguration() {
@@ -218,8 +242,8 @@ public class Config {
                 int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
 
-                if (minChunk > 41 || maxChunk > 41) {
-                    Util.log("&cError: Tier " + tierKey + " exceeds maximum chunk limit (41)!");
+                if (minChunk > 35 || maxChunk > 35) {
+                    Util.log("&cError: Tier " + tierKey + " exceeds maximum chunk limit (35)!");
                     isValid = false;
                 }
 
@@ -291,9 +315,6 @@ public class Config {
         return lang.equals("en-US") || lang.equals("tr-TR");
     }
 
-    /*
-     * Update config
-     */
     public Config updateConfig() {
         String version = plugin.getDescription().getVersion();
         String configVersion = config.getString("config_version", "0");
@@ -306,14 +327,12 @@ public class Config {
             return this;
         }
 
-        // Backup old config
         saveBackupConfig();
 
-        // Value pasting from old config
         FileConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
         for(String key : defConfig.getKeys(true)) {
             if (defConfig.isConfigurationSection(key)) {
-                continue; // Skip parent keys
+                continue;
             }
             if(config.contains(key)) {
                 defConfig.set(key, config.get(key));

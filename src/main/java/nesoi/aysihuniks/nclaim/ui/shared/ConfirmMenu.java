@@ -1,21 +1,22 @@
 package nesoi.aysihuniks.nclaim.ui.shared;
 
 import com.google.common.collect.Sets;
+import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.ItemCreator;
-import org.nandayo.dapi.guimanager.Button;
+import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.MenuType;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
+import org.nandayo.dapi.guimanager.button.Button;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ConfirmMenu extends BaseMenu {
     private final String itemName;
@@ -30,10 +31,14 @@ public class ConfirmMenu extends BaseMenu {
         this.onFinish = onFinish;
 
         createInventory(MenuType.CHEST_3_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
         setup();
         MessageType.MENU_FORWARD.playSound(player);
         displayTo(player);
+    }
+
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
     }
 
     private void setup() {
@@ -51,7 +56,7 @@ public class ConfirmMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.BOOK)
+                return ItemCreator.of(getMaterial("center"))
                         .name(itemName)
                         .lore(lore)
                         .get();
@@ -69,7 +74,7 @@ public class ConfirmMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.GREEN_DYE)
+                return ItemCreator.of(getMaterial("confirm"))
                         .name(getString("confirm.display_name"))
                         .get();
             }
@@ -91,7 +96,7 @@ public class ConfirmMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.RED_DYE)
+                return ItemCreator.of(getMaterial("decline"))
                         .name(getString("decline.display_name"))
                         .get();
             }

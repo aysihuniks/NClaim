@@ -8,25 +8,25 @@ import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
-import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.CoopPermission;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.nandayo.dapi.Util;
-import org.nandayo.dapi.guimanager.Button;
-import org.nandayo.dapi.ItemCreator;
+import org.jetbrains.annotations.Nullable;
+import org.nandayo.dapi.guimanager.button.Button;
+import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CoopListMenu extends BaseMenu {
@@ -57,13 +57,17 @@ public class CoopListMenu extends BaseMenu {
         });
     }
 
+    @Override
+    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
+        return BackgroundMenu::getButton;
+    }
+
     public CoopListMenu(Player player, @NotNull Claim claim, Boolean admin) {
         this(player, claim, admin, 0);
     }
 
     private void setupMenu() {
         createInventory(MenuType.CHEST_6_ROWS, getString("title"));
-        setBackgroundButton(BackgroundMenu::getButton);
 
         addNavigationButton();
         addAddMemberButton();
@@ -83,7 +87,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(page == 0 ? Material.OAK_DOOR : Material.FEATHER)
+                return ItemCreator.of(page == 0 ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
                         .name(NClaim.inst().getGuiLangManager().getString((page == 0 ? "back" : "previous_page") + ".display_name"))
                         .get();
             }
@@ -92,11 +96,7 @@ public class CoopListMenu extends BaseMenu {
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_BACK.playSound(player);
                 if (page == 0) {
-                    if (!admin) {
-                        new ClaimManagementMenu(player, claim);
-                    } else {
-                        new AdminClaimManagementMenu(player, claim);
-                    }
+                    new ClaimManagementMenu(player, claim, admin);
                 } else {
                     new CoopListMenu(player, claim, admin, page - 1);
                 }
@@ -113,7 +113,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.NETHER_STAR)
+                return ItemCreator.of(getMaterial("add_coop"))
                         .name(getString("add_coop.display_name"))
                         .get();
             }
@@ -184,7 +184,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.COMPASS)
+                return ItemCreator.of(getMaterialFullPath("next_page"))
                         .name(getString("next_page.display_name"))
                         .get();
             }
@@ -229,7 +229,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.RED_STAINED_GLASS_PANE)
+                return ItemCreator.of(getMaterial("locked_slot"))
                         .name(getString("locked_slot.display_name"))
                         .lore(getStringList("locked_slot.lore"))
                         .get();
@@ -296,7 +296,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(Material.WHITE_STAINED_GLASS_PANE)
+                return ItemCreator.of(getMaterial("empty_slot"))
                         .name(getString("empty_slot.display_name"))
                         .lore(getStringList("empty_slot.lore"))
                         .get();

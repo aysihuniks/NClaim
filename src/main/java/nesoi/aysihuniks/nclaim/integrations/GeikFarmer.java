@@ -4,7 +4,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.utils.FarmerListener;
 import org.bukkit.Location;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 import xyz.geik.farmer.Main;
 import xyz.geik.farmer.integrations.Integrations;
 

@@ -10,6 +10,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
 
+import java.text.DecimalFormat;
+
 public class BalanceCommand extends BaseCommand {
 
     @Override
@@ -31,7 +33,10 @@ public class BalanceCommand extends BaseCommand {
                 ? User.getUser(player.getUniqueId()).getBalance()
                 : NClaim.inst().getEconomy().getBalance(player);
 
-        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.current").replace("{balance}", String.valueOf(balance)));
+        DecimalFormat df = new DecimalFormat("#.##");
+        String formattedBalance = df.format(balance);
+
+        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.current").replace("{balance}", formattedBalance));
         return true;
     }
 }

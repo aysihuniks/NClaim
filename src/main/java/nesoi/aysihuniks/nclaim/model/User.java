@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.nandayo.dapi.Util;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,6 +37,10 @@ public class User {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
+    }
+
+    public String getFormattedBalance() {
+        return String.format("%.2f", this.balance);
     }
 
     public void addBalance(double amount) {
