@@ -1,0 +1,645 @@
+guis:
+  background_buttons: true
+  background_1:
+    display_name: "&8x"
+    material: "BLACK_STAINED_GLASS_PANE"
+  background_2:
+    display_name: "&8x"
+    material: "GRAY_STAINED_GLASS_PANE"
+  back:
+    display_name: "&eRetour"
+    material: "OAK_DOOR"
+  previous_page:
+    display_name: "&ePage précédente"
+    material: "FEATHER"
+  next_page:
+    display_name: "&ePage suivante"
+    material: "COMPASS"
+  enabled:
+    display_name: "&aActivé"
+  disabled:
+    display_name: "&cDésactivé"
+
+  # Menu de revendication - Lorsque /nclaim est tapé, c'est le menu avec des opérations telles que l'achat d'une revendication
+  claim_menu:
+    title: "Menu de revendication"
+    admin:
+      display_name: "&6Menu Admin"
+      material: "COMMAND_BLOCK"
+    buy_claim:
+      display_name: "&6Acheter une revendication"
+      material: "EMERALD"
+      lore:
+        - ""
+        - "&fAcheter une nouvelle revendication"
+        - "&7Coût : &e${price}"
+        - ""
+        - "&eCliquez pour acheter"
+    manage_claims:
+      display_name: "&6Gérer les revendications"
+      material: "CHEST"
+      lore:
+        - ""
+        - "&fGérer vos revendications :"
+        - "&7• &fAfficher toutes les revendications"
+        - "&7• &fModifier les paramètres"
+        - "&7• &fGérer les membres"
+        - ""
+        - "&eCliquez pour gérer"
+
+  # Menu Liste des revendications - Le menu qui s'ouvre après avoir tapé /nclaim et cliqué sur le bouton « Gérer les revendications ».
+  claim_list_menu:
+    title: "Liste des revendications"
+    list_type:
+      display_name: "&6Type de liste"
+      material: "PAPER"
+      all: "Tous"
+      player: "Joueur"
+      coop: "Co-op"
+    own_claims:
+      display_name: "&6Revendication : &e{claim_id}"
+      material: "GRASS_BLOCK"
+      lore:
+        - ""
+        - "&fMonde : &e{world}"
+        - "&fEmplacement : &e{coordinates}"
+        - "&fPropriétaire : &e{owner}"
+        - ""
+        - "&7Cliquez pour gérer"
+    coop_claims:
+      display_name: "&6Revendication Co-op : &e{claim_id}"
+      material: "OAK_SIGN"
+      lore:
+        - ""
+        - "&fMonde : &e{world}"
+        - "&fEmplacement : &e{coordinates}"
+        - "&fPropriétaire : &e{owner}"
+        - ""
+        - "&7Vous pouvez seulement afficher"
+
+  # Menu de gestion des revendications - Le menu qui s'ouvre lors de l'interaction avec le bloc de revendication.
+  claim_management_menu:
+    title: "Gérer la revendication"
+    expand:
+      display_name: "&6Étendre la revendication"
+      material: "GRASS_BLOCK"
+      lore:
+        - ""
+        - "&fÉtendre votre territoire de revendication"
+        - "&7• &fAjouter de nouveaux blocs"
+        - "&7• &fAfficher les blocs actuels"
+        - ""
+        - "&eCliquez pour gérer"
+    time:
+      display_name: "&6Gérer l'expiration"
+      material: "CLOCK"
+      lore:
+        - ""
+        - "&fGérer la durée de la revendication :"
+        - "&7• &fAfficher la date d'expiration"
+        - "&7• &fProlonger la durée de la revendication"
+        - ""
+        - "&eCliquez pour gérer"
+    coop:
+      display_name: "&6Gérer les Co-ops"
+      material: "TURTLE_HELMET"
+      lore:
+        - ""
+        - "&fGérer les membres co-op :"
+        - "&7• &fAjouter/Supprimer des membres"
+        - "&7• &fModifier les autorisations"
+        - ""
+        - "&eCliquez pour gérer"
+    setting:
+      display_name: "&6Paramètres de revendication"
+      material: "END_CRYSTAL"
+      lore:
+        - ""
+        - "&fConfigurer les paramètres de revendication :"
+        - "&7• &fAutorisations"
+        - "&7• &fProtections"
+        - "&7• &fRègles d'accès"
+        - ""
+        - "&eCliquez pour configurer"
+    type:
+      display_name: "&6Type de bloc de revendication"
+      material: "SHULKER_BOX"
+      lore:
+        - ""
+        - "&fModifier le type de votre bloc de revendication"
+        - "&7• &fAffecte seulement l'apparence"
+        - "&7• &fN'affecte pas les protections"
+        - ""
+        - "&eCliquez pour modifier"
+    delete:
+      display_name: "&cSupprimer la revendication"
+      material: "TNT"
+      lore:
+        - ""
+        - "&cAvertissement : &fCela supprimera définitivement"
+        - "&fvotre revendication sans aucun remboursement"
+        - ""
+        - "&7Cliquez pour continuer"
+
+  # Menu d'extension de revendication - Le menu qui s'ouvre après avoir interagi avec le bloc de revendication et cliqué sur le bouton « Étendre la revendication ».
+  claim_expand_menu:
+    title: "Étendre la revendication"
+    center:
+      display_name: "&6Bloc central"
+      lore:
+        - ""
+        - "&fCeci est le bloc central de votre revendication"
+    expand:
+      display_name: "&6Étendre la revendication"
+      material: "BROWN_WOOL"
+      lore:
+        - ""
+        - "&fÉtendre votre revendication"
+        - "&7Coût : &e${price}"
+        - ""
+        - "&eCliquez pour acheter"
+    claimed:
+      display_name: "&aBloc revendiqué"
+      material: "GREEN_WOOL"
+      lore:
+        - ""
+        - "&fCe bloc est revendiqué"
+    not_adjacent:
+      display_name: "&cBloc non valide"
+      material: "BLACK_WOOL"
+      lore:
+        - ""
+        - "&fVous pouvez seulement revendiquer des blocs adjacents"
+    claimed_another_player:
+      display_name: "&cRevendiqué par un autre joueur"
+      material: "RED_WOOL"
+      lore:
+        - ""
+        - "&fCe bloc appartient à quelqu'un d'autre"
+
+  # Menu de gestion du temps de revendication - Le menu qui s'ouvre après avoir interagi avec le bloc de revendication et cliqué sur le bouton « Gérer l'expiration ».
+  claim_time_management_menu:
+    title: "Gérer le temps"
+    claim_info:
+      display_name: "&6Informations sur la durée"
+      material: "ITEM_FRAME"
+      lore:
+        - ""
+        - "&fTemps restant : &e{time_left}"
+        - "&fExpire : &e{expires_at}"
+    confirm:
+      display_name: "&aConfirmer les modifications"
+      material: "BLUE_ICE"
+      lore:
+        - ""
+        - "&fNouvelle durée :"
+        - "&7• &e{d} &fjours"
+        - "&7• &e{h} &fheures"
+        - "&7• &e{m} &fminutes"
+        - "&7Coût : &e${price}"
+    select_time_unit:
+      display_name: "&6Sélectionner l'unité de temps"
+      material: "CHAIN"
+      lore:
+        - ""
+        - "&f• {days_status}"
+        - "&f• {hours_status}"
+        - "&f• {minutes_status}"
+    days_status: "Jours" # You cannot use color codes.
+    hours_status: "Heures"
+    minutes_status: "Minutes"
+    add_one:
+      display_name: "&a+1 {unit}"
+      material: "LIME_CONCRETE"
+    add_six:
+      display_name: "&a+6 {unit}"
+      material: "GREEN_CONCRETE"
+    subtract_one:
+      display_name: "&c-1 {unit}"
+      material: "PINK_CONCRETE"
+    subtract_six:
+      display_name: "&c-6 {unit}"
+      material: "RED_CONCRETE"
+
+  claim_manage_coop_menu:
+    title: "Membres Co-op"
+    offline: "&7(Hors ligne)"
+    add_coop:
+      display_name: "&aAjouter un membre"
+      material: "NETHER_STAR"
+    search_title: "Entrez un nom de joueur"
+    empty_slot:
+      display_name: "&fEmplacement vide"
+      material: "WHITE_STAINED_GLASS_PANE"
+      lore:
+        - ""
+        - "&eCliquez pour ajouter un membre"
+    locked_slot:
+      display_name: "&cEmplacement verrouillé"
+      material: "RED_STAINED_GLASS_PANE"
+      lore:
+        - ""
+        - "&eAutorisation requise"
+    coop_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fRejoint : &7{date}"
+        - ""
+        - "&eCliquez pour modifier"
+      admin_lore:
+        - "&fAutorisations : &a{yes}&7/&c{no}"
+        - ""
+        - "&eCliquez pour modifier"
+
+  manage_coop_player_permission_menu:
+    title: "Gérer {player}"
+    click_to_view: "&eCliquez pour afficher"
+    right_click_toggle: "&eClique droit pour tout activer/désactiver"
+    offline: "&7(Hors ligne)"
+    player_info:
+      display_name: "&e{player}"
+      lore:
+        - ""
+        - "&fRejoint : &7{date}"
+        - ""
+        - "&7Gérer les autorisations ci-dessous"
+    transfer:
+      display_name: "&6Transférer la revendication"
+      material: "GOLDEN_HELMET"
+      lore:
+        - ""
+        - "&7Transférer la propriété de cette revendication"
+        - "&7à &e{player}"
+        - ""
+        - "&7Cette action est irréversible !"
+        - ""
+        - "&eCliquez pour transférer"
+    kick:
+      display_name: "&cExclure le Co-op"
+      material: "BARRIER"
+      lore:
+        - ""
+        - "&fExclure ce co-op"
+        - "&fde votre revendication"
+        - ""
+        - "&7Cliquez pour exclure"
+    categories:
+      blocks:
+        display_name: "&6Autorisations de bloc"
+        material: "GRASS_BLOCK"
+      containers:
+        display_name: "&6Accès aux conteneurs"
+        material: "CHEST"
+      redstone:
+        display_name: "&6Utilisation de la redstone"
+        material: "REDSTONE_WIRE"
+      doors:
+        display_name: "&6Accès aux portes"
+        material: "OAK_DOOR"
+      workstations:
+        display_name: "&6Utilisation des postes de travail"
+        material: "CRAFTING_TABLE"
+      interactions:
+        display_name: "&6Droits d'interaction"
+        material: "LEVER"
+      liquids:
+        display_name: "&6Gestion des liquides"
+        material: "WATER_BUCKET"
+      entities:
+        display_name: "&6Interactions avec les entités"
+        material: "VILLAGER_SPAWN_EGG"
+    permissions:
+      break_blocks:
+        display_name: "&fCasser des blocs"
+        material: "DIAMOND_PICKAXE"
+      break_spawner:
+        display_name: "&fCasser des générateurs"
+        material: "SPAWNER"
+      place_blocks:
+        display_name: "&fPlacer des blocs"
+        material: "GRASS_BLOCK"
+      place_spawner:
+        display_name: "&fPlacer des générateurs"
+        material: "SPAWNER"
+      use_chest:
+        display_name: "&fUtiliser des coffres"
+        material: "CHEST"
+      use_furnace:
+        display_name: "&fUtiliser des fours"
+        material: "FURNACE"
+      use_barrel:
+        display_name: "&fUtiliser des tonneaux"
+        material: "BARREL"
+      use_shulker:
+        display_name: "&fUtiliser des boîtes de Shulker"
+        material: "SHULKER_BOX"
+      use_hopper:
+        display_name: "&fUtiliser des entonnoirs"
+        material: "HOPPER"
+      use_dispenser:
+        display_name: "&fUtiliser des distributeurs"
+        material: "DISPENSER"
+      use_dropper:
+        display_name: "&fUtiliser des largueurs"
+        material: "DROPPER"
+      use_repeater:
+        display_name: "&fUtiliser des répéteurs"
+        material: "REPEATER"
+      use_comparator:
+        display_name: "&fUtiliser des comparateurs"
+        material: "COMPARATOR"
+      use_buttons:
+        display_name: "&fUtiliser des boutons"
+        material: "STONE_BUTTON"
+      use_pressure_plates:
+        display_name: "&fUtiliser des plaques de pression"
+        material: "STONE_PRESSURE_PLATE"
+      use_levers:
+        display_name: "&fUtiliser des leviers"
+        material: "LEVER"
+      use_doors:
+        display_name: "&fUtiliser des portes"
+        material: "OAK_DOOR"
+      use_trapdoors:
+        display_name: "&fUtiliser des trappes"
+        material: "OAK_TRAPDOOR"
+      use_gates:
+        display_name: "&fUtiliser des portails"
+        material: "OAK_FENCE_GATE"
+      use_crafting:
+        display_name: "&fUtiliser des tables de fabrication"
+        material: "CRAFTING_TABLE"
+      use_enchanting:
+        display_name: "&fUtiliser des tables d'enchantement"
+        material: "ENCHANTING_TABLE"
+      use_anvil:
+        display_name: "&fUtiliser des enclumes"
+        material: "ANVIL"
+      use_grindstone:
+        display_name: "&fUtiliser des meules"
+        material: "GRINDSTONE"
+      use_stonecutter:
+        display_name: "&fUtiliser des tailleurs de pierre"
+        material: "STONECUTTER"
+      use_loom:
+        display_name: "&fUtiliser des métiers à tisser"
+        material: "LOOM"
+      use_smithing:
+        display_name: "&fUtiliser des tables de forgeron"
+        material: "SMITHING_TABLE"
+      use_cartography:
+        display_name: "&fUtiliser des tables de cartographie"
+        material: "CARTOGRAPHY_TABLE"
+      use_brewing:
+        display_name: "&fUtiliser des alambics"
+        material: "BREWING_STAND"
+      use_bell:
+        display_name: "&fUtiliser des cloches"
+        material: "BELL"
+      use_beacon:
+        display_name: "&fUtiliser des balises"
+        material: "BEACON"
+      use_jukebox:
+        display_name: "&fUtiliser des juke-box"
+        material: "JUKEBOX"
+      use_noteblock:
+        display_name: "&fUtiliser des blocs musicaux"
+        material: "NOTE_BLOCK"
+      use_campfire:
+        display_name: "&fUtiliser des feux de camp"
+        material: "CAMPFIRE"
+      use_bed:
+        display_name: "&fUtiliser des lits"
+        material: "RED_BED"
+      interact_armor_stand:
+        display_name: "&fUtiliser des présentoirs d'armure"
+        material: "ARMOR_STAND"
+      interact_item_frame:
+        display_name: "&fUtiliser des cadres d'objets"
+        material: "ITEM_FRAME"
+      place_water:
+        display_name: "&fPlacer de l'eau"
+        material: "WATER_BUCKET"
+      place_lava:
+        display_name: "&fPlacer de la lave"
+        material: "LAVA_BUCKET"
+      take_water:
+        display_name: "&fPrendre de l'eau"
+        material: "WATER_BUCKET"
+      take_lava:
+        display_name: "&fPrendre de la lave"
+        material: "LAVA_BUCKET"
+      interact_villager:
+        display_name: "&fÉchanger avec des villageois"
+        material: "EMERALD"
+      leash_mobs:
+        display_name: "&fAttacher des créatures"
+        material: "LEAD"
+      ride_entities:
+        display_name: "&fMonter des entités"
+        material: "SADDLE"
+
+  claim_settings_menu:
+    title: "Paramètres de revendication"
+    settings:
+      pvp:
+        display_name: "&6PvP"
+        material: "DIAMOND_SWORD"
+        lore:
+          - ""
+          - "&fAutoriser le combat de joueur dans la revendication"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      tnt_explosions:
+        display_name: "&6Dégâts de TNT"
+        material: "TNT"
+        lore:
+          - ""
+          - "&fAutoriser le TNT à endommager les blocs"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      creeper_explosions:
+        display_name: "&6Dégâts de Creeper"
+        material: "CREEPER_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAutoriser les dégâts d'explosion de Creeper"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      mob_attacks:
+        display_name: "&6Combat de créatures"
+        material: "GOLDEN_APPLE"
+        lore:
+          - ""
+          - "&fAutoriser les joueurs à combattre les créatures"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      monster_spawning:
+        display_name: "&6Apparition de monstres"
+        material: "ZOMBIE_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAutoriser l'apparition de monstres"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      animal_spawning:
+        display_name: "&6Apparition d'animaux"
+        material: "PIG_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAutoriser l'apparition d'animaux"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+      villager_interactions:
+        display_name: "&6Échange avec les villageois"
+        material: "VILLAGER_SPAWN_EGG"
+        lore:
+          - ""
+          - "&fAutoriser les interactions avec les villageois"
+          - ""
+          - "&7Statut : {status}"
+          - ""
+          - "&eCliquez pour activer/désactiver"
+
+  claim_block_management_menu:
+    title: "Gestion du type de bloc de revendication"
+
+  admin_menu:
+    all_claims_menu:
+      title: "Toutes les revendications"
+      reset_settings:
+        display_name: "&cRéinitialiser les paramètres"
+        material: "BOOK"
+      search_player:
+        display_name: "&aRechercher un joueur"
+        material: "NETHER_STAR"
+      sort_by_date:
+        display_name: "&aTrier par date"
+        material: "GOLD_BLOCK"
+        lore:
+          - ""
+          - "&f• {newest_status}"
+          - "&f• {oldest_status}"
+      delete_selected:
+        display_name: "&cSupprimer la sélection"
+        material: "BARRIER"
+      claim_items:
+        selected:
+          display_name: "&aRevendication de {owner} &7(Sélectionnée)"
+          material: "YELLOW_STAINED_GLASS_PANE"
+          lore:
+            - ""
+            - "&fCréé : &7{created_at}"
+            - "&fEmplacement : &7{world}, {coordinates}"
+            - "&fTaille : &7{land_size} blocs"
+            - "&fMembres Co-op : &7{coop_count}"
+            - "&fParamètres : &a{yes}&7/&c{no}"
+            - ""
+            - "&eCliquez &7- &fGérer"
+            - "&eMaj + Clic &7- &fTéléporter"
+            - "&eClic droit &7- &fDésélectionner"
+        unselected:
+          display_name: "&6Revendication de {owner}"
+          material: "WHITE_STAINED_GLASS_PANE"
+          lore:
+            - ""
+            - "&fCréé : &7{created_at}"
+            - "&fEmplacement : &7{world}, {coordinates}"
+            - "&fTaille : &7{land_size} blocs"
+            - "&fMembres Co-op : &7{coop_count}"
+            - ""
+            - "&fParamètres : &a{yes}&7/&c{no}"
+            - ""
+            - "&eCliquez &7- &fGérer"
+            - "&eMaj + Clic &7- &fTéléporter"
+            - "&eClic droit &7- &fSélectionner"
+
+  # Menu de confirmation - C'est le menu qui s'ouvre lorsqu'il y a un processus de confirmation.
+  confirm_menu:
+    title: "Confirmer l'action"
+    confirm:
+      display_name: "&aConfirmer"
+      material: "GREEN_DYE"
+    decline:
+      display_name: "&cRefuser"
+      material: "RED_DYE"
+    center:
+      material: "BOOK"
+    children:
+      buy_new_claim:
+        display_name: "&6Acheter une nouvelle revendication"
+        lore:
+          - ""
+          - "&fSi vous approuvez cette action :"
+          - "&7• &e${price} &fsera déduit de votre solde"
+          - "&7• &fVous recevrez une &enouvelle revendication"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer l'achat"
+          - "&cCliquez sur la teinture rouge pour annuler l'achat"
+      claim_expand:
+        display_name: "&6Étendre la revendication"
+        lore:
+          - ""
+          - "&fSi vous approuvez cette action :"
+          - "&7• &fCoût : &e${price}"
+          - "&7• &fLe bloc sélectionné sera ajouté à votre revendication"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer l'extension"
+          - "&cCliquez sur la teinture rouge pour annuler l'extension"
+      delete_claim:
+        display_name: "&6Supprimer la revendication"
+        lore:
+          - ""
+          - "&cAvertissement : &fCette action :"
+          - "&7• &fSupprimera définitivement votre revendication"
+          - "&7• &fNe peut pas être annulée"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer la suppression"
+          - "&cCliquez sur la teinture rouge pour annuler la suppression"
+      kick_coop:
+        display_name: "&6Supprimer le Co-op"
+        lore:
+          - ""
+          - "&fCette action :"
+          - "&7• &fSupprimera &e{player} &fde votre revendication"
+          - "&7• &fRévoquera toutes ses autorisations"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer la suppression"
+          - "&cCliquez sur la teinture rouge pour annuler la suppression"
+      add_coop:
+        display_name: "&6Ajouter un membre Co-op"
+        lore:
+          - ""
+          - "&fCette action :"
+          - "&7• &fAjoutera &e{player} &fà votre revendication"
+          - "&7• &fLui accordera des autorisations co-op"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer l'ajout"
+          - "&cCliquez sur la teinture rouge pour annuler l'ajout"
+      transfer_claim:
+        display_name: "&6Transférer la revendication"
+        lore:
+          - ""
+          - "&cAvertissement : &fCette action :"
+          - "&7• &fTransférera la propriété à &e{player}"
+          - "&7• &fSupprimera votre accès à cette revendication"
+          - "&7• &fNe peut pas être annulée"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer le transfert"
+          - "&cCliquez sur la teinture rouge pour annuler le transfert"
+
+# NE PAS CHANGER!
+gui_version: "{version}"
