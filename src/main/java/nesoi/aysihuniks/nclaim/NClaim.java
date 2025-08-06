@@ -36,7 +36,6 @@ import org.nandayo.dapi.object.DParticle;
 import org.nandayo.dapi.object.DSound;
 import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.util.Util;
-import space.arim.morepaperlib.MorePaperLib;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -59,7 +58,6 @@ public final class NClaim extends JavaPlugin {
     private ClaimSettingsManager claimSettingsManager;
     private ClaimLevelManager blockValueManager;
     private HeadManager headManager;
-    private MorePaperLib morePaperLib;
     private MySQLManager mySQLManager;
     private SQLiteManager sqLiteManager;
     private DatabaseManager databaseManager;
@@ -246,7 +244,6 @@ public final class NClaim extends JavaPlugin {
 
     private void initializeManagers() {
         wrapper = new Wrapper(this);
-        morePaperLib = new MorePaperLib(this);
         if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
             GeikFarmer.registerIntegration();
         }
