@@ -14,6 +14,7 @@ import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
  import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.ui.claim.management.TimeManagementMenu;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -310,6 +311,8 @@ public class ClaimManager implements Listener {
                 new ClaimManagementMenu(player, claim, false);
             } else if (player.hasPermission("nclaim.admin")) {
                 new ClaimManagementMenu(player, claim, true);
+            } else if(coopManager.hasPermission(player, claim, Permission.EXTEND_EXPIRATION)) {
+                new TimeManagementMenu(player, 0, 0, 0, 0, claim, false);
             }
             return;
         }

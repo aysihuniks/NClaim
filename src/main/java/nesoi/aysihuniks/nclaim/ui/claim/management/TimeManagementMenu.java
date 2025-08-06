@@ -32,7 +32,7 @@ public class TimeManagementMenu extends BaseMenu {
     private int minutes;
     private int timeUnit;
     private final @NotNull Claim claim;
-    private boolean admin;
+    private final boolean admin;
 
     public TimeManagementMenu(@NotNull Player player, int days, int hours, int minutes, int timeUnit, @NotNull Claim claim, boolean admin) {
         super("claim_time_management_menu");
@@ -97,7 +97,7 @@ public class TimeManagementMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 if (days == 0 && hours == 0 && minutes == 0) {
-                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("error.no_time_selected"));
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.time.no_time_selected"));
                     MessageType.FAIL.playSound(player);
                     return;
                 }
@@ -159,6 +159,10 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if(!admin && !claim.isOwner(player.getUniqueId())) {
+                    MessageType.FAIL.playSound(player);
+                    return;
+                }
                 MessageType.MENU_BACK.playSound(player);
                 new ClaimManagementMenu(player, claim, admin);
             }

@@ -13,7 +13,7 @@ public enum PermissionCategory {
             Permission.PLACE_BLOCKS, Permission.PLACE_SPAWNER),
             
     CONTAINERS("Container Permissions",
-            Permission.USE_CHEST, Permission.USE_FURNACE,
+            Permission.USE_CHEST, Permission.USE_TRAPPED_CHEST, Permission.USE_FURNACE,
             Permission.USE_BARREL, Permission.USE_SHULKER,
             Permission.USE_HOPPER, Permission.USE_DISPENSER, Permission.USE_DROPPER),
             
@@ -36,7 +36,7 @@ public enum PermissionCategory {
     INTERACTIONS("Interaction Permissions",
             Permission.USE_BELL, Permission.USE_BEACON,
             Permission.USE_JUKEBOX, Permission.USE_NOTEBLOCK,
-            Permission.USE_CAMPFIRE, Permission.USE_BED,
+            Permission.USE_CAMPFIRE, Permission.USE_SOUL_CAMPFIRE, Permission.USE_BED,
             Permission.INTERACT_ARMOR_STAND, Permission.INTERACT_ITEM_FRAME),
             
     LIQUIDS("Liquid Permissions",
@@ -45,7 +45,10 @@ public enum PermissionCategory {
             
     ENTITIES("Entity Permissions",
             Permission.INTERACT_VILLAGER, Permission.LEASH_MOBS,
-            Permission.RIDE_ENTITIES);
+            Permission.RIDE_ENTITIES),
+
+    TIMERS("Timers Permissions",
+            Permission.EXTEND_EXPIRATION);
 
     private final String displayName;
     private final Set<Permission> permissions;

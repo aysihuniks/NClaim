@@ -211,4 +211,8 @@ public class Claim {
             plugin.getDatabaseManager().saveClaim(this);
         }
     }
+
+    public boolean isOwner(UUID uuid) {
+        return getOwner().equals(uuid);
+    }
 }

@@ -9,7 +9,6 @@ import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.PermissionCategory;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -220,96 +219,7 @@ public class CoopPermissionsMenu extends BaseMenu {
     }
 
     private ItemStack getPermissionIcon(Permission permission) {
-        switch (permission) {
-            case BREAK_BLOCKS:
-                return getMaterial("permissions.break_blocks");
-            case BREAK_SPAWNER:
-                return getMaterial("permissions.break_spawner");
-            case PLACE_SPAWNER:
-                return getMaterial("permissions.place_spawner");
-            case PLACE_BLOCKS:
-                return getMaterial("permissions.place_blocks");
-            case USE_CHEST:
-                return getMaterial("permissions.use_chest");
-            case USE_FURNACE:
-                return getMaterial("permissions.use_furnace");
-            case USE_BARREL:
-                return getMaterial("permissions.use_barrel");
-            case USE_SHULKER:
-                return getMaterial("permissions.use_shulker");
-            case USE_HOPPER:
-                return getMaterial("permissions.use_hopper");
-            case USE_DISPENSER:
-                return getMaterial("permissions.use_dispenser");
-            case USE_DROPPER:
-                return getMaterial("permissions.use_dropper");
-            case USE_REPEATER:
-                return getMaterial("permissions.use_repeater");
-            case USE_COMPARATOR:
-                return getMaterial("permissions.use_comparator");
-            case USE_BUTTONS:
-                return getMaterial("permissions.use_buttons");
-            case USE_PRESSURE_PLATES:
-                return getMaterial("permissions.use_pressure_plates");
-            case USE_LEVERS:
-                return getMaterial("permissions.use_levers");
-            case USE_DOORS:
-                return getMaterial("permissions.use_doors");
-            case USE_TRAPDOORS:
-                return getMaterial("permissions.use_trapdoors");
-            case USE_GATES:
-                return getMaterial("permissions.use_gates");
-            case USE_CRAFTING:
-                return getMaterial("permissions.use_crafting");
-            case USE_ENCHANTING:
-                return getMaterial("permissions.use_enchanting");
-            case USE_ANVIL:
-                return getMaterial("permissions.use_anvil");
-            case USE_GRINDSTONE:
-                return getMaterial("permissions.use_grindstone");
-            case USE_STONECUTTER:
-                return getMaterial("permissions.use_stonecutter");
-            case USE_LOOM:
-                return getMaterial("permissions.use_loom");
-            case USE_SMITHING:
-                return getMaterial("permissions.use_smithing");
-            case USE_CARTOGRAPHY:
-                return getMaterial("permissions.use_cartographhy");
-            case USE_BREWING:
-                return getMaterial("permissions.use_brewing");
-            case USE_BELL:
-                return getMaterial("permissions.use_bell");
-            case USE_BEACON:
-                return getMaterial("permissions.use_beacon");
-            case USE_JUKEBOX:
-                return getMaterial("permissions.use_jukebox");
-            case USE_NOTEBLOCK:
-                return getMaterial("permissions.use_noteblock");
-            case USE_CAMPFIRE:
-                return getMaterial("permissions.use_campfire");
-            case USE_BED:
-                return getMaterial("permissions.use_bed");
-            case INTERACT_ARMOR_STAND:
-                return getMaterial("permissions.interact_armor_stand");
-            case INTERACT_ITEM_FRAME:
-                return getMaterial("permissions.interact_item_frame");
-            case PLACE_WATER:
-                return getMaterial("permissions.place_water");
-            case PLACE_LAVA:
-                return getMaterial("permissions.place_lava");
-            case TAKE_WATER:
-                return getMaterial("permissions.take_water");
-            case TAKE_LAVA:
-                return getMaterial("permissions.take_lava");
-            case INTERACT_VILLAGER:
-                return getMaterial("permissions.interact_villager");
-            case LEASH_MOBS:
-                return getMaterial("permissions.leash_mobs");
-            case RIDE_ENTITIES:
-                return getMaterial("permissions.ride_entities");
-            default:
-                return new ItemStack(Material.BARRIER);
-        }
+        return getMaterial("permissions." + permission.name().toLowerCase(Locale.ENGLISH));
     }
 
     private void addTransferButton() {
