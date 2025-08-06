@@ -65,7 +65,7 @@ public class CoopPermissionsMenu extends BaseMenu {
     private final Map<PermissionCategory, ItemStack> CATEGORY_ICONS = new EnumMap<>(PermissionCategory.class);
 
     private void setupMenu() {
-        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer.getName()));
+        createInventory(MenuType.CHEST_6_ROWS, getString("title").replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
 
         loadCategoryIcons();
 
@@ -113,9 +113,10 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                String playerName = coopPlayer.isOnline() ?
-                        "&a" + coopPlayer.getName() :
-                        "&7" + coopPlayer.getName() + " " + getString("offline");
+                String name = coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown";
+                String playerName = coopPlayer != null && coopPlayer.isOnline() ?
+                        "&a" + name :
+                        "&7" + name + " " + getString("offline");
 
                 List<String> lore = new ArrayList<>(getStringList("player_info.lore"));
                 lore.replaceAll(s -> s.replace("{date}",
@@ -233,7 +234,7 @@ public class CoopPermissionsMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterial("transfer"))
                         .name(getString("transfer.display_name"))
-                        .lore(getStringList("transfer.lore").stream().map(line -> line.replace("{player}", coopPlayer.getName())).collect(Collectors.toList()))
+                        .lore(getStringList("transfer.lore").stream().map(line -> line.replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown")).collect(Collectors.toList()))
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .get();
             }
@@ -248,14 +249,14 @@ public class CoopPermissionsMenu extends BaseMenu {
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.transfer_claim.display_name"),
                         NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.transfer_claim.lore").stream()
-                                .map(s -> s.replace("{player}", coopPlayer.getName()))
+                                .map(s -> s.replace("{player}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"))
                                 .collect(Collectors.toList()),
                         result -> {
                             if ("confirmed".equals(result)) {
                                 player.closeInventory();
                                 claim.setOwner(coopPlayer.getUniqueId());
                                 player.sendMessage(NClaim.inst().getLangManager().getString("claim.transferred")
-                                        .replace("{target}", coopPlayer.getName()));
+                                        .replace("{target}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
                             } else if ("declined".equals(result)) {
                                 new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
                             }
@@ -285,7 +286,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.kick_coop.display_name"),
                         NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.kick_coop.lore").stream()
-                                .map(s -> s.replace("{player}", coopPlayer.getName()))
+                                .map(s -> s.replace("{player}", coopPlayer != null && coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"))
                                 .collect(Collectors.toList()),
                         result -> {
                             if ("confirmed".equals(result)) {
