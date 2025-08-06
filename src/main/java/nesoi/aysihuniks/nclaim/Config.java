@@ -3,7 +3,6 @@ package nesoi.aysihuniks.nclaim;
 import lombok.Getter;
 import lombok.Setter;
 import nesoi.aysihuniks.nclaim.model.TimeLeftThreshold;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;

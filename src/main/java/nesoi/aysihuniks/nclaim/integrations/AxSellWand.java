@@ -1,7 +1,6 @@
 package nesoi.aysihuniks.nclaim.integrations;
 
 import com.artillexstudios.axsellwands.api.events.AxSellwandsSellEvent;
-import com.sk89q.worldguard.commands.region.RegionPrintoutBuilder;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import org.bukkit.Material;

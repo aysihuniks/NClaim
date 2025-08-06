@@ -9,10 +9,7 @@ import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.model.CoopPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
-
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ClaimSettingsManager {

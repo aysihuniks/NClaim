@@ -18,7 +18,6 @@ import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
-import org.nandayo.dapi.util.Util;
 
 import java.util.*;
 import java.util.function.Consumer;

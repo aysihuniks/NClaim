@@ -6,7 +6,6 @@ import nesoi.aysihuniks.nclaim.model.Claim;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.nandayo.dapi.util.Util;
 import org.nandayo.dapi.message.ChannelType;
 import xyz.geik.farmer.Main;
 import xyz.geik.farmer.api.handlers.FarmerBoughtEvent;
