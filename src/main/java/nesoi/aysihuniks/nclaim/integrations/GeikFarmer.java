@@ -41,14 +41,12 @@ public class GeikFarmer extends Integrations {
 
     public static void registerIntegration() {
         if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
-            NClaim.inst().getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
-                try {
-                    Main.setIntegration(new GeikFarmer());
-                    Util.log("&aFarmer integration enabled successfully!");
-                } catch (Exception e) {
-                    Util.log("&cFailed to initialize Farmer integration: " + e.getMessage());
-                }
-            }, 1L);
+            try {
+                Main.setIntegration(new GeikFarmer());
+                Util.log("&aFarmer integration enabled successfully!");
+            } catch (Exception e) {
+                Util.log("&cFailed to initialize Farmer integration: " + e.getMessage());
+            }
         } else {
             Util.log("&eFarmer plugin not found! Farmer integration disabled.");
         }
