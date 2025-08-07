@@ -92,11 +92,11 @@ public class HeadManager {
             try {
                 URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + Bukkit.getOfflinePlayer(uuid).getName());
                 InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
-                String id = new JsonParser().parse(reader_0).getAsJsonObject().get("id").getAsString();
+                String id = JsonParser.parseReader(reader_0).getAsJsonObject().get("id").getAsString();
 
                 URL url_1 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
                 InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
-                JsonObject textureProperty = new JsonParser().parse(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
+                JsonObject textureProperty = JsonParser.parseReader(reader_1).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
                 texture = textureProperty.get("value").getAsString();
             } catch (Exception ignored) {}
         }

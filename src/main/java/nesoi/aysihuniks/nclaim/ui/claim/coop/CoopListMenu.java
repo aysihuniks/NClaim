@@ -127,7 +127,7 @@ public class CoopListMenu extends BaseMenu {
 
     private void handleAddMember(Player player) {
         MessageType.SEARCH_OPEN.playSound(player);
-        new AnvilManager(NClaim.inst(), player, getString("search_title"),
+        new AnvilManager(player, getString("search_title"),
                 (text) -> {
                     if (text == null || text.isEmpty()) {
                         ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));

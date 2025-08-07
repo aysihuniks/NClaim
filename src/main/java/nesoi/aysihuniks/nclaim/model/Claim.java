@@ -169,7 +169,7 @@ public class Claim {
             }
         });
 
-        world.spawnParticle(plugin.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), claimBlock, 1);
+        world.spawnParticle(NClaim.getParticle(DParticle.LARGE_SMOKE, DParticle.SMOKE_LARGE), claimBlock, 1);
         world.playSound(claimBlock, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
@@ -214,5 +214,9 @@ public class Claim {
 
     public boolean isOwner(UUID uuid) {
         return getOwner().equals(uuid);
+    }
+
+    public Optional<Player> getOwnerPlayer() {
+        return Optional.ofNullable(Bukkit.getPlayer(owner));
     }
 }

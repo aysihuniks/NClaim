@@ -1,6 +1,7 @@
 package nesoi.aysihuniks.nclaim.service;
 
 import lombok.RequiredArgsConstructor;
+import nesoi.aysihuniks.nclaim.Config;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.model.Claim;
@@ -90,7 +91,7 @@ public class ClaimExpirationManager {
 
     public String getTimeLeftColor(long secondsLeft) {
         for (TimeLeftThreshold t : plugin.getNconfig().getTimeLeftThresholds()) {
-            long userValue = NClaim.inst().getNconfig().getTimeUnitValue(secondsLeft, t.getUnit());
+            long userValue = Config.getTimeUnitValue(secondsLeft, t.getUnit());
             boolean match = false;
             switch (t.getOperator()) {
                 case ">=": match = userValue >= t.getValue(); break;

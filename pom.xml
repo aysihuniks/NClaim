@@ -57,20 +57,7 @@
                                     <pattern>de.tr7zw.changeme.nbtapi</pattern>
                                     <shadedPattern>nesoi.aysihuniks.libs.nbtapi</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>net.wesjd.anvilgui</pattern>
-                                    <shadedPattern>nesoi.aysihuniks.libs.anvilgui</shadedPattern>
-                                </relocation>
                             </relocations>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludeDefaults>false</excludeDefaults>
-                                    <includes>
-                                        <include>net/wesjd/anvilgui/**</include>
-                                    </includes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -148,17 +135,17 @@
             <version>1.18.38</version>
             <scope>provided</scope>
         </dependency>
-        <!-- AnvilGUI -->
-        <dependency>
-            <groupId>net.wesjd</groupId>
-            <artifactId>anvilgui</artifactId>
-            <version>1.10.7-SNAPSHOT</version>
-        </dependency>
         <!-- DAPI -->
         <dependency>
             <groupId>com.github.desaxxx</groupId>
             <artifactId>DAPI</artifactId>
-            <version>7d1c93246b</version>
+            <version>1.3.3</version>
+        </dependency>
+        <!-- AnvilMenu -->
+        <dependency>
+            <groupId>com.github.desaxxx</groupId>
+            <artifactId>AnvilMenu</artifactId>
+            <version>0.1.1</version>
         </dependency>
         <!-- PlaceholderAPI -->
         <dependency>

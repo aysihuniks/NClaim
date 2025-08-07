@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MenuCommand extends BaseCommand {
 

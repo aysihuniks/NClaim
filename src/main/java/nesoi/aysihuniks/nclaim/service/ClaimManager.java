@@ -54,6 +54,7 @@ public class ClaimManager implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Chunk fromChunk = event.getFrom().getChunk();
+        if(event.getTo() == null) return;
         Chunk toChunk = event.getTo().getChunk();
 
         if (fromChunk.equals(toChunk)) return;
@@ -94,7 +95,7 @@ public class ClaimManager implements Listener {
             String pvpStatus = plugin.getLangManager().getString(isPvpEnabled ? "move.pvp_enabled" : "move.pvp_disabled");
             OfflinePlayer owner = Bukkit.getOfflinePlayer(toClaim.getOwner());
             LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.claimed_chunk")
-                    .replace("{owner}", owner.getName())
+                    .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown")
                     .replace("{pvp_status}", pvpStatus));
         }
     }

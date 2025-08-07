@@ -2,7 +2,6 @@ package nesoi.aysihuniks.nclaim.service;
 
 import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
-import nesoi.aysihuniks.nclaim.model.Claim;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Particle;

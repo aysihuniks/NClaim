@@ -2,7 +2,6 @@ package nesoi.aysihuniks.nclaim.utils;
 
 import nesoi.aysihuniks.nclaim.NClaim;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.nandayo.dapi.object.DSound;
 
@@ -107,7 +106,7 @@ public abstract class MessageType {
     public static final MessageType MENU_FORWARD = new MessageType() {
         @Override
         public void playSound(Player player) {
-            NClaim.inst().getWrapper().playSound(player, getSound(DSound.BLOCK_ENCHANTMENT_TABLE_USE, DSound.BLOCK_BEACON_ACTIVATE), 0.5f, 1.5f);;
+            NClaim.inst().getWrapper().playSound(player, getSound(DSound.BLOCK_ENCHANTMENT_TABLE_USE, DSound.BLOCK_BEACON_ACTIVATE), 0.5f, 1.5f);
 
             Bukkit.getScheduler().runTaskLater(NClaim.inst(), task -> {
                 NClaim.inst().getWrapper().playSound(player, getSound(DSound.ENTITY_EXPERIENCE_ORB_PICKUP, DSound.ENTITY_PLAYER_LEVELUP), 0.3f, 1.8f);
