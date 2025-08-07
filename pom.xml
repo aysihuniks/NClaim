@@ -58,10 +58,6 @@
                                     <shadedPattern>nesoi.aysihuniks.libs.nbtapi</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>space.arim.morepaperlib</pattern>
-                                    <shadedPattern>nesoi.aysihuniks.libs.morepaperlib</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>net.wesjd.anvilgui</pattern>
                                     <shadedPattern>nesoi.aysihuniks.libs.anvilgui</shadedPattern>
                                 </relocation>
