@@ -53,7 +53,9 @@ public enum Permission {
 
     INTERACT_VILLAGER("Interact with villagers"),
     LEASH_MOBS("Leash mobs"),
-    RIDE_ENTITIES("Ride entities");
+    RIDE_ENTITIES("Ride entities"),
+
+    EXTEND_EXPIRATION("Extend claim expiration");
 
     private final String description;
 

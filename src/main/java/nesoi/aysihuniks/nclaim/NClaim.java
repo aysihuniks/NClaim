@@ -36,7 +36,6 @@ import org.nandayo.dapi.object.DParticle;
 import org.nandayo.dapi.object.DSound;
 import org.nandayo.dapi.util.HexUtil;
 import org.nandayo.dapi.util.Util;
-import space.arim.morepaperlib.MorePaperLib;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -59,7 +58,6 @@ public final class NClaim extends JavaPlugin {
     private ClaimSettingsManager claimSettingsManager;
     private ClaimLevelManager blockValueManager;
     private HeadManager headManager;
-    private MorePaperLib morePaperLib;
     private MySQLManager mySQLManager;
     private SQLiteManager sqLiteManager;
     private DatabaseManager databaseManager;
@@ -85,7 +83,7 @@ public final class NClaim extends JavaPlugin {
 
         initializeDAPI();
 
-        if (!getDataFolder().exists()) {
+        if (!getDataFolder().exists()) { //noinspection ResultOfMethodCallIgnored
             getDataFolder().mkdirs();
         }
         nconfig = new Config(this).load().updateConfig();
@@ -246,7 +244,6 @@ public final class NClaim extends JavaPlugin {
 
     private void initializeManagers() {
         wrapper = new Wrapper(this);
-        morePaperLib = new MorePaperLib(this);
         if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
             GeikFarmer.registerIntegration();
         }
@@ -640,9 +637,11 @@ public final class NClaim extends JavaPlugin {
         File playersFolder = new File(getDataFolder(), "players");
 
         boolean hasClaimData = claimsFile.exists();
-        boolean hasUserData = playersFolder.exists() &&
-                playersFolder.listFiles() != null &&
-                playersFolder.listFiles().length > 0;
+        boolean hasUserData = false;
+        if(playersFolder.exists()) {
+            File[] playerFiles = playersFolder.listFiles();
+            hasUserData = playerFiles != null && playerFiles.length > 0;
+        }
 
         if (hasClaimData || hasUserData) {
             String dbType = nconfig.getDatabaseType().toUpperCase();

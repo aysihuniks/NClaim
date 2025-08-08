@@ -6,10 +6,8 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
-import org.nandayo.dapi.util.Util;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FancyHologramHandler implements HologramHandler {
     @Override

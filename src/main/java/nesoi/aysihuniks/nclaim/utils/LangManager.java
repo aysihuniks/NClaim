@@ -25,7 +25,7 @@ public class LangManager {
     public LangManager(@NotNull NClaim plugin, @NotNull String fileName) {
         this.plugin = plugin;
         this.folder = new File(plugin.getDataFolder(), "lang");
-        if(!folder.exists()) {
+        if(!folder.exists()) { //noinspection ResultOfMethodCallIgnored
             folder.mkdirs();
         }
         this.loadDefaultFiles();
@@ -116,7 +116,7 @@ public class LangManager {
 
     private void saveBackupConfig(@NotNull String languageName, @NotNull FileConfiguration config) {
         File backupDir = new File(plugin.getDataFolder(), "backups");
-        if (!backupDir.exists()) {
+        if (!backupDir.exists()) { //noinspection ResultOfMethodCallIgnored
             backupDir.mkdirs();
         }
         String date = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());

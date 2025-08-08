@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim;
 import lombok.Getter;
 import lombok.Setter;
 import nesoi.aysihuniks.nclaim.model.TimeLeftThreshold;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -172,7 +174,7 @@ public class Config {
     public void loadTimeLeftThresholds() {
         timeLeftThresholds.clear();
         if (config.isList("hologram_settings.time_left_thresholds")) {
-            List<?> rawList = config.getList("hologram_settings.time_left_thresholds");
+            List<?> rawList = config.getList("hologram_settings.time_left_thresholds", new ArrayList<>());
             for (Object obj : rawList) {
                 if (!(obj instanceof java.util.Map)) continue;
                 java.util.Map<?, ?> map = (java.util.Map<?, ?>) obj;
@@ -195,7 +197,6 @@ public class Config {
             case "day": return seconds / 86400;
             case "hour": return seconds / 3600;
             case "minute": return seconds / 60;
-            case "second": return seconds;
             default: return seconds;
         }
     }
@@ -209,8 +210,9 @@ public class Config {
             return getEachLandBuyPrice();
         }
 
-        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
-            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
+        ConfigurationSection tiersSection = config.getConfigurationSection("claim_settings.tiered_pricing.tiers");
+        if (tiersSection != null) {
+            for (String tierKey : tiersSection.getKeys(false)) {
                 int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
                 double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
@@ -236,8 +238,9 @@ public class Config {
 
         boolean isValid = true;
 
-        if (config.isConfigurationSection("claim_settings.tiered_pricing.tiers")) {
-            for (String tierKey : config.getConfigurationSection("claim_settings.tiered_pricing.tiers").getKeys(false)) {
+        ConfigurationSection tiersSection = config.getConfigurationSection("claim_settings.tiered_pricing.tiers");
+        if (tiersSection != null) {
+            for (String tierKey : tiersSection.getKeys(false)) {
                 int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
 
@@ -272,8 +275,9 @@ public class Config {
 
         int maxCoop = config.getInt("claim_settings.max_coop_count.default", 3);
 
-        if (config.isConfigurationSection("claim_settings.max_coop_count")) {
-            for (String key : config.getConfigurationSection("claim_settings.max_coop_count").getKeys(false)) {
+        ConfigurationSection maxCoopSection = config.getConfigurationSection("claim_settings.max_coop_count");
+        if (maxCoopSection != null) {
+            for (String key : maxCoopSection.getKeys(false)) {
                 if (!key.equals("default") && player.hasPermission("nclaim.maxcoop." + key)) {
                     int value = config.getInt("claim_settings.max_coop_count." + key);
                     if (value > maxCoop) {
@@ -353,7 +357,7 @@ public class Config {
 
     private void saveBackupConfig() {
         File backupDir = new File(plugin.getDataFolder(), "backups");
-        if (!backupDir.exists()) {
+        if (!backupDir.exists()) { //noinspection ResultOfMethodCallIgnored
             backupDir.mkdirs();
         }
         String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());

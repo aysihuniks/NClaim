@@ -310,7 +310,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
     private void handleSearch(Player player) {
         MessageType.SEARCH_OPEN.playSound(player);
-        new AnvilManager(NClaim.inst(), player, "Enter a player name",
+        new AnvilManager(player, "Enter a player name",
                 (text) -> {
                     if (text == null || text.isEmpty()) {
                         ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));

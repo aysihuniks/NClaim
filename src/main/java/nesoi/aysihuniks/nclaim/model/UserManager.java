@@ -1,9 +1,6 @@
 package nesoi.aysihuniks.nclaim.model;
 
 import nesoi.aysihuniks.nclaim.NClaim;
-import nesoi.aysihuniks.nclaim.utils.HeadManager;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

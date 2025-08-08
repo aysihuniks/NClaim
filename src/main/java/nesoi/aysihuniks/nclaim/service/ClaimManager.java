@@ -14,6 +14,7 @@ import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
  import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.ui.claim.management.TimeManagementMenu;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -53,6 +54,7 @@ public class ClaimManager implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Chunk fromChunk = event.getFrom().getChunk();
+        if(event.getTo() == null) return;
         Chunk toChunk = event.getTo().getChunk();
 
         if (fromChunk.equals(toChunk)) return;
@@ -93,7 +95,7 @@ public class ClaimManager implements Listener {
             String pvpStatus = plugin.getLangManager().getString(isPvpEnabled ? "move.pvp_enabled" : "move.pvp_disabled");
             OfflinePlayer owner = Bukkit.getOfflinePlayer(toClaim.getOwner());
             LangManager.sendSortedMessage(player, plugin.getLangManager().getString("move.claimed_chunk")
-                    .replace("{owner}", owner.getName())
+                    .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown")
                     .replace("{pvp_status}", pvpStatus));
         }
     }
@@ -310,6 +312,8 @@ public class ClaimManager implements Listener {
                 new ClaimManagementMenu(player, claim, false);
             } else if (player.hasPermission("nclaim.admin")) {
                 new ClaimManagementMenu(player, claim, true);
+            } else if(coopManager.hasPermission(player, claim, Permission.EXTEND_EXPIRATION)) {
+                new TimeManagementMenu(player, 0, 0, 0, 0, claim, false);
             }
             return;
         }

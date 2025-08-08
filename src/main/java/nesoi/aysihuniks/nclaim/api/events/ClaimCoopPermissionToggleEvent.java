@@ -19,14 +19,12 @@ public class ClaimCoopPermissionToggleEvent extends Event implements Cancellable
 
     private boolean cancelled = false;
 
-    private final @NotNull Player owner;
     private final @NotNull UUID coopPlayerUUID;
     private final @NotNull Claim claim;
     private final @NotNull Permission permission;
     private final boolean newState;
 
-    public ClaimCoopPermissionToggleEvent(@NotNull Player owner, @NotNull UUID coopPlayerUUID, @NotNull Claim claim, @NotNull Permission permission, boolean newState) {
-        this.owner = owner;
+    public ClaimCoopPermissionToggleEvent(@NotNull UUID coopPlayerUUID, @NotNull Claim claim, @NotNull Permission permission, boolean newState) {
         this.coopPlayerUUID = coopPlayerUUID;
         this.claim = claim;
         this.permission = permission;

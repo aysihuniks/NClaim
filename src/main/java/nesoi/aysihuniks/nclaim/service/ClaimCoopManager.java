@@ -94,7 +94,6 @@ public class ClaimCoopManager {
     public void toggleCoopPermission(@NotNull Claim claim, @NotNull UUID player, @NotNull Permission permission) {
         boolean newState = !claim.getCoopPermissions().get(player).isEnabled(permission);
         ClaimCoopPermissionToggleEvent toggleEvent = new ClaimCoopPermissionToggleEvent(
-                Bukkit.getPlayer(claim.getOwner()),
                 player,
                 claim,
                 permission,
@@ -122,7 +121,6 @@ public class ClaimCoopManager {
         boolean newState = !currentState;
 
         ClaimCoopPermissionCategoryToggleEvent toggleEvent = new ClaimCoopPermissionCategoryToggleEvent(
-                Bukkit.getPlayer(claim.getOwner()),
                 player,
                 claim,
                 category,

@@ -5,8 +5,6 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimSettingChangeEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.model.ClaimSetting;
-import nesoi.aysihuniks.nclaim.model.CoopPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nandayo.dapi.message.ChannelType;

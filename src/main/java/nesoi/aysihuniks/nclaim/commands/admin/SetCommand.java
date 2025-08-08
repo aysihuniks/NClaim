@@ -81,20 +81,16 @@ public class SetCommand extends BaseCommand {
                 double currentBalance = NClaim.inst().getEconomy().getBalance(targetPlayer);
                 NClaim.inst().getEconomy().withdrawPlayer(targetPlayer, currentBalance);
                 NClaim.inst().getEconomy().depositPlayer(targetPlayer, amount);
-                
-                ChannelType.CHAT.send(targetPlayer, NClaim.inst().getLangManager().getString("command.set.target_balance_set")
-                        .replace("{balance}", String.valueOf(amount)));
-                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.set.player_balance_set")
-                        .replace("{amount}", String.valueOf(amount))
-                        .replace("{target}", targetName));
+
             } else {
                 user.setBalance(amount);
-                ChannelType.CHAT.send(targetPlayer, NClaim.inst().getLangManager().getString("command.set.target_balance_set")
-                        .replace("{balance}", String.valueOf(amount)));
-                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.set.player_balance_set")
-                        .replace("{amount}", String.valueOf(amount))
-                        .replace("{target}", targetName));
             }
+
+            ChannelType.CHAT.send(targetPlayer, NClaim.inst().getLangManager().getString("command.set.target_balance_set")
+                    .replace("{balance}", String.valueOf(amount)));
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.set.player_balance_set")
+                    .replace("{amount}", String.valueOf(amount))
+                    .replace("{target}", targetName));
         } catch (NumberFormatException e) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_valid_number"));
         }

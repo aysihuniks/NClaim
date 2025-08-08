@@ -293,7 +293,7 @@ guis:
         material: "CHEST"
       redstone:
         display_name: "&6Utilisation de la redstone"
-        material: "REDSTONE_WIRE"
+        material: "REDSTONE"
       doors:
         display_name: "&6Accès aux portes"
         material: "OAK_DOOR"
@@ -309,6 +309,9 @@ guis:
       entities:
         display_name: "&6Interactions avec les entités"
         material: "VILLAGER_SPAWN_EGG"
+      timers:
+        display_name: "&6Timers Management"
+        material: "CLOCK"
     permissions:
       break_blocks:
         display_name: "&fCasser des blocs"
@@ -325,6 +328,9 @@ guis:
       use_chest:
         display_name: "&fUtiliser des coffres"
         material: "CHEST"
+      use_trapped_chest:
+        display_name: "&fUse Trapped Chests"
+        material: "TRAPPED_CHEST"
       use_furnace:
         display_name: "&fUtiliser des fours"
         material: "FURNACE"
@@ -409,6 +415,9 @@ guis:
       use_campfire:
         display_name: "&fUtiliser des feux de camp"
         material: "CAMPFIRE"
+      use_soul_campfire:
+        display_name: "&fUse Soul Campfires"
+        material: "SOUL_CAMPFIRE"
       use_bed:
         display_name: "&fUtiliser des lits"
         material: "RED_BED"
@@ -439,6 +448,9 @@ guis:
       ride_entities:
         display_name: "&fMonter des entités"
         material: "SADDLE"
+      extend_expiration:
+        display_name: "&fExtend Claim Expiration"
+        material: "CLOCK"
 
   claim_settings_menu:
     title: "Paramètres de revendication"
