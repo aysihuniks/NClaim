@@ -162,8 +162,8 @@ public class ClaimCoopManager {
     }
 
     private boolean canAddCoop(Claim claim, Player owner, Player coopPlayer) {
-        if (!isClaimOwner(claim, owner)) {
-            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.not_yours"));
+        if (!isClaimOwner(claim, owner) && plugin.getClaimCoopManager().hasPermission(coopPlayer, claim, Permission.ADD_COOP)) {
+            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("command.permission_denied"));
             return false;
         }
 

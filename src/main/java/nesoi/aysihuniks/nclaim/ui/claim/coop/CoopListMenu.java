@@ -281,8 +281,10 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                MessageType.MENU_FORWARD.playSound(player);
-                new CoopPermissionsMenu(player, coopPlayer, claim, admin, null);
+                if (claim.isOwner(player.getUniqueId()) || admin && !claim.getCoopPlayers().contains(player.getUniqueId())) {
+                    MessageType.MENU_FORWARD.playSound(player);
+                    new CoopPermissionsMenu(player, coopPlayer, claim, admin, null);
+                }
             }
         });
     }

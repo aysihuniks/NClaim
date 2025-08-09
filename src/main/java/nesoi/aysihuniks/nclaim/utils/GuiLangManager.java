@@ -1,6 +1,9 @@
 package nesoi.aysihuniks.nclaim.utils;
 
+import lombok.Getter;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.Setting;
+import nesoi.aysihuniks.nclaim.model.SettingCfg;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,12 +15,17 @@ import org.bukkit.persistence.PersistentDataType;
 import org.nandayo.dapi.util.Util;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GuiLangManager {
 
+    @Getter
     private final FileConfiguration guiConfig;
+
     private final HeadManager headManager;
+    private Map<Setting, SettingCfg> settingConfigs;
 
     public GuiLangManager() {
         File file = new File(NClaim.inst().getDataFolder(), "guis.yml");
@@ -26,6 +34,47 @@ public class GuiLangManager {
         }
         this.guiConfig = YamlConfiguration.loadConfiguration(file);
         this.headManager = NClaim.inst().getHeadManager();
+        this.settingConfigs = new HashMap<>();
+        loadSettingConfigs();
+    }
+
+    private void loadSettingConfigs() {
+        ConfigurationSection settingsSection = guiConfig.getConfigurationSection("guis.claim_settings_menu.settings");
+        if (settingsSection == null) return;
+
+        for (String key : settingsSection.getKeys(false)) {
+            ConfigurationSection settingSection = settingsSection.getConfigurationSection(key);
+            if (settingSection == null) continue;
+
+            boolean defaultValue = settingSection.getBoolean("default_value", false);
+            boolean changeable = settingSection.getBoolean("changeable", true);
+            String permission = settingSection.getString("permission", null);
+            String displayName = settingSection.getString("display_name", key);
+            String material = settingSection.getString("material", "DIRT");
+            List<String> lore = settingSection.getStringList("lore");
+
+            Setting settingEnum = getSettingByKey(key);
+            if (settingEnum != null) {
+                settingConfigs.put(settingEnum, new SettingCfg(defaultValue, changeable, permission, displayName, material, lore));
+            }
+        }
+    }
+
+    private Setting getSettingByKey(String key) {
+        switch (key) {
+            case "pvp": return Setting.CLAIM_PVP;
+            case "tnt_explosions": return Setting.TNT_DAMAGE;
+            case "creeper_explosions": return Setting.CREEPER_DAMAGE;
+            case "mob_attacks": return Setting.MOB_ATTACKING;
+            case "monster_spawning": return Setting.MONSTER_SPAWNING;
+            case "animal_spawning": return Setting.ANIMAL_SPAWNING;
+            case "villager_interactions": return Setting.VILLAGER_INTERACTION;
+            default: return null;
+        }
+    }
+
+    public SettingCfg getSettingConfig(Setting setting) {
+        return settingConfigs.get(setting);
     }
 
     public String getString(String section, String path) {

@@ -6,7 +6,7 @@
 
     <groupId>nesoi.aysihuniks</groupId>
     <artifactId>NClaim</artifactId>
-    <version>2.2</version>
+    <version>3.0</version>
     <packaging>jar</packaging>
 
     <name>NClaim</name>
@@ -152,6 +152,13 @@
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
             <version>2.11.6</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ptthanh02</groupId>
+            <artifactId>SmartSpawner</artifactId>
+            <version>1.4.0.2</version>
             <scope>provided</scope>
         </dependency>
         <!-- NBT-API -->

@@ -6,6 +6,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import github.nighter.smartspawner.api.SmartSpawnerProvider;
 import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
@@ -21,9 +22,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
@@ -52,6 +51,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerMove(PlayerMoveEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Chunk fromChunk = event.getFrom().getChunk();
         if(event.getTo() == null) return;
@@ -102,6 +103,7 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamageByExplosion(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
         if (!(event.getEntity() instanceof LivingEntity)) return;
 
         Entity damager = event.getDamager();
@@ -122,6 +124,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDamageByPlayer(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+
         if (!(event.getEntity() instanceof Player)) return;
         if (event.getDamager().hasPermission("nclaim.bypass.*") || event.getDamager().hasPermission("nclaim.bypass.pvp")) return;
 
@@ -151,6 +155,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent event) {
+        if (event.isCancelled()) return;
+
         Location explodeLocation = event.getLocation();
         Claim explodeClaim = Claim.getClaim(explodeLocation.getChunk());
 
@@ -186,6 +192,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onMobAttackPlayer(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+
         if (!(event.getEntity() instanceof Player)) return;
 
         Entity damager = event.getDamager();
@@ -204,6 +212,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerAttackMob(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+
         if (!(event.getEntity() instanceof Monster)) return;
         if (!(event.getDamager() instanceof Player)) return;
 
@@ -223,6 +233,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
+        if (event.isCancelled()) return;
+
         Claim claim = Claim.getClaim(event.getLocation().getChunk());
         if (claim == null) return;
 
@@ -241,6 +253,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockBreak(BlockBreakEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Claim claim = Claim.getClaim(block.getChunk());
@@ -262,7 +276,6 @@ public class ClaimManager implements Listener {
                 if (!coopManager.hasPermission(player, claim, Permission.BREAK_SPAWNER)) {
                     event.setCancelled(true);
                     sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
-                    return;
                 }
             } else {
                 if (!coopManager.hasPermission(player, claim, Permission.BREAK_BLOCKS)) {
@@ -271,12 +284,12 @@ public class ClaimManager implements Listener {
                 }
             }
         }
-
-
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Claim claim = Claim.getClaim(block.getChunk());
@@ -300,6 +313,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.useInteractedBlock() == Event.Result.DENY) return;
+
         Player player = event.getPlayer();
         Block block = event.getClickedBlock();
         if (block == null) return;
@@ -308,12 +323,10 @@ public class ClaimManager implements Listener {
         if (claim == null) return;
 
         if (block.getType() == claim.getClaimBlockType() && claim.getClaimBlockLocation().equals(block.getLocation())) {
-            if (coopManager.isClaimOwner(claim, player)) {
+            if (coopManager.isClaimOwner(claim, player) || coopManager.hasPermission(player, claim, Permission.OPEN_CLAIM_MENU)) {
                 new ClaimManagementMenu(player, claim, false);
-            } else if (player.hasPermission("nclaim.admin")) {
+            } else if (player.hasPermission("nclaim.admin") && player.isSneaking() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
                 new ClaimManagementMenu(player, claim, true);
-            } else if(coopManager.hasPermission(player, claim, Permission.EXTEND_EXPIRATION)) {
-                new TimeManagementMenu(player, 0, 0, 0, 0, claim, false);
             }
             return;
         }
@@ -321,6 +334,14 @@ public class ClaimManager implements Listener {
         if (player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.interact")) return;
 
         Material type = block.getType();
+
+        if (type == Material.SPAWNER) {
+            if (!coopManager.hasPermission(player, claim, Permission.PLACE_SPAWNER) && !coopManager.hasPermission(player, claim, Permission.BREAK_SPAWNER)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
 
         if (type == Material.CHEST) {
             if (!coopManager.hasPermission(player, claim, Permission.USE_CHEST)) {
@@ -573,6 +594,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
         Claim claim = Claim.getClaim(entity.getLocation().getChunk());
@@ -597,6 +620,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         ArmorStand armorStand = event.getRightClicked();
         Claim claim = Claim.getClaim(armorStand.getLocation().getChunk());
@@ -628,6 +653,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onPlayerLeashEntity(PlayerLeashEntityEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Entity entity = event.getEntity();
         Claim claim = Claim.getClaim(entity.getLocation().getChunk());
@@ -661,6 +688,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Claim claim = Claim.getClaim(block.getChunk());
@@ -680,6 +709,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void onBlockFromTo(BlockFromToEvent event) {
+        if (event.isCancelled()) return;
+
         Block fromBlock = event.getBlock();
         Block toBlock = event.getToBlock();
 

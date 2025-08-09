@@ -309,9 +309,9 @@ guis:
       entities:
         display_name: "&6Interactions avec les entités"
         material: "VILLAGER_SPAWN_EGG"
-      timers:
-        display_name: "&6Timers Management"
-        material: "CLOCK"
+      coop_permissions:
+        display_name: "&6Autorisations de réclamation"
+        material: "SHIELD"
     permissions:
       break_blocks:
         display_name: "&fCasser des blocs"
@@ -448,14 +448,32 @@ guis:
       ride_entities:
         display_name: "&fMonter des entités"
         material: "SADDLE"
+      open_claim_menu:
+        display_name: "&fInteragir avec le bloc de réclamation"
+        material: "BEDROCK"
       extend_expiration:
-        display_name: "&fExtend Claim Expiration"
+        display_name: "&fProlonger la date d'expiration de la réclamation"
         material: "CLOCK"
+      expand_claim:
+        display_name: "&fDéveloppez la revendication."
+        material: "MAP"
+      add_coop:
+        display_name: "&fAjouter une co-op"
+        material: "NAME_TAG"
+      manage_claim_block_types:
+        display_name: "&fGérer les types de blocage des réclamations"
+        material: "STONE_AXE"
+      manage_settings:
+        display_name: "&fGérer les paramètres de réclamation"
+        material: "BOOK"
 
   claim_settings_menu:
     title: "Paramètres de revendication"
     settings:
       pvp:
+        default_value: false
+        changeable: true
+        # permission: "nclaim.change_claim_pvp_setting"
         display_name: "&6PvP"
         material: "DIAMOND_SWORD"
         lore:
@@ -466,6 +484,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       tnt_explosions:
+        default_value: true
+        changeable: true
+        # permission: "nclaim.change_tnt_explosion_setting"
         display_name: "&6Dégâts de TNT"
         material: "TNT"
         lore:
@@ -476,6 +497,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       creeper_explosions:
+        default_value: true
+        changeable: true
+        # permission: "nclaim.change_claim_creeper_explosion_setting"
         display_name: "&6Dégâts de Creeper"
         material: "CREEPER_SPAWN_EGG"
         lore:
@@ -486,6 +510,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       mob_attacks:
+        default_value: false
+        changeable: true
+        # permission: "nclaim.change_claim_mob_attack_setting"
         display_name: "&6Combat de créatures"
         material: "GOLDEN_APPLE"
         lore:
@@ -496,6 +523,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       monster_spawning:
+        default_value: true
+        changeable: true
+        # permission: "nclaim.change_claim_monster_spawning_setting"
         display_name: "&6Apparition de monstres"
         material: "ZOMBIE_SPAWN_EGG"
         lore:
@@ -506,6 +536,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       animal_spawning:
+        default_value: true
+        changeable: true
+        # permission: "nclaim.change_claim_animal_spawning_setting"
         display_name: "&6Apparition d'animaux"
         material: "PIG_SPAWN_EGG"
         lore:
@@ -516,6 +549,9 @@ guis:
           - ""
           - "&eCliquez pour activer/désactiver"
       villager_interactions:
+        default_value: false
+        changeable: true
+        # permission: "nclaim.change_claim_villager_interaction_setting"
         display_name: "&6Échange avec les villageois"
         material: "VILLAGER_SPAWN_EGG"
         lore:

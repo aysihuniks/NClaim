@@ -47,8 +47,10 @@ public enum PermissionCategory {
             Permission.INTERACT_VILLAGER, Permission.LEASH_MOBS,
             Permission.RIDE_ENTITIES),
 
-    TIMERS("Timers Permissions",
-            Permission.EXTEND_EXPIRATION);
+    COOP_PERMISSIONS("Coop Permissions",
+            Permission.OPEN_CLAIM_MENU, Permission.EXPAND_CLAIM,
+            Permission.ADD_COOP, Permission.EXTEND_EXPIRATION,
+            Permission.MANAGE_SETTINGS, Permission.MANAGE_CLAIM_BLOCK_TYPES);
 
     private final String displayName;
     private final Set<Permission> permissions;

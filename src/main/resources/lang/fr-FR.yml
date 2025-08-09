@@ -52,6 +52,7 @@ command:
     blockvalue_updated: '{prefix} &aValeur du bloc mise à jour : &e{material} &a{old_value} -> {new_value}'
     blockvalue_added: '{prefix} &aNouvelle valeur de bloc ajoutée : &e{material} &a= {value}'
     blockvalue_not_changed: '{prefix} &aLa valeur du bloc n''a pas changé car l''ancienne et la nouvelle valeur sont identiques.'
+    setting_cannot_be_changed: '{prefix} &cLe réglage ne peut pas être modifié.'
   migrate:
     database_disabled: '{prefix} &cLa connexion à la base de données est désactivée dans la config.'
     completed: '{prefix} &aMigration terminée avec succès.'

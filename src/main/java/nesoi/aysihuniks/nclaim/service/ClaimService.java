@@ -9,8 +9,10 @@ import com.sk89q.worldguard.protection.regions.RegionQuery;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimBuyLandEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimCreateEvent;
+import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.ClaimSetting;
+import nesoi.aysihuniks.nclaim.model.SettingCfg;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import org.bukkit.Bukkit;
@@ -185,6 +187,7 @@ public class ClaimService {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
+
         for (int x = chunkX - 1; x <= chunkX + 1; x++) {
             for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
                 if (x == chunkX && z == chunkZ) {
@@ -195,6 +198,8 @@ public class ClaimService {
                 Claim nearbyClaim = Claim.getClaim(nearbyChunk);
 
                 if (nearbyClaim != null) {
+                    if (nearbyClaim.getCoopPlayers().contains(player.getUniqueId())) continue;
+
                     if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
                         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
                         return false;
@@ -229,6 +234,13 @@ public class ClaimService {
         Set<Material> purchasedBlockTypes = new HashSet<>();
         purchasedBlockTypes.add(defaultBlockType);
 
+        ClaimSetting claimSetting = new ClaimSetting();
+        for (Setting setting : Setting.values()) {
+            SettingCfg cfg = plugin.getGuiLangManager().getSettingConfig(setting);
+            boolean defaultValue = cfg != null ? cfg.isDefaultValue() : claimSetting.isEnabled(setting);
+            claimSetting.set(setting, defaultValue);
+        }
+
         Claim claim = new Claim(
                 claimId,
                 chunk,
@@ -242,7 +254,7 @@ public class ClaimService {
                 new ArrayList<>(),
                 new HashMap<>(),
                 new HashMap<>(),
-                new ClaimSetting(),
+                claimSetting,
                 purchasedBlockTypes
         );
         ClaimCreateEvent createEvent = new ClaimCreateEvent(player, claim);

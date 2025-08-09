@@ -52,6 +52,7 @@ command:
     blockvalue_updated: "{prefix} &aBlock value updated: &e{material} &a{old_value} -> {new_value}"
     blockvalue_added: "{prefix} &aNew block value added: &e{material} &a= {value}"
     blockvalue_not_changed: "{prefix} &aThe block value has not changed because the old value and the new value are equal."
+    setting_cannot_be_changed: "{prefix} &cThis setting cannot be changed."
   migrate:
     database_disabled: "{prefix} &cDatabase connection is disabled in config."
     completed: "{prefix} &aMigration successfully completed."

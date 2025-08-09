@@ -55,7 +55,12 @@ public enum Permission {
     LEASH_MOBS("Leash mobs"),
     RIDE_ENTITIES("Ride entities"),
 
-    EXTEND_EXPIRATION("Extend claim expiration");
+    OPEN_CLAIM_MENU("Interact with claim bedrock"),
+    EXTEND_EXPIRATION("Extend claim expiration"),
+    EXPAND_CLAIM("Expand claim chunks"),
+    ADD_COOP("Add co-op to claim"),
+    MANAGE_CLAIM_BLOCK_TYPES("Manage claim block types"),
+    MANAGE_SETTINGS("Manage claim settings");
 
     private final String description;
 

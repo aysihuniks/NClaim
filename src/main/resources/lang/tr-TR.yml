@@ -52,6 +52,7 @@ command:
     blockvalue_updated: "{prefix} &aBlok değeri güncellendi: &e{material} &a{old_value} -> {new_value}"
     blockvalue_added: "{prefix} &aYeni blok değeri eklendi: &e{material} &a= {value}"
     blockvalue_not_changed: "{prefix} &aEski değer ve yeni değer eşit olduğu için blok değeri değişmedi."
+    setting_cannot_be_changed: "{prefix} &cBu ayar değiştirilemez."
   migrate:
     database_disabled: "{prefix} &cVeritabanı bağlantısı yapılandırmada devre dışı."
     completed: "{prefix} &aTaşıma başarıyla tamamlandı."

@@ -5,6 +5,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimSettingChangeEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.SettingCfg;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nandayo.dapi.message.ChannelType;
@@ -14,6 +15,17 @@ public class ClaimSettingsManager {
     private final NClaim plugin;
 
     public void toggleSetting(Claim claim, Player player, Setting setting) {
+
+        SettingCfg settingCfg = plugin.getGuiLangManager().getSettingConfig(setting);
+        if (!settingCfg.isChangeable()) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.change.setting_cannot_be_changed"));
+            return;
+        }
+        if (settingCfg.getPermission() != null && !player.hasPermission(settingCfg.getPermission())) {
+            ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
+            return;
+        }
+
         if (!isAuthorized(claim, player)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("command.permission_denied"));
             return;

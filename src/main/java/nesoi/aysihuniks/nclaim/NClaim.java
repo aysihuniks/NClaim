@@ -10,11 +10,9 @@ import nesoi.aysihuniks.nclaim.database.SQLiteManager;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.hologram.HologramManager;
-import nesoi.aysihuniks.nclaim.integrations.Expansion;
-import nesoi.aysihuniks.nclaim.integrations.GeikFarmer;
-import nesoi.aysihuniks.nclaim.integrations.Metrics;
-import nesoi.aysihuniks.nclaim.integrations.AxSellWand;
+import nesoi.aysihuniks.nclaim.integrations.*;
 import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.model.UserManager;
 import nesoi.aysihuniks.nclaim.service.*;
@@ -115,6 +113,7 @@ public final class NClaim extends JavaPlugin {
         loadData();
 
         setupMetrics();
+
     }
 
     private void initializeDAPI() {
@@ -127,6 +126,7 @@ public final class NClaim extends JavaPlugin {
         if (!blocksFile.exists()) {
             saveResource("block_levels.yml", false);
         }
+
         blockValueManager.loadBlockValues();
     }
 
@@ -296,6 +296,7 @@ public final class NClaim extends JavaPlugin {
         setupPlaceholderAPI();
         setupVault();
         setupAxsellwand();
+        setupSmartSpawner();
         checkForUpdates();
     }
 
@@ -303,6 +304,13 @@ public final class NClaim extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Axsellwand") != null) {
             getServer().getPluginManager().registerEvents(new AxSellWand(this), this);
             Util.log("&aAxsellwand integration enabled successfully!");
+        }
+    }
+
+    private void setupSmartSpawner() {
+        if (getServer().getPluginManager().getPlugin("SmartSpawner") != null) {
+            getServer().getPluginManager().registerEvents(new SSpawner(this), this);
+            Util.log("&aSmartSpawner integration enabled successfully!");
         }
     }
 

@@ -2,6 +2,7 @@ package nesoi.aysihuniks.nclaim.ui.claim.management;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 
@@ -84,6 +86,11 @@ public class ClaimManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!claim.isOwner(player.getUniqueId()) && !admin && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.EXPAND_CLAIM)) {
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+
                 MessageType.MENU_FORWARD.playSound(player);
                 new LandExpansionMenu(player, claim, admin);
             }
@@ -103,6 +110,11 @@ public class ClaimManagementMenu extends BaseMenu {
             }
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!claim.isOwner(player.getUniqueId()) && !admin && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.EXTEND_EXPIRATION)) {
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+
                 MessageType.MENU_FORWARD.playSound(player);
                 new TimeManagementMenu(player, 0,0,0,0, claim, admin);
             }
@@ -125,6 +137,11 @@ public class ClaimManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!claim.isOwner(player.getUniqueId()) && !admin && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.ADD_COOP)) {
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+
                 MessageType.MENU_FORWARD.playSound(player);
                 new CoopListMenu(player, claim, admin);
             }
@@ -146,6 +163,11 @@ public class ClaimManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!claim.isOwner(player.getUniqueId()) && !admin && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.MANAGE_SETTINGS)) {
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+
                 MessageType.MENU_FORWARD.playSound(player);
                 new ClaimSettingsMenu(player, claim, 0, admin);
             }
@@ -169,6 +191,12 @@ public class ClaimManagementMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                    if (!claim.isOwner(player.getUniqueId()) && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.MANAGE_CLAIM_BLOCK_TYPES)) {
+                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                        return;
+                    }
+
+                    MessageType.MENU_FORWARD.playSound(player);
                     new ManageClaimBlockMenu(claim, player, 0);
                 }
             });
@@ -190,6 +218,11 @@ public class ClaimManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                if (!claim.isOwner(player.getUniqueId())) {
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+
                 new ConfirmMenu(player,
                         NClaim.inst().getGuiLangManager().getString("confirm_menu.children.delete_claim.display_name"),
                         NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.delete_claim.lore"),
