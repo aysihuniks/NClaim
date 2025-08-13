@@ -193,7 +193,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                         if ("confirmed".equals(result)) {
                             selectedClaims.forEach(claim -> claim.remove(RemoveCause.REMOVED_BY_ADMIN));
                             selectedClaims.clear();
-                            new AdminAllClaimMenu(player, target, sortByNewest, page, null);
+                            new AdminAllClaimMenu(player, target, sortByNewest, page, new ArrayList<>());
                             MessageType.CONFIRM.playSound(player);
                         } else if ("declined".equals(result)) {
                             new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);

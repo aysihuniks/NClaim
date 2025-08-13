@@ -43,15 +43,10 @@ public class ClaimListMenu extends BaseMenu {
         this.page = page;
 
         User user = User.getUser(player.getUniqueId());
-        if (user != null) {
-            if (!user.getPlayerClaims().isEmpty() || !user.getCoopClaims().isEmpty()) {
-                new ClaimListMenu(player, 0);
-            } else {
-                player.closeInventory();
-                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_found"));
-                MessageType.WARN.playSound(player);
-                return;
-            }
+        if (user.getPlayerClaims().isEmpty() && user.getCoopClaims().isEmpty()) {
+            player.closeInventory();
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_found"));
+            MessageType.WARN.playSound(player);
             return;
         }
 
