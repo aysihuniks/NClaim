@@ -688,6 +688,16 @@ guis:
           - ""
           - "&aClick to green dye for confirm transfer"
           - "&cClick to red dye for cancel transfer"
+      admin_delete_claim:
+        display_name: "&6Delete Selected Claims"
+        lore:
+          - ""
+          - "&cWarning: &fThis action will:"
+          - "&7• &fPermanently delete selected claims"
+          - "&7• &fCannot be undone"
+          - ""
+          - "&aClick to green dye for confirm deletion"
+          - "&cClick to red dye for cancel deletion"
 
 # DO NOT CHANGE!
 gui_version: "{version}"

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.button.SingleSlotButton;
+import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 
@@ -40,6 +41,19 @@ public class ClaimListMenu extends BaseMenu {
         super("claim_list_menu");
         this.player = player;
         this.page = page;
+
+        User user = User.getUser(player.getUniqueId());
+        if (user != null) {
+            if (!user.getPlayerClaims().isEmpty() || !user.getCoopClaims().isEmpty()) {
+                new ClaimListMenu(player, 0);
+            } else {
+                player.closeInventory();
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_found"));
+                MessageType.WARN.playSound(player);
+                return;
+            }
+            return;
+        }
 
         setupMenu();
         displayTo(player);

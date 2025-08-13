@@ -291,7 +291,6 @@ public final class NClaim extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        setupHologramPlugin();
         setupWorldGuard();
         setupPlaceholderAPI();
         setupVault();

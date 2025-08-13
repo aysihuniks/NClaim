@@ -6,11 +6,13 @@ import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.ClaimMainMenu;
+import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.ClaimSetting;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -25,6 +27,7 @@ import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -186,10 +189,20 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                    selectedClaims.forEach(claim -> claim.remove(RemoveCause.REMOVED_BY_ADMIN));
-                    selectedClaims.clear();
-                    MessageType.CONFIRM.playSound(player);
-                    new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
+                    Consumer<String> onFinish = (result) -> {
+                        if ("confirmed".equals(result)) {
+                            selectedClaims.forEach(claim -> claim.remove(RemoveCause.REMOVED_BY_ADMIN));
+                            selectedClaims.clear();
+                            new AdminAllClaimMenu(player, target, sortByNewest, page, null);
+                            MessageType.CONFIRM.playSound(player);
+                        } else if ("declined".equals(result)) {
+                            new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
+                        }
+                    };
+
+                    new ConfirmMenu(player,
+                            NClaim.inst().getGuiLangManager().getString("confirm_menu.children.admin_delete_claim.display_name"),
+                            NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.admin_delete_claim.lore"), onFinish);
                 }
             });
         }

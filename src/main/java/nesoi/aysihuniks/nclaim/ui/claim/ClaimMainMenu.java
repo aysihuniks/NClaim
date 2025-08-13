@@ -118,20 +118,9 @@ public class ClaimMainMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                handleManageClaimsClick(player);
+                new ClaimListMenu(player, 0);
             }
         });
-    }
-
-    private void handleManageClaimsClick(Player player) {
-        User user = User.getUser(player.getUniqueId());
-        if (!user.getPlayerClaims().isEmpty() || !user.getCoopClaims().isEmpty()) {
-            new ClaimListMenu(player, 0);
-        } else {
-            player.closeInventory();
-            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.not_found"));
-            MessageType.WARN.playSound(player);
-        }
     }
 
     private void addAdminButton() {

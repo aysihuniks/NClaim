@@ -688,6 +688,16 @@ guis:
           - ""
           - "&aCliquez sur la teinture verte pour confirmer le transfert"
           - "&cCliquez sur la teinture rouge pour annuler le transfert"
+      admin_delete_claim:
+        display_name: "&6Supprimer les revendications sélectionnées"
+        lore:
+          - ""
+          - "&cAvertissement : &fCette action va :"
+          - "&7• &fSupprimer définitivement les revendications sélectionnées"
+          - "&7• &fNe peut pas être annulée"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer la suppression"
+          - "&cCliquez sur la teinture rouge pour annuler la suppression"
 
 # NE PAS CHANGER!
 gui_version: "{version}"

@@ -29,6 +29,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
         commands.put("balance", new BalanceCommand());
         commands.put("help", new HelpCommand());
         commands.put("level", new LevelCommand());
+        commands.put("list", new ListCommand());
 
         adminCommands.put("add", new AddCommand());
         adminCommands.put("change", new ChangeCommand());

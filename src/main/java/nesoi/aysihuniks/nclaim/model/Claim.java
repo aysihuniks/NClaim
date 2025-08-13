@@ -122,14 +122,16 @@ public class Claim {
 
         String hologramId = "claim_" + world.getName() + "_" + getChunk().getX() + "_" + getChunk().getZ();
 
-        if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
-            Hologram hologram = DHAPI.getHologram(hologramId);
-            if (hologram != null) {
-                hologram.delete();
+        if (NClaim.inst().getHologramManager() != null) {
+            if (HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM) {
+                Hologram hologram = DHAPI.getHologram(hologramId);
+                if (hologram != null) {
+                    hologram.delete();
+                }
+            } else {
+                HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+                manager.getHologram(hologramId).ifPresent(manager::removeHologram);
             }
-        } else {
-            HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-            manager.getHologram(hologramId).ifPresent(manager::removeHologram);
         }
 
         int centerX = getChunk().getX() * 16 + 8;
