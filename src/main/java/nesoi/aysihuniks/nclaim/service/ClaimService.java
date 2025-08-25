@@ -226,7 +226,7 @@ public class ClaimService {
         Date expiredAt = calculateExpirationDate();
         Location claimBlockLocation = player.getLocation().getBlock().getLocation();
 
-        Material defaultBlockType = Material.OBSIDIAN;
+        Material defaultBlockType = NClaim.inst().getNconfig().getDefaultClaimBlockType();
         claimBlockLocation.getBlock().setType(defaultBlockType);
 
         long initialValue = plugin.getBlockValueManager().calculateChunkValue(chunk);

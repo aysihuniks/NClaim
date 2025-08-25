@@ -37,7 +37,8 @@ public enum PermissionCategory {
             Permission.USE_BELL, Permission.USE_BEACON,
             Permission.USE_JUKEBOX, Permission.USE_NOTEBLOCK,
             Permission.USE_CAMPFIRE, Permission.USE_SOUL_CAMPFIRE, Permission.USE_BED,
-            Permission.INTERACT_ARMOR_STAND, Permission.INTERACT_ITEM_FRAME),
+            Permission.INTERACT_ARMOR_STAND, Permission.INTERACT_ITEM_FRAME,
+            Permission.USE_ENDER_PEARL),
             
     LIQUIDS("Liquid Permissions",
             Permission.PLACE_WATER, Permission.PLACE_LAVA,

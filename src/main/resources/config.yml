@@ -57,6 +57,8 @@ claim_settings:
   buy_price: 1500     # Cost to create a new claim
   expand_price: 2000  # Cost to expand an existing claim by one chunk
 
+  default_claim_block_type: OBSIDIAN  # Block type to be used as the marker for new claims (e.g., OBSIDIAN, GOLD_BLOCK, DIAMOND_BLOCK)
+
   # TIERED PRICING SYSTEM (Maximum 35 chunks)
   tiered_pricing:
     enable: false  # true = Tiered system ON, false = Old system (fixed price)

@@ -45,6 +45,7 @@ public enum Permission {
     USE_BED("Use beds"),
     INTERACT_ARMOR_STAND("Interact with armor stands"),
     INTERACT_ITEM_FRAME("Interact with item frames"),
+    USE_ENDER_PEARL("Use ender pearls"),
 
     PLACE_WATER("Place water"),
     PLACE_LAVA("Place lava"),

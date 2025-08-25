@@ -6,16 +6,14 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-import github.nighter.smartspawner.api.SmartSpawnerProvider;
 import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimLeaveEvent;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
- import nesoi.aysihuniks.nclaim.model.Claim;
+import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
-import nesoi.aysihuniks.nclaim.ui.claim.management.TimeManagementMenu;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -27,6 +25,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.projectiles.ProjectileSource;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DEntityType;
 
@@ -55,7 +54,7 @@ public class ClaimManager implements Listener {
 
         Player player = event.getPlayer();
         Chunk fromChunk = event.getFrom().getChunk();
-        if(event.getTo() == null) return;
+        if (event.getTo() == null) return;
         Chunk toChunk = event.getTo().getChunk();
 
         if (fromChunk.equals(toChunk)) return;
@@ -102,58 +101,6 @@ public class ClaimManager implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onEntityDamageByExplosion(EntityDamageByEntityEvent event) {
-        if (event.isCancelled()) return;
-        if (!(event.getEntity() instanceof LivingEntity)) return;
-
-        Entity damager = event.getDamager();
-        Location damageLocation = event.getEntity().getLocation();
-        Claim claim = Claim.getClaim(damageLocation.getChunk());
-
-        if (claim != null) {
-            if ((damager instanceof TNTPrimed || damager instanceof ExplosiveMinecart) &&
-                    !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.TNT_DAMAGE)) {
-                event.setCancelled(true);
-            }
-            else if (damager instanceof Creeper &&
-                    !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.CREEPER_DAMAGE)) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerDamageByPlayer(EntityDamageByEntityEvent event) {
-        if (event.isCancelled()) return;
-
-        if (!(event.getEntity() instanceof Player)) return;
-        if (event.getDamager().hasPermission("nclaim.bypass.*") || event.getDamager().hasPermission("nclaim.bypass.pvp")) return;
-
-        Player damaged = (Player) event.getEntity();
-        Player damager;
-
-        if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
-            damager = (Player) ((Projectile) event.getDamager()).getShooter();
-        } else if (event.getDamager() instanceof Player) {
-            damager = (Player) event.getDamager();
-        } else {
-            return;
-        }
-
-        Claim damagedClaim = Claim.getClaim(damaged.getLocation().getChunk());
-        Claim damagerClaim = Claim.getClaim(damager.getLocation().getChunk());
-
-        if (damagedClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagedClaim, Setting.CLAIM_PVP)) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (damagerClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagerClaim, Setting.CLAIM_PVP)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent event) {
         if (event.isCancelled()) return;
 
@@ -173,8 +120,7 @@ public class ClaimManager implements Listener {
             if (blockClaim != null) {
                 if (isTNT && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.TNT_DAMAGE)) {
                     blocksToRemove.add(block);
-                }
-                else if (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.CREEPER_DAMAGE)) {
+                } else if (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.CREEPER_DAMAGE)) {
                     blocksToRemove.add(block);
                 }
             }
@@ -191,43 +137,193 @@ public class ClaimManager implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onMobAttackPlayer(EntityDamageByEntityEvent event) {
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (event.isCancelled()) return;
+        if (event.getCause() != PlayerTeleportEvent.TeleportCause.ENDER_PEARL) return;
 
-        if (!(event.getEntity() instanceof Player)) return;
+        Player player = event.getPlayer();
+        Claim targetClaim = Claim.getClaim(event.getTo().getChunk());
 
-        Entity damager = event.getDamager();
-        if (!(damager instanceof Monster)) return;
-
-        Player player = (Player) event.getEntity();
-        Claim claim = Claim.getClaim(player.getLocation().getChunk());
-        if (claim == null) return;
-
-        boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
-
-        if (!mobAttackingEnabled && !claim.getOwner().equals(player.getUniqueId()) && !claim.getCoopPlayers().contains(player.getUniqueId())) {
+        if (targetClaim != null && !coopManager.hasPermission(player, targetClaim, Permission.USE_ENDER_PEARL)) {
             event.setCancelled(true);
+            sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
+        Entity remover = event.getRemover();
+        Hanging hanging = event.getEntity();
+        if (!(hanging instanceof ItemFrame || hanging instanceof Painting)) return;
+
+        Player player = null;
+        if (remover instanceof Player) {
+            player = (Player) remover;
+        } else if (remover instanceof Projectile) {
+            Projectile projectile = (Projectile) remover;
+            if (projectile.getShooter() instanceof Player) {
+                player = (Player) projectile.getShooter();
+            }
+        }
+
+        if (player != null) {
+            Claim claim = Claim.getClaim(hanging.getLocation().getChunk());
+            if (player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.interact")) return;
+
+            Permission perm = Permission.INTERACT_ITEM_FRAME;
+            if (hanging instanceof Painting) perm = Permission.PLACE_BLOCKS;
+
+            boolean hasPerm = coopManager.hasPermission(player, claim, perm);
+
+            if (claim != null && !hasPerm) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+            }
+        }
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof Player) {
+            if (event.getDamager().hasPermission("nclaim.bypass.*") || event.getDamager().hasPermission("nclaim.bypass.pvp")) return;
+
+            Player damaged = (Player) event.getEntity();
+            Player damager = null;
+            if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
+                damager = (Player) ((Projectile) event.getDamager()).getShooter();
+            } else if (event.getDamager() instanceof Player) {
+                damager = (Player) event.getDamager();
+            }
+
+            if (damager != null) {
+                Claim damagedClaim = Claim.getClaim(damaged.getLocation().getChunk());
+                Claim damagerClaim = Claim.getClaim(damager.getLocation().getChunk());
+
+                if (damagedClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagedClaim, Setting.CLAIM_PVP)) {
+                    event.setCancelled(true);
+                    return;
+                }
+                if (damagerClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagerClaim, Setting.CLAIM_PVP)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+        if (event.getEntity() instanceof ItemFrame || event.getEntity() instanceof Painting || event.getEntity() instanceof ArmorStand) {
+            Player player = null;
+            if (event.getDamager() instanceof Player) {
+                player = (Player) event.getDamager();
+            } else if (event.getDamager() instanceof Projectile) {
+                Projectile projectile = (Projectile) event.getDamager();
+                if (projectile.getShooter() instanceof Player) {
+                    player = (Player) projectile.getShooter();
+                }
+            }
+
+            if (player != null && !player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.interact")) {
+                Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+                Permission perm = Permission.INTERACT_ITEM_FRAME;
+                if (event.getEntity() instanceof Painting) perm = Permission.PLACE_BLOCKS;
+                if (event.getEntity() instanceof ArmorStand) perm = Permission.INTERACT_ARMOR_STAND;
+
+                if (claim != null && !coopManager.hasPermission(player, claim, perm)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+            }
+        }
+
+        if (event.getEntity() instanceof Player && event.getDamager() instanceof Monster) {
+            Player player = (Player) event.getEntity();
+            Claim claim = Claim.getClaim(player.getLocation().getChunk());
+            if (claim != null) {
+                boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
+                if (!mobAttackingEnabled && !claim.getOwner().equals(player.getUniqueId()) && !claim.getCoopPlayers().contains(player.getUniqueId())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+        if (event.getEntity() instanceof Monster && event.getDamager() instanceof Player) {
+            Player damager = (Player) event.getDamager();
+            if (damager.hasPermission("nclaim.bypass.*") || damager.hasPermission("nclaim.bypass.mob_attacking")) return;
+            Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+            if (claim != null) {
+                boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
+                if (!mobAttackingEnabled && !claim.getOwner().equals(damager.getUniqueId()) && !claim.getCoopPlayers().contains(damager.getUniqueId())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+        if (event.getEntity() instanceof LivingEntity) {
+            Entity damager = event.getDamager();
+            Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+
+            if (claim != null) {
+                if ((damager instanceof TNTPrimed || damager instanceof ExplosiveMinecart) &&
+                        !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.TNT_DAMAGE)) {
+                    event.setCancelled(true);
+                } else if (damager instanceof Creeper &&
+                        !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.CREEPER_DAMAGE)) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void windCharge(ExplosionPrimeEvent event) {
+        EntityType type = event.getEntity().getType();
+        if (type == EntityType.WIND_CHARGE || type == EntityType.BREEZE_WIND_CHARGE) {
+            Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+            if (claim != null && event.getEntity() instanceof Projectile) {
+                Projectile projectile = (Projectile) event.getEntity();
+                ProjectileSource source = projectile.getShooter();
+                if (source instanceof Player) {
+                    Player player = (Player) source;
+                    if (!coopManager.hasPermission(player, claim, Permission.PLACE_BLOCKS)) {
+                        event.setCancelled(true);
+                        sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                    }
+                }
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerAttackMob(EntityDamageByEntityEvent event) {
-        if (event.isCancelled()) return;
-
-        if (!(event.getEntity() instanceof Monster)) return;
-        if (!(event.getDamager() instanceof Player)) return;
-
-        Player damager = (Player) event.getDamager();
-
-        if (damager.hasPermission("nclaim.bypass.*") || damager.hasPermission("nclaim.bypass.mob_attacking")) return;
-
-        Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
-        if (claim == null) return;
-
-        boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
-
-        if (!mobAttackingEnabled && !claim.getOwner().equals(damager.getUniqueId()) && !claim.getCoopPlayers().contains(damager.getUniqueId())) {
-            event.setCancelled(true);
+    public void onProjectileHit(ProjectileHitEvent event) {
+        Projectile projectile = event.getEntity();
+        Bukkit.getLogger().info("[nclaim debug] ProjectileHitEvent: Entity=" + projectile.getType().name());
+        if (projectile.getType().name().equalsIgnoreCase("WIND_CHARGE")) {
+            Bukkit.getLogger().info("[nclaim debug] Wind charge DETECTED!");
+            Block hitBlock = event.getHitBlock();
+            if (hitBlock != null) {
+                Claim claim = Claim.getClaim(hitBlock.getChunk());
+                if (claim != null && projectile.getShooter() instanceof Player) {
+                    Player player = (Player) projectile.getShooter();
+                    Material type = hitBlock.getType();
+                    Bukkit.getLogger().info("[nclaim debug] Wind charge hit block: " + type.name());
+                    if (
+                            Tag.BUTTONS.isTagged(type) ||
+                                    Tag.PRESSURE_PLATES.isTagged(type) ||
+                                    Tag.DOORS.isTagged(type) ||
+                                    Tag.TRAPDOORS.isTagged(type) ||
+                                    Tag.FENCE_GATES.isTagged(type)
+                    ) {
+                        if (!coopManager.hasPermission(player, claim, Permission.USE_DOORS)) {
+                            Bukkit.getLogger().info("[nclaim debug] Wind charge ile etkileşim ENGELLENDİ: " + player.getName() + ", block=" + type.name());
+                            event.setCancelled(true);
+                            sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -283,6 +379,23 @@ public class ClaimManager implements Listener {
                     sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                 }
             }
+
+            if (block.getType() == Material.ITEM_FRAME) {
+                if (!coopManager.hasPermission(player, claim, Permission.INTERACT_ITEM_FRAME)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                }
+            } else if (block.getType() == Material.PAINTING) {
+                if (!coopManager.hasPermission(player, claim, Permission.PLACE_BLOCKS)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                }
+            } else if (block.getType() == Material.GLOW_ITEM_FRAME) {
+                if (!coopManager.hasPermission(player, claim, Permission.INTERACT_ITEM_FRAME)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                }
+            }
         }
     }
 
@@ -318,7 +431,7 @@ public class ClaimManager implements Listener {
         Player player = event.getPlayer();
         Block block = event.getClickedBlock();
         if (block == null) return;
-        
+
         Claim claim = Claim.getClaim(block.getChunk());
         if (claim == null) return;
 
@@ -345,6 +458,14 @@ public class ClaimManager implements Listener {
 
         if (type == Material.CHEST) {
             if (!coopManager.hasPermission(player, claim, Permission.USE_CHEST)) {
+                event.setCancelled(true);
+                sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                return;
+            }
+        }
+
+        if (type == Material.FURNACE || type == Material.BLAST_FURNACE || type == Material.SMOKER) {
+            if (!coopManager.hasPermission(player, claim, Permission.USE_FURNACE)) {
                 event.setCancelled(true);
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                 return;
@@ -590,6 +711,31 @@ public class ClaimManager implements Listener {
                 return;
             }
         }
+
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            Material handType = player.getInventory().getItemInMainHand().getType();
+            if (handType == Material.ITEM_FRAME || handType == Material.GLOW_ITEM_FRAME) {
+                if (!coopManager.hasPermission(player, claim, Permission.INTERACT_ITEM_FRAME)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+            }
+            if (handType == Material.PAINTING) {
+                if (!coopManager.hasPermission(player, claim, Permission.PLACE_BLOCKS)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+            }
+            if (handType == Material.ARMOR_STAND) {
+                if (!coopManager.hasPermission(player, claim, Permission.INTERACT_ARMOR_STAND)) {
+                    event.setCancelled(true);
+                    sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
+                    return;
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -609,7 +755,7 @@ public class ClaimManager implements Listener {
                 sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
             }
         }
-        
+
         if (entity instanceof ItemFrame) {
             if (!coopManager.hasPermission(player, claim, Permission.INTERACT_ITEM_FRAME)) {
                 event.setCancelled(true);
@@ -626,7 +772,7 @@ public class ClaimManager implements Listener {
         ArmorStand armorStand = event.getRightClicked();
         Claim claim = Claim.getClaim(armorStand.getLocation().getChunk());
 
-        if(player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.interact")) return;
+        if (player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.interact")) return;
 
         if (claim != null && !coopManager.hasPermission(player, claim, Permission.INTERACT_ARMOR_STAND)) {
             event.setCancelled(true);
@@ -638,7 +784,7 @@ public class ClaimManager implements Listener {
     public void onVehicleEnter(VehicleEnterEvent event) {
         Entity entity = event.getEntered();
         if (!(entity instanceof Player)) return;
-        
+
         Player player = (Player) entity;
         Vehicle vehicle = event.getVehicle();
         Claim claim = Claim.getClaim(vehicle.getLocation().getChunk());
@@ -730,14 +876,14 @@ public class ClaimManager implements Listener {
     public void onRedstoneUpdate(BlockRedstoneEvent event) {
         Block block = event.getBlock();
         Claim sourceClaim = Claim.getClaim(block.getChunk());
-        
+
         for (BlockFace face : BlockFace.values()) {
             Block relative = block.getRelative(face);
             Claim targetClaim = Claim.getClaim(relative.getChunk());
 
             if (targetClaim != null && sourceClaim != null) {
-                if (!targetClaim.getOwner().equals(sourceClaim.getOwner()) && 
-                    !targetClaim.getCoopPlayers().contains(sourceClaim.getOwner())) {
+                if (!targetClaim.getOwner().equals(sourceClaim.getOwner()) &&
+                        !targetClaim.getCoopPlayers().contains(sourceClaim.getOwner())) {
                     event.setNewCurrent(event.getOldCurrent());
                     return;
                 }

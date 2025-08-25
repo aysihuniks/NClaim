@@ -412,6 +412,9 @@ guis:
       use_noteblock:
         display_name: "&fUse Note Blocks"
         material: "NOTE_BLOCK"
+      use_ender_pearl:
+        display_name: "&fUse Ender Pearls"
+        material: "ENDER_PEARL"
       use_campfire:
         display_name: "&fUse Campfires"
         material: "CAMPFIRE"

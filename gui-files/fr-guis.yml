@@ -412,6 +412,9 @@ guis:
       use_noteblock:
         display_name: "&fUtiliser des blocs musicaux"
         material: "NOTE_BLOCK"
+      use_ender_pearl:
+        display_name: "&fUtilisez les perles d'Ender"
+        material: "ENDER_PEARL"
       use_campfire:
         display_name: "&fUtiliser des feux de camp"
         material: "CAMPFIRE"

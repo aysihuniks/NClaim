@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim;
 import lombok.Getter;
 import lombok.Setter;
 import nesoi.aysihuniks.nclaim.model.TimeLeftThreshold;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -66,6 +67,8 @@ public class Config {
     private double timeExtensionPricePerDay;
     private double timeExtensionTaxRate;
 
+    private Material defaultClaimBlockType = Material.OBSIDIAN;
+
     public FileConfiguration get() {
         return config;
     }
@@ -117,6 +120,14 @@ public class Config {
         setMaxLifetime(config.getLong("database.mysql.max_lifetime", 1800000));
         setConnectionTimeout(config.getLong("database.mysql.connection_timeout", 30000));
 
+        String defClaimBlockStr = config.getString("claim_settings.default_claim_block_type", "OBSIDIAN");
+        try {
+            setDefaultClaimBlockType(Material.valueOf(defClaimBlockStr.toUpperCase()));
+        } catch (Exception e) {
+            setDefaultClaimBlockType(Material.OBSIDIAN);
+            Util.log("&cThe default_claim_block_type in Config is invalid! It has been set to OBSIDIAN.");
+        }
+
         validateTierConfiguration();
         loadTimeLeftThresholds();
 
@@ -164,6 +175,8 @@ public class Config {
             config.set("database.mysql.idle_timeout", getIdleTimeout());
             config.set("database.mysql.max_lifetime", getMaxLifetime());
             config.set("database.mysql.connection_timeout", getConnectionTimeout());
+
+            config.set("claim_settings.default_claim_block_type", getDefaultClaimBlockType().name());
 
             config.save(new File(plugin.getDataFolder(), "config.yml"));
         } catch (Exception e) {
@@ -231,9 +244,9 @@ public class Config {
         return getEachLandBuyPrice();
     }
 
-    public boolean validateTierConfiguration() {
+    public void validateTierConfiguration() {
         if (!isEnableTieredPricing()) {
-            return true;
+            return;
         }
 
         boolean isValid = true;
@@ -265,7 +278,6 @@ public class Config {
             Util.log("&cTiered pricing system has configuration errors. Please fix your config.yml!");
         }
 
-        return isValid;
     }
 
     public int getMaxCoopPlayers(Player player) {
