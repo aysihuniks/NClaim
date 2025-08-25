@@ -299,16 +299,13 @@ public class ClaimManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onProjectileHit(ProjectileHitEvent event) {
         Projectile projectile = event.getEntity();
-        Bukkit.getLogger().info("[nclaim debug] ProjectileHitEvent: Entity=" + projectile.getType().name());
         if (projectile.getType().name().equalsIgnoreCase("WIND_CHARGE")) {
-            Bukkit.getLogger().info("[nclaim debug] Wind charge DETECTED!");
             Block hitBlock = event.getHitBlock();
             if (hitBlock != null) {
                 Claim claim = Claim.getClaim(hitBlock.getChunk());
                 if (claim != null && projectile.getShooter() instanceof Player) {
                     Player player = (Player) projectile.getShooter();
                     Material type = hitBlock.getType();
-                    Bukkit.getLogger().info("[nclaim debug] Wind charge hit block: " + type.name());
                     if (
                             Tag.BUTTONS.isTagged(type) ||
                                     Tag.PRESSURE_PLATES.isTagged(type) ||
@@ -317,7 +314,6 @@ public class ClaimManager implements Listener {
                                     Tag.FENCE_GATES.isTagged(type)
                     ) {
                         if (!coopManager.hasPermission(player, claim, Permission.USE_DOORS)) {
-                            Bukkit.getLogger().info("[nclaim debug] Wind charge ile etkileşim ENGELLENDİ: " + player.getName() + ", block=" + type.name());
                             event.setCancelled(true);
                             sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
                         }
