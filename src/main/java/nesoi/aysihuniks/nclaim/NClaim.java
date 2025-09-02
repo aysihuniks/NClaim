@@ -296,7 +296,6 @@ public final class NClaim extends JavaPlugin {
         setupVault();
         setupAxsellwand();
         setupSmartSpawner();
-        checkForUpdates();
     }
 
     private void setupAxsellwand() {
@@ -529,6 +528,20 @@ public final class NClaim extends JavaPlugin {
         instance = null;
     }
 
+    public static String formatTime(long totalSeconds, String d, String h, String m, String s) {
+        long days = totalSeconds / 86400;
+        long hours = (totalSeconds % 86400) / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) sb.append(days).append(d).append(" ");
+        if (hours > 0) sb.append(hours).append(h).append(" ");
+        if (minutes > 0) sb.append(minutes).append(m).append(" ");
+        if (seconds > 0 || sb.length() == 0) sb.append(seconds).append(s);
+        return sb.toString().trim();
+    }
+
     public static boolean isChunkAdjacent(@NotNull Chunk chunk, @NotNull Chunk thatChunk, int radius) {
         return Math.abs(chunk.getX() - thatChunk.getX()) <= radius &&
                 Math.abs(chunk.getZ() - thatChunk.getZ()) <= radius;
@@ -658,17 +671,5 @@ public final class NClaim extends JavaPlugin {
 
     public Economy getEconomy() {
         return econ;
-    }
-
-    public void checkForUpdates() {
-        if (configManager.getBoolean("check_for_updates", true)) {
-            new UpdateChecker(this, 122527).getVersion(version -> {
-                if (this.getDescription().getVersion().equals(version)) {
-                    Util.log("&aPlugin is up-to-date.");
-                } else {
-                    Util.log("&fThere is a new version update. (&e" + version + "&f)");
-                }
-            });
-        }
     }
 }

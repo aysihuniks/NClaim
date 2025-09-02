@@ -218,7 +218,7 @@ public class ClaimManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if (!claim.isOwner(player.getUniqueId())) {
+                if (!(claim.isOwner(player.getUniqueId()) || admin)) {
                     ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
                     return;
                 }

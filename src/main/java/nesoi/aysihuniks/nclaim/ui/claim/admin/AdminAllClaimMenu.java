@@ -32,12 +32,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AdminAllClaimMenu extends BaseMenu {
-    private static final int CLAIMS_PER_PAGE = 28;
+    private static final int CLAIMS_PER_PAGE = 14;
     private static final int[] CLAIM_SLOTS = {
             28, 29, 30, 31, 32, 33, 34,
-            37, 38, 39, 40, 41, 42, 43,
-            46, 47, 48, 49, 50, 51, 52,
-            19, 20, 21, 22, 23, 24, 25
+            37, 38, 39, 40, 41, 42, 43
     };
 
     private final OfflinePlayer target;
@@ -70,7 +68,7 @@ public class AdminAllClaimMenu extends BaseMenu {
         addResetButton();
         addDeleteButton();
         addClaimButtons();
-        
+
         if (hasNextPage()) {
             addNextPageButton();
         }
@@ -261,7 +259,7 @@ public class AdminAllClaimMenu extends BaseMenu {
         Chunk chunk = claim.getChunk();
         OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
         ClaimSetting settings = claim.getSettings();
-        
+
         int enabledSettings = (int) Arrays.stream(Setting.values())
                 .filter(settings::isEnabled)
                 .count();
@@ -286,9 +284,16 @@ public class AdminAllClaimMenu extends BaseMenu {
                         .replace("{yes}", String.valueOf(enabledSettings))
                         .replace("{no}", String.valueOf(disabledSettings)));
 
-                return ItemCreator.of(selectedClaims.contains(claim) 
-                        ? getMaterial("claim_items.selected")
-                        : getMaterial("claim_items.unselected"))
+                ItemStack baseItem;
+                String materialPath = "guis." + section + ".material";
+
+                if (NClaim.inst().getGuiLangManager().getGuiConfig().contains(materialPath)) {
+                    baseItem = NClaim.inst().getGuiLangManager().getMaterial(section);
+                } else {
+                    baseItem = NClaim.inst().getHeadManager().createHeadFromCache(owner.getUniqueId());
+                }
+
+                return ItemCreator.of(baseItem)
                         .name(getString(section + ".display_name")
                                 .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown"))
                         .lore(lore)
@@ -328,24 +333,50 @@ public class AdminAllClaimMenu extends BaseMenu {
                     if (text == null || text.isEmpty()) {
                         ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));
                         MessageType.FAIL.playSound(player);
-                        player.closeInventory();
+                        new AdminAllClaimMenu(player, null, sortByNewest, page, selectedClaims);
                         return;
                     }
 
-                    Player onlinePlayer = Bukkit.getPlayerExact(text);
-                    if (onlinePlayer != null) {
+                    Set<String> matchedNames = getStrings(text);
+
+                    if (matchedNames.isEmpty()) {
                         MessageType.FAIL.playSound(player);
-                        new AdminAllClaimMenu(player, onlinePlayer, sortByNewest, 0, selectedClaims);
+                        new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
                         return;
                     }
 
-                    OfflinePlayer searchedPlayer = Arrays.stream(Bukkit.getOfflinePlayers())
-                            .filter(op -> op.getName() != null && op.getName().equalsIgnoreCase(text))
-                            .findFirst()
-                            .orElse(null);
-
-                    new AdminAllClaimMenu(player, searchedPlayer, sortByNewest, 0, selectedClaims);
+                    if (matchedNames.size() == 1) {
+                        String foundName = matchedNames.iterator().next();
+                        OfflinePlayer target = null;
+                        for (OfflinePlayer offline : Bukkit.getOfflinePlayers()) {
+                            if (offline.getName() != null && offline.getName().equals(foundName)) {
+                                target = offline;
+                                break;
+                            }
+                        }
+                        new AdminAllClaimMenu(player, target, sortByNewest, 0, selectedClaims);
+                    } else {
+                        new AdminAllClaimMenu(player, null, sortByNewest, 0, selectedClaims);
+                    }
                 });
+    }
+
+    private static @NotNull Set<String> getStrings(String text) {
+        Set<String> matchedNames = new HashSet<>();
+
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getName().toLowerCase().startsWith(text.toLowerCase())) {
+                matchedNames.add(online.getName());
+            }
+        }
+
+        for (OfflinePlayer offline : Bukkit.getOfflinePlayers()) {
+            String name = offline.getName();
+            if (name != null && name.toLowerCase().startsWith(text.toLowerCase())) {
+                matchedNames.add(name);
+            }
+        }
+        return matchedNames;
     }
 
     private void teleportToClaimSafely(Player player, Claim claim) {

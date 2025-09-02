@@ -86,7 +86,14 @@ public class TimeManagementMenu extends BaseMenu {
                 double finalPrice = totalPrice + tax;
 
                 List<String> lore = new ArrayList<>(getStringList("confirm.lore"));
-                lore.replaceAll(s -> s.replace("{price}", String.format("%.2f", finalPrice)).replace("{d}", String.valueOf(days)).replace("{h}", String.valueOf(hours)).replace("{m}", String.valueOf(minutes)));
+                String priceStr = admin
+                        ? NClaim.inst().getGuiLangManager().getString("free")
+                        : String.format("%.2f", finalPrice);
+
+                lore.replaceAll(s -> s.replace("{price}", priceStr)
+                        .replace("{d}", String.valueOf(days))
+                        .replace("{h}", String.valueOf(hours))
+                        .replace("{m}", String.valueOf(minutes)));
 
                 return ItemCreator.of(Material.BLUE_ICE)
                         .name(getString("confirm.display_name"))
@@ -102,42 +109,48 @@ public class TimeManagementMenu extends BaseMenu {
                     return;
                 }
 
-                double totalPrice = calculateTotalPrice();
-                double tax = totalPrice * NClaim.inst().getNconfig().getTimeExtensionTaxRate();
-                double finalPrice = totalPrice + tax;
+                if (!admin) {
+                    double totalPrice = calculateTotalPrice();
+                    double tax = totalPrice * NClaim.inst().getNconfig().getTimeExtensionTaxRate();
+                    double finalPrice = totalPrice + tax;
 
-                if (NClaim.inst().getBalanceSystem() == Balance.PLAYERDATA) {
-                    User user = User.getUser(player.getUniqueId());
-                    if (user == null) {
-                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player_data_not_found"));
-                        MessageType.FAIL.playSound(player);
-                        return;
+                    if (NClaim.inst().getBalanceSystem() == Balance.PLAYERDATA) {
+                        User user = User.getUser(player.getUniqueId());
+                        if (user == null) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player_data_not_found"));
+                            MessageType.FAIL.playSound(player);
+                            return;
+                        }
+
+                        if (user.getBalance() < finalPrice) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
+                            MessageType.FAIL.playSound(player);
+                            return;
+                        }
+
+                        user.addBalance(-finalPrice);
+                    } else {
+                        if (NClaim.inst().getEconomy().getBalance(player) < finalPrice) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
+                            MessageType.FAIL.playSound(player);
+                            return;
+                        }
+
+                        NClaim.inst().getEconomy().withdrawPlayer(player, finalPrice);
                     }
-
-                    if (user.getBalance() < finalPrice) {
-                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
-                        MessageType.FAIL.playSound(player);
-                        return;
-                    }
-
-                    user.addBalance(-finalPrice);
-                } else {
-                    if (NClaim.inst().getEconomy().getBalance(player) < finalPrice) {
-                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
-                        MessageType.FAIL.playSound(player);
-                        return;
-                    }
-
-                    NClaim.inst().getEconomy().withdrawPlayer(player, finalPrice);
                 }
 
                 NClaim.inst().getClaimExpirationManager().extendClaimExpiration(claim, days, hours, minutes);
+
+                String priceStr = admin
+                        ? NClaim.inst().getGuiLangManager().getString("free")
+                        : String.format("%.2f", calculateTotalPrice() + calculateTotalPrice() * NClaim.inst().getNconfig().getTimeExtensionTaxRate());
 
                 ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.expiration_extended")
                         .replace("{d}", String.valueOf(days))
                         .replace("{h}", String.valueOf(hours))
                         .replace("{m}", String.valueOf(minutes))
-                        .replace("{price}", String.format("%.2f", finalPrice)));
+                        .replace("{price}", priceStr));
 
                 MessageType.CONFIRM.playSound(player);
                 player.closeInventory();
@@ -220,7 +233,7 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                adjustTime(1);
+                adjustTime(1, admin);
                 MessageType.VALUE_INCREASE.playSound(player);
                 new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
@@ -242,7 +255,7 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                adjustTime(6);
+                adjustTime(6, admin);
                 MessageType.VALUE_INCREASE.playSound(player);
                 new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
@@ -264,7 +277,7 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                adjustTime(-1);
+                adjustTime(-1, admin);
                 MessageType.VALUE_DECREASE.playSound(player);
                 new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
@@ -286,7 +299,7 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                adjustTime(-6);
+                adjustTime(-6, admin);
                 MessageType.VALUE_DECREASE.playSound(player);
                 new TimeManagementMenu(player, days, hours, minutes, timeUnit, claim, admin);
             }
@@ -304,16 +317,16 @@ public class TimeManagementMenu extends BaseMenu {
         }
     }
 
-    private void adjustTime(int amount) {
+    private void adjustTime(int amount, boolean admin) {
         switch (timeUnit) {
             case 0:
-                days = Math.max(0, days + amount);
+                days = admin ? days + amount : Math.max(0, days + amount);
                 break;
             case 1:
-                hours = Math.max(0, hours + amount);
+                hours = admin ? hours + amount : Math.max(0, hours + amount);
                 break;
             case 2:
-                minutes = Math.max(0, minutes + amount);
+                minutes = admin ? minutes + amount : Math.max(0, minutes + amount);
                 break;
         }
     }

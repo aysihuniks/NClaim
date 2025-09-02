@@ -27,12 +27,33 @@ import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.Util;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 public class ClaimService {
     private final NClaim plugin;
 
+    private static final Map<UUID, Long> lastClaimTime = new ConcurrentHashMap<>();
+    private static final long CLAIM_COOLDOWN_MILLIS = NClaim.inst().getNconfig().getLastClaimTime() * 60 * 1000;
+
     public void buyNewClaim(Player player) {
+
+        long now = System.currentTimeMillis();
+        Long last = lastClaimTime.get(player.getUniqueId());
+        if (last != null && (now - last) < CLAIM_COOLDOWN_MILLIS) {
+            long ks = (CLAIM_COOLDOWN_MILLIS - (now - last)) / 1000;
+            if (ks < 0) ks = 0;
+
+            String d = NClaim.inst().getLangManager().getString("hologram.time_left.d");
+            String h = NClaim.inst().getLangManager().getString("hologram.time_left.h");
+            String m = NClaim.inst().getLangManager().getString("hologram.time_left.m");
+            String s = NClaim.inst().getLangManager().getString("hologram.time_left.s");
+
+            String formattedTime = NClaim.formatTime(ks, d, h, m, s);
+            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.cooldown").replace("{time}", formattedTime));
+            return;
+        }
+
         Chunk chunk = player.getLocation().getChunk();
         User user = User.getUser(player.getUniqueId());
 
@@ -46,13 +67,15 @@ public class ClaimService {
 
         createNewClaim(player, chunk);
 
+        lastClaimTime.put(player.getUniqueId(), now);
+
         if (plugin.getNconfig().isDatabaseEnabled()) {
             plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
             plugin.getDatabaseManager().saveUser(user);
         }
     }
 
-    public void buyLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk) {
+    public void buyLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk, boolean isAdmin) {
         if (claim.getChunk().equals(chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.already_own_chunk"));
             return;
@@ -64,7 +87,7 @@ public class ClaimService {
             return;
         }
 
-        if (!isAdjacentChunk(claim, chunk)) {
+        if (!isAdmin && !isAdjacentChunk(claim, chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.not_adjacent"));
             return;
         }
@@ -74,7 +97,7 @@ public class ClaimService {
             return;
         }
 
-        if (!canClaimOrExpandNearOthers(player, chunk)) {
+        if (!isAdmin && canClaimOrExpandNearOthers(player, chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
             return;
         }
@@ -90,7 +113,7 @@ public class ClaimService {
             return;
         }
 
-        if (!player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.land_buy_price")) {
+        if (!isAdmin && !player.hasPermission("nclaim.bypass.*") && !player.hasPermission("nclaim.bypass.land_buy_price")) {
             if (!handlePayment(player, user, landPrice)) {
                 return;
             }
@@ -175,7 +198,7 @@ public class ClaimService {
             return false;
         }
 
-        if (!canClaimOrExpandNearOthers(player, chunk)) {
+        if (canClaimOrExpandNearOthers(player, chunk)) {
             ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
             return false;
         }
@@ -187,6 +210,9 @@ public class ClaimService {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
+        if (player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass.claim_nearby_others")) {
+            return false;
+        }
 
         for (int x = chunkX - 1; x <= chunkX + 1; x++) {
             for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
@@ -201,14 +227,13 @@ public class ClaimService {
                     if (nearbyClaim.getCoopPlayers().contains(player.getUniqueId())) continue;
 
                     if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
-                        ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.too_close_to_other_claim"));
-                        return false;
+                        return true;
                     }
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     private boolean handleClaimPayment(Player player, User user) {
@@ -257,6 +282,7 @@ public class ClaimService {
                 claimSetting,
                 purchasedBlockTypes
         );
+
         ClaimCreateEvent createEvent = new ClaimCreateEvent(player, claim);
         Bukkit.getPluginManager().callEvent(createEvent);
 
@@ -268,6 +294,7 @@ public class ClaimService {
         if (plugin.getHologramManager() != null) {
             plugin.getHologramManager().createHologram(claimBlockLocation);
         }
+
         User.getUser(player.getUniqueId()).getPlayerClaims().add(claim);
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.received"));
     }
@@ -301,7 +328,6 @@ public class ClaimService {
     }
 
     private boolean isInBlacklistedRegion(Location location) {
-
         if (!NClaim.inst().isWorldGuardEnabled()) return false;
 
         try {

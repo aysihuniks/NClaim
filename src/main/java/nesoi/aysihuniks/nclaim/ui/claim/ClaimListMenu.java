@@ -2,6 +2,7 @@ package nesoi.aysihuniks.nclaim.ui.claim;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
@@ -217,7 +218,11 @@ public class ClaimListMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if (isOwner) new ClaimManagementMenu(player, claim, false);
+                if (isOwner || NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.OPEN_CLAIM_MENU)) {
+                    new ClaimManagementMenu(player, claim, false);
+                } else{
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
+                }
             }
         });
     }

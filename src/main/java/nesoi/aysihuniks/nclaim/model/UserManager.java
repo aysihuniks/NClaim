@@ -1,6 +1,8 @@
 package nesoi.aysihuniks.nclaim.model;
 
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.utils.MessageType;
+import nesoi.aysihuniks.nclaim.utils.UpdateChecker;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -8,6 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.Util;
 
 import java.util.UUID;
@@ -19,6 +22,18 @@ public class UserManager implements Listener {
         UUID playerUUID = event.getPlayer().getUniqueId();
 
         User.loadUser(playerUUID);
+        if (event.getPlayer().isOp() || event.getPlayer().hasPermission("nclaim.admin")) {
+            if (NClaim.inst().getConfigManager().getBoolean("check_for_updates", true)) {
+                UpdateChecker checker = new UpdateChecker(NClaim.inst(), 122527);
+                checker.getVersion(latestVersion -> {
+                    String currentVersion = NClaim.inst().getDescription().getVersion();
+                    if (!currentVersion.equalsIgnoreCase(latestVersion)) {
+                        ChannelType.CHAT.sendWithPrefix(event.getPlayer(), "&aA new version is available: &ev" + latestVersion + " &8(&7You are using: &ev" + currentVersion + "&8)");
+                        MessageType.CONFIRM.playSound(event.getPlayer());
+                    }
+                });
+            }
+        }
 
         new BukkitRunnable() {
             @Override

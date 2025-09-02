@@ -6,6 +6,7 @@ guis:
   background_2:
     display_name: "&8x"
     material: "GRAY_STAINED_GLASS_PANE"
+  free: "&eFree"
   back:
     display_name: "&eBack"
     material: "OAK_DOOR"
@@ -19,6 +20,13 @@ guis:
     display_name: "&aEnabled"
   disabled:
     display_name: "&cDisabled"
+
+  scroll_button:
+    directions:
+      LEFT: "Left"
+      RIGHT: "Right"
+      DOWN: "Down"
+      UP: "Up"
 
   # Claim Menu - When /nclaim is typed, it is the menu with operations such as buy claim
   claim_menu:
@@ -144,6 +152,8 @@ guis:
   # Claim Expand Menu - The menu that opens after interacting with the claim block and clicking the 'Expand Claim' button.
   claim_expand_menu:
     title: "Expand Claim"
+    scroll_button:
+      display_name: "&fScroll {direction}"
     center:
       display_name: "&6Center Chunk"
       lore:
@@ -452,7 +462,7 @@ guis:
         display_name: "&fRide Entities"
         material: "SADDLE"
       open_claim_menu:
-        display_name: "&fInteract with claim block"
+        display_name: "&fInteract With Claim Block"
         material: "BEDROCK"
       extend_expiration:
         display_name: "&fExtend Claim Expiration"

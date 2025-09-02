@@ -61,8 +61,10 @@ command:
     failed: '{prefix} &cMigration échouée. Veuillez vérifier la console.'
 
 claim:
+  cooldown: "{prefix} &cVous devez encore attendre &e{time} &cavant de claim à nouveau."
   too_close_to_other_claim: '{prefix} &cVous ne pouvez pas revendiquer ce chunk ! Trop proche d''une autre revendication.'
   no_owner: 'Propriétaire introuvable.' # Alias : Non réclamé
+  owner: '&e{owner}'
   max_reached: '{prefix} &cVous avez atteint votre limite maximale de revendications.'
   not_found: '{prefix} &cVous ne possédez aucune revendication et n''êtes ajouté à aucune.'
   in_blacklisted_region_or_world: '{prefix} &cAction impossible dans un monde ou une région en liste noire.'

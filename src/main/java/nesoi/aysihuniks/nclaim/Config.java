@@ -37,6 +37,7 @@ public class Config {
     private int claimExpiryDays;
     private int maxCoopPlayers;
     private int maxClaimCount;
+    private long lastClaimTime;
     private List<String> blacklistedWorlds;
     private List<String> blacklistedRegions;
     private int autoSave;
@@ -67,6 +68,20 @@ public class Config {
     private double timeExtensionPricePerDay;
     private double timeExtensionTaxRate;
 
+    private boolean webhookEnabled;
+    private String webhookUrl;
+    private boolean webhookUseEmbed;
+    private String webhookContent;
+    private String webhookEmbedTitle;
+    private String webhookEmbedDescription;
+    private String webhookEmbedColor;
+    private String webhookEmbedFooter;
+    private boolean webhookEmbedTimestamp;
+    private String webhookEmbedImage;
+    private String webhookEmbedThumbnail;
+    private String webhookMention;
+    
+
     private Material defaultClaimBlockType = Material.OBSIDIAN;
 
     public FileConfiguration get() {
@@ -91,6 +106,7 @@ public class Config {
         setEnableTieredPricing(config.getBoolean("claim_settings.tiered_pricing.enable", false));
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
+        setLastClaimTime(config.getLong("claim_settings.last_claim_time", 5));
 
         setShowHologramTitle(config.getBoolean("hologram_settings.show_title", true));
         setShowHologramOwner(config.getBoolean("hologram_settings.show_owner", true));
@@ -120,6 +136,24 @@ public class Config {
         setMaxLifetime(config.getLong("database.mysql.max_lifetime", 1800000));
         setConnectionTimeout(config.getLong("database.mysql.connection_timeout", 30000));
 
+        setWebhookEnabled(config.getBoolean("webhook_settings.enabled", false));
+        setWebhookUrl(config.getString("webhook_settings.url", ""));
+        setWebhookUseEmbed(config.getBoolean("webhook_settings.use_embed", false));
+        setWebhookContent(config.getString("webhook_settings.content", ""));
+
+        if (config.isConfigurationSection("webhook_settings.embed")) {
+            ConfigurationSection embedSection = config.getConfigurationSection("webhook_settings.embed");
+            setWebhookEmbedTitle(embedSection.getString("title", "")); // Empty string for no title
+            setWebhookEmbedDescription(embedSection.getString("description", ""));
+            setWebhookEmbedColor(embedSection.getString("color", "#FF0000"));
+            setWebhookEmbedFooter(embedSection.getString("footer", ""));
+            setWebhookEmbedTimestamp(embedSection.getBoolean("timestamp", true));
+            setWebhookEmbedImage(embedSection.getString("image", ""));
+            setWebhookEmbedThumbnail(embedSection.getString("thumbnail", ""));
+        }
+
+        setWebhookMention(config.getString("webhook_settings.mention", ""));
+
         String defClaimBlockStr = config.getString("claim_settings.default_claim_block_type", "OBSIDIAN");
         try {
             setDefaultClaimBlockType(Material.valueOf(defClaimBlockStr.toUpperCase()));
@@ -145,6 +179,7 @@ public class Config {
             config.set("claim_settings.expand_price", getEachLandBuyPrice());
             config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
+            config.set("claim_settings.last_claim_time", getLastClaimTime());
 
             config.set("hologram_settings.show_title", isShowHologramTitle());
             config.set("hologram_settings.show_owner", isShowHologramOwner());
@@ -175,6 +210,22 @@ public class Config {
             config.set("database.mysql.idle_timeout", getIdleTimeout());
             config.set("database.mysql.max_lifetime", getMaxLifetime());
             config.set("database.mysql.connection_timeout", getConnectionTimeout());
+
+            config.set("webhook_settings.enabled", isWebhookEnabled());
+            config.set("webhook_settings.url", getWebhookUrl());
+            config.set("webhook_settings.use_embed", isWebhookUseEmbed());
+            config.set("webhook_settings.content", getWebhookContent());
+
+            ConfigurationSection embedSection = config.createSection("webhook_settings.embed");
+            embedSection.set("title", getWebhookEmbedTitle());
+            embedSection.set("description", getWebhookEmbedDescription());
+            embedSection.set("color", getWebhookEmbedColor());
+            embedSection.set("footer", getWebhookEmbedFooter());
+            embedSection.set("timestamp", isWebhookEmbedTimestamp());
+            embedSection.set("image", getWebhookEmbedImage());
+            embedSection.set("thumbnail", getWebhookEmbedThumbnail());
+
+            config.set("webhook_settings.mention", getWebhookMention());
 
             config.set("claim_settings.default_claim_block_type", getDefaultClaimBlockType().name());
 
@@ -327,7 +378,7 @@ public class Config {
     }
 
     public boolean isValidLanguage(String lang) {
-        return lang.equals("en-US") || lang.equals("tr-TR");
+        return lang.equals("en-US") || lang.equals("tr-TR") || lang.equals("fr-FR");
     }
 
     public Config updateConfig() {

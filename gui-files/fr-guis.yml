@@ -6,6 +6,7 @@ guis:
   background_2:
     display_name: "&8x"
     material: "GRAY_STAINED_GLASS_PANE"
+  free: "&eGratuit"
   back:
     display_name: "&eRetour"
     material: "OAK_DOOR"
@@ -19,6 +20,13 @@ guis:
     display_name: "&aActivé"
   disabled:
     display_name: "&cDésactivé"
+
+  scroll_button:
+    directions:
+      LEFT: "Gauche"
+      RIGHT: "Droite"
+      DOWN: "Bas"
+      UP: "Haut"
 
   # Menu de revendication - Lorsque /nclaim est tapé, c'est le menu avec des opérations telles que l'achat d'une revendication
   claim_menu:
@@ -75,7 +83,7 @@ guis:
         - "&fEmplacement : &e{coordinates}"
         - "&fPropriétaire : &e{owner}"
         - ""
-        - "&7Vous pouvez seulement afficher"
+        - "&7Cliquez pour gérer"
 
   # Menu de gestion des revendications - Le menu qui s'ouvre lors de l'interaction avec le bloc de revendication.
   claim_management_menu:
@@ -144,6 +152,8 @@ guis:
   # Menu d'extension de revendication - Le menu qui s'ouvre après avoir interagi avec le bloc de revendication et cliqué sur le bouton « Étendre la revendication ».
   claim_expand_menu:
     title: "Étendre la revendication"
+    scroll_button:
+      display_name: "&fDéfiler {direction}"
     center:
       display_name: "&6Bloc central"
       lore:

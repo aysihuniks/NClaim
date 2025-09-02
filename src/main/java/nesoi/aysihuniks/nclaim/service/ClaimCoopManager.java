@@ -35,8 +35,8 @@ public class ClaimCoopManager {
         return claim.getCoopPermissions().get(playerUuid).isEnabled(permission);
     }
 
-    public void addCoopPlayer(Claim claim, Player owner, Player coopPlayer) {
-        if (!canAddCoop(claim, owner, coopPlayer)) {
+    public void addCoopPlayer(Claim claim, Player owner, Player coopPlayer, boolean isAdmin) {
+        if (!canAddCoop(claim, owner, coopPlayer, isAdmin)) {
             return;
         }
 
@@ -161,26 +161,33 @@ public class ClaimCoopManager {
         User.saveUser(coopUUID);
     }
 
-    private boolean canAddCoop(Claim claim, Player owner, Player coopPlayer) {
-        if (!isClaimOwner(claim, owner) && plugin.getClaimCoopManager().hasPermission(coopPlayer, claim, Permission.ADD_COOP)) {
-            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("command.permission_denied"));
-            return false;
-        }
-
+    private boolean canAddCoop(Claim claim, Player actor, Player coopPlayer, boolean isAdmin) {
+        UUID ownerUUID = claim.getOwner();
+        UUID actorUUID = actor.getUniqueId();
         UUID coopUUID = coopPlayer.getUniqueId();
-        if (claim.getOwner().equals(coopUUID)) {
-            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("command.player.cant_add_self"));
+
+        if (ownerUUID.equals(coopUUID)) {
+            ChannelType.CHAT.send(actor, plugin.getLangManager().getString("command.player.cant_add_self"));
             return false;
         }
 
         if (isCoopPlayer(claim, coopUUID)) {
-            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.already_added")
+            ChannelType.CHAT.send(actor, plugin.getLangManager().getString("claim.coop.already_added")
                     .replace("{coop}", coopPlayer.getName()));
             return false;
         }
 
-        if (claim.getCoopPlayers().size() >= plugin.getNconfig().getMaxCoopPlayers(owner)) {
-            ChannelType.CHAT.send(owner, plugin.getLangManager().getString("claim.coop.limit_reached"));
+        if (isAdmin && !ownerUUID.equals(actorUUID) && coopUUID.equals(actorUUID)) {
+            return true;
+        }
+
+        if (!isAdmin && !isClaimOwner(claim, actor) && !plugin.getClaimCoopManager().hasPermission(actor, claim, Permission.ADD_COOP)) {
+            ChannelType.CHAT.send(actor, plugin.getLangManager().getString("command.permission_denied"));
+            return false;
+        }
+
+        if (!isAdmin && claim.getCoopPlayers().size() >= plugin.getNconfig().getMaxCoopPlayers(actor)) {
+            ChannelType.CHAT.send(actor, plugin.getLangManager().getString("claim.coop.limit_reached"));
             return false;
         }
 

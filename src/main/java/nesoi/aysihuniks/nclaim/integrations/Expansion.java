@@ -71,6 +71,13 @@ public class Expansion extends PlaceholderExpansion {
             return handleBlockValue(params);
         }
 
+        if (params.equals("coop_count") || params.startsWith("coop_count_") && params.split("_").length <= 3) {
+            return handleCoopCount(params, player);
+        }
+        if (params.equals("claim_count") || params.startsWith("claim_count_") && params.split("_").length <= 3) {
+            return handleClaimCount(params, player);
+        }
+
         if (params.startsWith("expiration_") || params.startsWith("owner_") ||
                 params.startsWith("coop_count_") || params.startsWith("total_size_")) {
             return handleClaimInfo(params);
@@ -233,6 +240,37 @@ public class Expansion extends PlaceholderExpansion {
         }
     }
 
+    private @NotNull String handleClaimCount(String params, Player player) {
+        User user = getUserFromPlaceholder(params, player, "claim_count");
+        if (user == null) return "User not found";
+        int claimCount = user.getPlayerClaims().size();
+        return String.valueOf(claimCount);
+    }
+
+    private @NotNull String handleCoopCount(String params, Player player) {
+        User user = getUserFromPlaceholder(params, player, "coop_count");
+        if (user == null) return "User not found";
+        int coopCount = user.getCoopClaims().size();
+
+        return String.valueOf(coopCount);
+    }
+
+    private @Nullable User getUserFromPlaceholder(String params, Player player, String prefix) {
+        String[] parts = params.split("_", 3);
+
+        String playerName = null;
+        if (parts.length == 2) {
+            if (player == null) return null;
+            playerName = player.getName();
+        } else if (parts.length == 3) {
+            playerName = parts[2];
+        }
+
+        if (playerName == null || playerName.isEmpty()) return null;
+        OfflinePlayer target = Bukkit.getOfflinePlayer(playerName);
+        return User.getUser(target.getUniqueId());
+    }
+
     private @Nullable String handleCurrentChunkOwner(Player player) {
         if (player == null) return null;
         Chunk chunk = player.getLocation().getChunk();
@@ -241,7 +279,7 @@ public class Expansion extends PlaceholderExpansion {
             return NClaim.inst().getLangManager().getString("claim.no_owner");
         }
         OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
-        return owner.getName() != null ? owner.getName() : NClaim.inst().getLangManager().getString("claim.no_owner");
+        return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner").replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
 }

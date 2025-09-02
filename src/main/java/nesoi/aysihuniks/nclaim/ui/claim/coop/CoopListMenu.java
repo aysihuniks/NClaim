@@ -136,11 +136,13 @@ public class CoopListMenu extends BaseMenu {
                         return;
                     }
 
-                    if (text.equalsIgnoreCase(player.getName())) {
-                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player.cant_add_self"));
-                        MessageType.FAIL.playSound(player);
-                        player.closeInventory();
-                        return;
+                    if (!admin) {
+                        if (text.equalsIgnoreCase(player.getName())) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.player.cant_add_self"));
+                            MessageType.FAIL.playSound(player);
+                            player.closeInventory();
+                            return;
+                        }
                     }
 
                     Player target = Bukkit.getPlayerExact(text);
@@ -160,7 +162,7 @@ public class CoopListMenu extends BaseMenu {
         Consumer<String> onFinish = (result) -> {
             if ("confirmed".equals(result)) {
                 player.closeInventory();
-                NClaim.inst().getClaimCoopManager().addCoopPlayer(claim, player, target);
+                NClaim.inst().getClaimCoopManager().addCoopPlayer(claim, player, target, admin);
             } else if ("declined".equals(result)) {
                 new CoopListMenu(player, claim, admin, page);
             }
@@ -272,7 +274,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(NClaim.inst().getHeadManager().createHead(coopPlayer))
+                return ItemCreator.of(NClaim.inst().getHeadManager().createHeadFromCache(coopPlayer.getUniqueId()))
                         .name(getString(buttonPath + ".display_name")
                                 .replace("{player}", coopPlayer.isOnline() ? "&a" + playerName : "&7" + playerName + " " + getString("offline")))
                         .lore(lore)
@@ -281,7 +283,7 @@ public class CoopListMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if (claim.isOwner(player.getUniqueId()) || admin && !claim.getCoopPlayers().contains(player.getUniqueId())) {
+                if (claim.isOwner(player.getUniqueId()) || admin) {
                     MessageType.MENU_FORWARD.playSound(player);
                     new CoopPermissionsMenu(player, coopPlayer, claim, admin, null);
                 }

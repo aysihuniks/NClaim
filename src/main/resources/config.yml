@@ -102,6 +102,7 @@ claim_settings:
     vip: 5
   # Permissions will be need like this "nclaim.maxcoop.default"
   expiry_days: 7      # Days until an inactive claim expires
+  last_claim_time: 5  # The time (in minutes) to wait before making a new claim after buying a claim
 
 # Auto-Save Configuration
 auto_save: 30  # How often to save data (in minutes)
@@ -112,6 +113,26 @@ time_extension:
   price_per_hour: 1500.0
   price_per_day: 5000.0
   tax_rate: 0.1
+
+webhook_settings:
+  enabled: false # Enable or disable the webhook system
+  url: "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN" # Discord webhook URL
+  use_embed: true # Send it as embed (true) or plain text (false)
+  content: |
+    Claim of %player% in %world% at %x%, %y%, %z% has expired and was deleted!
+  embed:
+    title: "" # Embed title
+    description: | # Embed description (supports placeholders)
+      > # ⏰ Claim Time Expired / Deleted!
+      > **Player**: `%player%`
+      > **World**: `%world%`
+      > **Coordinates**: `%x%, %y%, %z%`
+    color: "#FF0000" # Embed color (hex format)
+    footer: "NClaim Advanced Chunk-Based Claim System" # Text shown in the embed footer
+    timestamp: true # Add the current timestamp to the embed
+    image: "" # Image URL to display in the embed (optional)
+    thumbnail: "" # Thumbnail image URL (optional)
+  mention: "" # Mention a user or role (e.g., <@&ROLE_ID>, leave empty for none)
 
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage

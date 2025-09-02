@@ -119,16 +119,49 @@ public class HeadManager {
             return cachedHead.clone();
         }
 
-        String texture = getSkinTextureValue(uuid, false);
-        if (texture == null) {
-            ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
-            headCache.put(uuid, defaultHead);
-            return defaultHead.clone();
+        ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
+
+        Bukkit.getScheduler().runTaskAsynchronously(NClaim.inst(), () -> {
+            String texture = getSkinTextureValue(uuid, false);
+            if (texture != null) {
+                ItemStack head = createHeadWithTexture(texture);
+                headCache.put(uuid, head);
+            }
+        });
+
+        return defaultHead;
+    }
+
+    public ItemStack createHeadFromCache(UUID uuid) {
+        ItemStack cachedHead = headCache.get(uuid);
+        if (cachedHead != null) {
+            return cachedHead.clone();
         }
 
-        ItemStack head = createHeadWithTexture(texture);
-        headCache.put(uuid, head);
-        return head.clone();
+        String texture = skinTextureCache.get(uuid);
+        if (texture == null) {
+
+            User user = User.getUser(uuid);
+            if (user == null) {
+                User.loadUser(uuid);
+                user = User.getUser(uuid);
+            }
+
+            if (user != null && user.getSkinTexture() != null) {
+                texture = user.getSkinTexture();
+                skinTextureCache.put(uuid, texture);
+            }
+        }
+
+        if (texture != null) {
+            ItemStack head = createHeadWithTexture(texture);
+            headCache.put(uuid, head);
+            return head;
+        }
+
+        ItemStack defaultHead = new ItemStack(Material.PLAYER_HEAD);
+        headCache.put(uuid, defaultHead);
+        return defaultHead;
     }
 
     public ItemStack createHeadWithTexture(final String texture) {

@@ -119,7 +119,7 @@ public class ChangeCommand extends BaseCommand {
 
         if (args.length == 3) {
             if (args[1].equalsIgnoreCase("lang")) {
-                return Arrays.asList("tr-TR", "en-US");
+                return Arrays.asList("tr-TR", "en-US", "fr-FR");
             } else if (args[1].equalsIgnoreCase("blockvalue")) {
                 Set<Material> ymlMaterials = NClaim.inst().getBlockValueManager().getBlockValues().keySet();
                 return ymlMaterials.stream()

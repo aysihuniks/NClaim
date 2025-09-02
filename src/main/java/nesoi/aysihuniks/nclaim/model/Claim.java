@@ -15,7 +15,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DParticle;
+import org.nandayo.dapi.util.Util;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Getter
@@ -179,6 +183,104 @@ public class Claim {
         }
 
         claims.remove(this);
+
+        if (NClaim.inst().getNconfig().isWebhookEnabled()
+                && NClaim.inst().getNconfig().getWebhookUrl() != null
+                && !NClaim.inst().getNconfig().getWebhookUrl().isEmpty()) {
+            try {
+                String ownerName = Bukkit.getOfflinePlayer(getOwner()).getName();
+                String worldName = getChunk().getWorld().getName();
+                int x = getChunk().getX() * 16 + 8;
+                int y = getClaimBlockLocation().getBlockY();
+                int z = getChunk().getZ() * 16 + 8;
+
+                String payload;
+                if (NClaim.inst().getNconfig().isWebhookUseEmbed()) {
+                    String description = getString(ownerName);
+
+                    StringBuilder json = new StringBuilder();
+                    json.append("{");
+
+                    if (NClaim.inst().getNconfig().getWebhookMention() != null && !NClaim.inst().getNconfig().getWebhookMention().isEmpty()) {
+                        json.append("\"content\":\"").append(NClaim.inst().getNconfig().getWebhookMention()).append("\",");
+                    }
+
+                    json.append("\"embeds\":[{");
+                    if (!NClaim.inst().getNconfig().getWebhookEmbedTitle().isEmpty()) {
+                        json.append("\"title\":\"").append(escapeJson(NClaim.inst().getNconfig().getWebhookEmbedTitle())).append("\",");
+                    }
+                    json.append("\"description\":\"").append(escapeJson(description)).append("\",");
+                    json.append("\"color\":").append(Integer.parseInt(NClaim.inst().getNconfig().getWebhookEmbedColor().replace("#", ""), 16)).append(",");
+                    if (!NClaim.inst().getNconfig().getWebhookEmbedFooter().isEmpty()) {
+                        json.append("\"footer\":{\"text\":\"").append(escapeJson(NClaim.inst().getNconfig().getWebhookEmbedFooter())).append("\"},");
+                    }
+                    if (NClaim.inst().getNconfig().isWebhookEmbedTimestamp()) {
+                        json.append("\"timestamp\":\"").append(java.time.Instant.now().toString()).append("\",");
+                    }
+                    if (!NClaim.inst().getNconfig().getWebhookEmbedImage().isEmpty()) {
+                        json.append("\"image\":{\"url\":\"").append(escapeJson(NClaim.inst().getNconfig().getWebhookEmbedImage())).append("\"},");
+                    }
+                    if (!NClaim.inst().getNconfig().getWebhookEmbedThumbnail().isEmpty()) {
+                        json.append("\"thumbnail\":{\"url\":\"").append(escapeJson(NClaim.inst().getNconfig().getWebhookEmbedThumbnail())).append("\"},");
+                    }
+                    if (json.charAt(json.length() - 1) == ',') {
+                        json.deleteCharAt(json.length() - 1);
+                    }
+                    json.append("}]}");
+                    payload = json.toString();
+                } else {
+                    String content = NClaim.inst().getNconfig().getWebhookContent()
+                            .replace("%player%", ownerName != null ? ownerName : "Unknown")
+                            .replace("%world%", worldName)
+                            .replace("%x%", String.valueOf(x))
+                            .replace("%y%", String.valueOf(y))
+                            .replace("%z%", String.valueOf(z));
+                    StringBuilder json = new StringBuilder();
+                    json.append("{");
+                    if (NClaim.inst().getNconfig().getWebhookMention() != null && !NClaim.inst().getNconfig().getWebhookMention().isEmpty()) {
+                        json.append("\"content\":\"").append(NClaim.inst().getNconfig().getWebhookMention()).append(" ");
+                    } else {
+                        json.append("\"content\":\"");
+                    }
+                    json.append(escapeJson(content)).append("\"}");
+                    payload = json.toString();
+                }
+
+                URL url = new URL(NClaim.inst().getNconfig().getWebhookUrl());
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+                byte[] out = payload.getBytes(StandardCharsets.UTF_8);
+                connection.getOutputStream().write(out);
+
+                int responseCode = connection.getResponseCode();
+                connection.disconnect();
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to send Discord webhook: " + e.getMessage());
+            }
+        }
+    }
+
+    private @NotNull String getString(String ownerName) {
+        String worldName = getChunk().getWorld().getName();
+        int x = getChunk().getX() * 16 + 8;
+        int y = getClaimBlockLocation().getBlockY();
+        int z = getChunk().getZ() * 16 + 8;
+
+        return NClaim.inst().getNconfig().getWebhookEmbedDescription()
+                .replace("%player%", ownerName != null ? ownerName : "Unknown")
+                .replace("%world%", worldName)
+                .replace("%x%", String.valueOf(x))
+                .replace("%y%", String.valueOf(y))
+                .replace("%z%", String.valueOf(z));
+    }
+
+    private String escapeJson(String s) {
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
     }
 
     public void setOwner(@NotNull UUID newOwner) {

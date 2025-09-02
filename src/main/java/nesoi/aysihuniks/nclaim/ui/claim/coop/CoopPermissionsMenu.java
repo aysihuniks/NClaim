@@ -98,7 +98,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 if (currentCategory == null) {
                     new CoopListMenu(player, claim, admin, 0);
                 } else {
-                    new CoopPermissionsMenu(player,  coopPlayer, claim, admin, null);
+                    new CoopPermissionsMenu(player, coopPlayer, claim, admin, null);
                 }
             }
         });
@@ -122,7 +122,7 @@ public class CoopPermissionsMenu extends BaseMenu {
                 lore.replaceAll(s -> s.replace("{date}",
                         NClaim.serializeDate(claim.getCoopPlayerJoinDate().get(coopPlayer.getUniqueId()))));
 
-                return ItemCreator.of(NClaim.inst().getHeadManager().createHead(coopPlayer))
+                return ItemCreator.of(NClaim.inst().getHeadManager().createHeadFromCache(coopPlayer.getUniqueId()))
                         .name(getString("player_info.display_name").replace("{player}", playerName))
                         .lore(lore)
                         .get();
@@ -210,8 +210,7 @@ public class CoopPermissionsMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                    NClaim.inst().getClaimCoopManager()
-                            .toggleCoopPermission(claim, coopPlayer.getUniqueId(), permission);
+                    NClaim.inst().getClaimCoopManager().toggleCoopPermission(claim, coopPlayer.getUniqueId(), permission);
                     MessageType.CONFIRM.playSound(player);
                     new CoopPermissionsMenu(player, coopPlayer, claim, admin, currentCategory);
                 }
