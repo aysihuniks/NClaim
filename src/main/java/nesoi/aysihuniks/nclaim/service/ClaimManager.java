@@ -23,6 +23,7 @@ import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.nandayo.dapi.message.ChannelType;
