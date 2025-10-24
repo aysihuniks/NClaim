@@ -139,7 +139,7 @@
         <dependency>
             <groupId>com.github.desaxxx</groupId>
             <artifactId>DAPI</artifactId>
-            <version>0426b2bdb7</version> <!-- 1.5 candidate -->
+            <version>afc4221173</version> <!-- 1.5 candidate -->
         </dependency>
         <!-- AnvilMenu -->
         <dependency>

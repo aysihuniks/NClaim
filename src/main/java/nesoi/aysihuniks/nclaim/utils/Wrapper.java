@@ -18,7 +18,7 @@ public class Wrapper {
     }
     
     public void playSound(@NotNull Player player, @NotNull Sound sound, float volume, float pitch) {
-        if(version >= 181) {
+        if(version >= 1801) {
             player.playSound(player, sound, volume, pitch);
         }else {
             player.playSound(player.getLocation(), sound, volume, pitch);
