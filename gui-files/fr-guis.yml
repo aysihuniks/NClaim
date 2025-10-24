@@ -129,16 +129,17 @@ guis:
         - "&7• &fRègles d'accès"
         - ""
         - "&eCliquez pour configurer"
-    type:
-      display_name: "&6Type de bloc de revendication"
+    claim_block:
+      display_name: "&6Bloc de Protection"
       material: "SHULKER_BOX"
       lore:
         - ""
-        - "&fModifier le type de votre bloc de revendication"
-        - "&7• &fAffecte seulement l'apparence"
-        - "&7• &fN'affecte pas les protections"
+        - "&fGérez votre bloc de protection :"
+        - "&7• &fChanger l'apparence du bloc"
+        - "&7• &fSe téléporter à la protection"
+        - "&7• &fDéplacer le bloc"
         - ""
-        - "&eCliquez pour modifier"
+        - "&eCliquez pour gérer"
     delete:
       display_name: "&cSupprimer la revendication"
       material: "TNT"
@@ -476,6 +477,9 @@ guis:
       manage_claim_block_types:
         display_name: "&fGérer les types de blocage des réclamations"
         material: "STONE_AXE"
+      move_claim_block:
+        display_name: "&fDéplacer le Bloc de Protection"
+        material: "SHULKER_BOX"
       manage_settings:
         display_name: "&fGérer les paramètres de réclamation"
         material: "BOOK"
@@ -577,6 +581,22 @@ guis:
 
   claim_block_management_menu:
     title: "Gestion du type de bloc de revendication"
+    teleport:
+      display_name: "&6Se téléporter à la protection"
+      material: "ENDER_PEARL"
+      lore:
+        - ""
+        - "&fVous téléporte à l'emplacement de la protection"
+        - ""
+        - "&eCliquez pour vous téléporter"
+    move_claim_block:
+      display_name: "&6Déplacer le Bloc de Protection"
+      material: "SHULKER_BOX"
+      lore:
+        - ""
+        - "&fDéplace le bloc de protection à votre position"
+        - ""
+        - "&eCliquez pour continuer"
 
   admin_menu:
     all_claims_menu:
@@ -711,6 +731,16 @@ guis:
           - ""
           - "&aCliquez sur la teinture verte pour confirmer la suppression"
           - "&cCliquez sur la teinture rouge pour annuler la suppression"
+      move_claim_block:
+        display_name: "&6Déplacer le Bloc de Protection"
+        lore:
+          - ""
+          - "&fCette action va :"
+          - "&7• &fDéplacer le bloc de protection à votre position"
+          - "&7• &fLe point de téléportation sera aussi déplacé"
+          - ""
+          - "&aCliquez sur la teinture verte pour confirmer"
+          - "&cCliquez sur la teinture rouge pour annuler"
 
 # NE PAS CHANGER!
 gui_version: "{version}"

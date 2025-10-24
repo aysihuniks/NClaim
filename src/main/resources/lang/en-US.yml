@@ -106,6 +106,12 @@ claim:
     add_cancelled: "&cAdding co-op player was cancelled!"
     remove_cancelled: "&cRemoving co-op player was cancelled!"
     permission_toggle_cancelled: "&cChanging co-op permission was cancelled!"
+  teleport:
+    failed: "{prefix} &cBlocks above the claim block prevents you from teleporting."
+    success: "{prefix} &aTeleported to claim."
+  move:
+    outside_of_chunk: "{prefix} &cYou can't move the claim block outside of its chunk."
+    success: "{prefix} &aClaim block was moved successfully."
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Unclaimed"

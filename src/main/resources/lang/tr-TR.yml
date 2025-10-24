@@ -107,6 +107,12 @@ claim:
     add_cancelled: "&cOrtak oyuncu ekleme iptal edildi!"
     remove_cancelled: "&cOrtak oyuncu çıkarma iptal edildi!"
     permission_toggle_cancelled: "&cOrtak yetki değişikliği iptal edildi!"
+  teleport:
+    failed: "{prefix} &cBölgede blokunun üstündeki bloklar ışınlanmanı engelliyor."
+    success: "{prefix} &aBölgeye ışınlanıldı."
+  move:
+    outside_of_chunk: "{prefix} &cBölge blokunu chunk dışına taşıyamazsın."
+    success: "{prefix} &aBölge bloku başarıyla taşındı."
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Sahipsiz"

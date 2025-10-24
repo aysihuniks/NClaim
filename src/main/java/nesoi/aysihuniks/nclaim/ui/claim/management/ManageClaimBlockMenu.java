@@ -88,13 +88,12 @@ public class ManageClaimBlockMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
                 if(!claim.isSafeToTeleport()) {
-                    // TODO messages
-                    ChannelType.CHAT.send(player, "&cBlocks above the claim block prevents you from teleporting.");
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.failed"));
                     return;
                 }
 
                 claim.teleport(player);
-                ChannelType.CHAT.send(player, "&aTeleported to claim.");
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.teleport.success"));
                 player.closeInventory();
             }
         });
@@ -122,8 +121,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
                 Location playerLocation = player.getLocation().getBlock().getLocation();
                 if(!claim.getChunk().equals(playerLocation.getChunk())) {
-                    // TODO add message to lang files
-                    ChannelType.CHAT.send(player, "&cYou can't move the claim block outside of its chunk.");
+                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.move.outside_of_chunk"));
                     return;
                 }
 
@@ -134,10 +132,7 @@ public class ManageClaimBlockMenu extends BaseMenu {
                             if ("confirmed".equals(result)) {
                                 player.closeInventory();
                                 claim.moveClaimBlock(playerLocation);
-                                // TODO message
-                                ChannelType.CHAT.send(player, "&aMoved claim block successfully.");
-//                                player.sendMessage(NClaim.inst().getLangManager().getString("claim.transferred")
-//                                        .replace("{target}", coopPlayer.getName() != null ? coopPlayer.getName() : "Unknown"));
+                                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.move.success"));
                             } else if ("declined".equals(result)) {
                                 new ManageClaimBlockMenu(claim, player, page);
                             }
