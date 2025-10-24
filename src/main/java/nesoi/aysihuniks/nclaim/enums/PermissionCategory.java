@@ -51,7 +51,8 @@ public enum PermissionCategory {
     COOP_PERMISSIONS("Coop Permissions",
             Permission.OPEN_CLAIM_MENU, Permission.EXPAND_CLAIM,
             Permission.ADD_COOP, Permission.EXTEND_EXPIRATION,
-            Permission.MANAGE_SETTINGS, Permission.MANAGE_CLAIM_BLOCK_TYPES);
+            Permission.MANAGE_SETTINGS, Permission.MANAGE_CLAIM_BLOCK_TYPES,
+            Permission.MOVE_CLAIM_BLOCK);
 
     private final String displayName;
     private final Set<Permission> permissions;

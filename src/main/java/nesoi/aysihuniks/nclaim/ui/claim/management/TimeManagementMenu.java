@@ -172,10 +172,10 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if(!admin && !claim.isOwner(player.getUniqueId())) {
-                    MessageType.FAIL.playSound(player);
-                    return;
-                }
+//                if(!admin && !claim.isOwner(player.getUniqueId())) {
+//                    MessageType.FAIL.playSound(player);
+//                    return;
+//                }
                 MessageType.MENU_BACK.playSound(player);
                 new ClaimManagementMenu(player, claim, admin);
             }
