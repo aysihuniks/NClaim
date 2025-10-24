@@ -18,6 +18,10 @@ blacklisted_worlds:
 blacklisted_regions:
   - spawnarea  # Example: spawn protection area
 
+claim_distance:
+  chunks: 1 # How many chunks away from nearby claims can a player create a claim.
+  bypass_coop_players: true # If true, the distance rule will not apply to player who is coop in the nearby claim.
+
 # Hologram Settings
 # These settings allow you to customize the color of the "Time Left" field in claim holograms, perfect for matching your server's theme!
 #
@@ -59,13 +63,13 @@ claim_settings:
 
   default_claim_block_type: OBSIDIAN  # Block type to be used as the marker for new claims (e.g., OBSIDIAN, GOLD_BLOCK, DIAMOND_BLOCK)
 
-  # TIERED PRICING SYSTEM (Maximum 35 chunks)
+  # TIERED PRICING SYSTEM (Maximum 117 chunks)
   tiered_pricing:
     enable: false  # true = Tiered system ON, false = Old system (fixed price)
 
     # HOW IT WORKS:
     # Your claim starts with 1 chunk (main chunk)
-    # You can expand up to 35 chunks total
+    # You can expand up to 117 chunks total
     # Price increases with each tier
 
     tiers:
