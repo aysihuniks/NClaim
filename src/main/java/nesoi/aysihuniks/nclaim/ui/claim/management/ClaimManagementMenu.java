@@ -182,20 +182,15 @@ public class ClaimManagementMenu extends BaseMenu {
 
                 @Override
                 public @Nullable ItemStack getItem() {
-                    return ItemCreator.of(getMaterial("type"))
-                            .name(getString("type.display_name"))
-                            .lore(getStringList("type.lore"))
+                    return ItemCreator.of(getMaterial("claim_block"))
+                            .name(getString("claim_block.display_name"))
+                            .lore(getStringList("claim_block.lore"))
                             .flags(ItemFlag.values())
                             .get();
                 }
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                    if (!claim.isOwner(player.getUniqueId()) && !NClaim.inst().getClaimCoopManager().hasPermission(player, claim, Permission.MANAGE_CLAIM_BLOCK_TYPES)) {
-                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
-                        return;
-                    }
-
                     MessageType.MENU_FORWARD.playSound(player);
                     new ManageClaimBlockMenu(claim, player, 0);
                 }

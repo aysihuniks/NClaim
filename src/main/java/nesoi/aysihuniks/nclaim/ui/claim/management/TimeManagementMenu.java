@@ -172,10 +172,6 @@ public class TimeManagementMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                if(!admin && !claim.isOwner(player.getUniqueId())) {
-                    MessageType.FAIL.playSound(player);
-                    return;
-                }
                 MessageType.MENU_BACK.playSound(player);
                 new ClaimManagementMenu(player, claim, admin);
             }
@@ -193,7 +189,7 @@ public class TimeManagementMenu extends BaseMenu {
                 lore.replaceAll(s -> s.replace("{days_status}", timeUnit == 0 ? "&e" + getString("days_status") : "&7" + getString("days_status"))
                         .replace("{hours_status}", timeUnit == 1 ? "&e" + getString("hours_status") : "&7" + getString("hours_status"))
                         .replace("{minutes_status}", timeUnit == 2 ? "&e" + getString("minutes_status") : "&7" + getString("minutes_status")));
-                return ItemCreator.of(Material.CHAIN)
+                return ItemCreator.of(NClaim.getMaterial(DMaterial.IRON_CHAIN, DMaterial.CHAIN))
                         .name(getString("select_time_unit.display_name"))
                         .lore(lore)
                         .get();

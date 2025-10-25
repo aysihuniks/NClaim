@@ -40,6 +40,8 @@ public class Config {
     private long lastClaimTime;
     private List<String> blacklistedWorlds;
     private List<String> blacklistedRegions;
+    private int claimDistanceChunks;
+    private boolean claimDistanceCoopBypass;
     private int autoSave;
 
     private boolean showHologramTitle;
@@ -99,6 +101,8 @@ public class Config {
         setDefaultLanguage(config.getString("lang_file", "en-US"));
         setBlacklistedWorlds(config.getStringList("blacklisted_worlds"));
         setBlacklistedRegions(config.getStringList("blacklisted_regions"));
+        setClaimDistanceChunks(config.getInt("claim_distance.chunks", 1));
+        setClaimDistanceCoopBypass(config.getBoolean("claim_distance.bypass_coop_players", true));
 
         setMaxClaimCount(config.getInt("claim_settings.max_count", 3));
         setClaimBuyPrice(config.getDouble("claim_settings.buy_price", 1500));
@@ -266,7 +270,7 @@ public class Config {
     }
 
     public double getTieredPrice(int chunkNumber) {
-        if (chunkNumber > 35) {
+        if (chunkNumber > 117) {
             return -1;
         }
 
@@ -281,8 +285,8 @@ public class Config {
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
                 double price = config.getDouble("claim_settings.tiered_pricing.tiers." + tierKey + ".price", 0);
 
-                if (minChunk > 35 || maxChunk > 35) {
-                    Util.log("&cWarning: Tier " + tierKey + " has chunk numbers above limit (35). Skipping...");
+                if (minChunk > 117 || maxChunk > 117) {
+                    Util.log("&cWarning: Tier " + tierKey + " has chunk numbers above limit (117). Skipping...");
                     continue;
                 }
 
@@ -308,8 +312,8 @@ public class Config {
                 int minChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".min", 1);
                 int maxChunk = config.getInt("claim_settings.tiered_pricing.tiers." + tierKey + ".max", 1);
 
-                if (minChunk > 35 || maxChunk > 35) {
-                    Util.log("&cError: Tier " + tierKey + " exceeds maximum chunk limit (35)!");
+                if (minChunk > 117 || maxChunk > 117) {
+                    Util.log("&cError: Tier " + tierKey + " exceeds maximum chunk limit (117)!");
                     isValid = false;
                 }
 

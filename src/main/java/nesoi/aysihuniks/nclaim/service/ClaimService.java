@@ -214,8 +214,10 @@ public class ClaimService {
             return false;
         }
 
-        for (int x = chunkX - 1; x <= chunkX + 1; x++) {
-            for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
+        int claimDistance = Math.max(0, NClaim.inst().getNconfig().getClaimDistanceChunks());
+        boolean coopBypass = NClaim.inst().getNconfig().isClaimDistanceCoopBypass();
+        for (int x = chunkX - claimDistance; x <= chunkX + claimDistance; x++) {
+            for (int z = chunkZ - claimDistance; z <= chunkZ + claimDistance; z++) {
                 if (x == chunkX && z == chunkZ) {
                     continue;
                 }
@@ -224,7 +226,7 @@ public class ClaimService {
                 Claim nearbyClaim = Claim.getClaim(nearbyChunk);
 
                 if (nearbyClaim != null) {
-                    if (nearbyClaim.getCoopPlayers().contains(player.getUniqueId())) continue;
+                    if (coopBypass && nearbyClaim.getCoopPlayers().contains(player.getUniqueId())) continue;
 
                     if (!nearbyClaim.getOwner().equals(player.getUniqueId())) {
                         return true;

@@ -106,6 +106,12 @@ claim:
     add_cancelled: '&cAjout de joueur en coop annulé !'
     remove_cancelled: '&cSuppression de joueur en coop annulée !'
     permission_toggle_cancelled: '&cChangement de permission coop annulé !'
+  teleport:
+    failed: "{prefix} &cDes blocs au-dessus du bloc de protection vous empêchent de vous téléporter."
+    success: "{prefix} &aTéléporté à la protection."
+  move:
+    outside_of_chunk: "{prefix} &cVous ne pouvez pas déplacer le bloc de protection en dehors de son chunk."
+    success: "{prefix} &aBloc de protection déplacé avec succès."
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Non revendiqué"

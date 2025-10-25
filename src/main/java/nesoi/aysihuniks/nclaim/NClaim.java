@@ -12,7 +12,6 @@ import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.hologram.HologramManager;
 import nesoi.aysihuniks.nclaim.integrations.*;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.model.UserManager;
 import nesoi.aysihuniks.nclaim.service.*;

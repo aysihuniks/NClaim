@@ -167,7 +167,7 @@ public class HeadManager {
     public ItemStack createHeadWithTexture(final String texture) {
         try {
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-            if (version > 204) {
+            if (version > 2004) {
                 NBT.modifyComponents(head, nbt -> {
                     ReadWriteNBT profileNbt = nbt.getOrCreateCompound("minecraft:profile");
                     profileNbt.setUUID("id", UUID.randomUUID());

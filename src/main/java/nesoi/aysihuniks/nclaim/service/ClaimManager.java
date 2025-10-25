@@ -23,6 +23,7 @@ import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.nandayo.dapi.message.ChannelType;
@@ -50,7 +51,7 @@ public class ClaimManager implements Listener {
         return player.hasPermission("nclaim.bypass.*") || player.hasPermission("nclaim.bypass." + specificBypass);
     }
 
-    private boolean isClaimMember(Player player, Claim claim) {
+    private boolean isNotClaimMember(Player player, Claim claim) {
         if (claim == null) return true;
         UUID uuid = player.getUniqueId();
         return !claim.getOwner().equals(uuid) && !claim.getCoopPlayers().contains(uuid);
@@ -59,7 +60,7 @@ public class ClaimManager implements Listener {
     private boolean cancelIfNotClaimMember(Player player, Claim claim, Cancellable event) {
         if (claim == null) return false;
         if (hasClaimBypass(player, "")) return false;
-        if (isClaimMember(player, claim)) {
+        if (isNotClaimMember(player, claim)) {
             event.setCancelled(true);
             sendCooldownMessage(player, plugin.getLangManager().getString("command.permission_denied"));
             return true;
@@ -216,7 +217,7 @@ public class ClaimManager implements Listener {
             Claim claim = Claim.getClaim(player.getLocation().getChunk());
             if (claim != null) {
                 boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
-                if (!mobAttackingEnabled && isClaimMember(player, claim)) {
+                if (!mobAttackingEnabled && isNotClaimMember(player, claim)) {
                     event.setCancelled(true);
                     return;
                 }
@@ -227,7 +228,7 @@ public class ClaimManager implements Listener {
             Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
             if (claim != null && !hasClaimBypass(damager, "mob_attacking")) {
                 boolean mobAttackingEnabled = plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.MOB_ATTACKING);
-                if (!mobAttackingEnabled && isClaimMember(damager, claim)) {
+                if (!mobAttackingEnabled && isNotClaimMember(damager, claim)) {
                     event.setCancelled(true);
                     return;
                 }
@@ -331,8 +332,22 @@ public class ClaimManager implements Listener {
         Block block = event.getBlock();
         Claim claim = Claim.getClaim(block.getChunk());
         if (cancelIfNotClaimMember(player, claim, event)) return;
-        Permission permission = block.getType() == Material.SPAWNER ? Permission.PLACE_SPAWNER : Permission.PLACE_BLOCKS;
+        Permission permission = blockPlacePermission(event);
         cancelIfNoPermission(player, claim, permission, event, "place");
+    }
+
+    private Permission blockPlacePermission(BlockPlaceEvent event) {
+        Material type = event.getBlock().getType();
+        switch (type) {
+            case SPAWNER:
+                return Permission.PLACE_SPAWNER;
+            case CAMPFIRE:
+                return Permission.USE_CAMPFIRE;
+            case SOUL_CAMPFIRE:
+                return Permission.USE_SOUL_CAMPFIRE;
+            default:
+                return Permission.PLACE_BLOCKS;
+        }
     }
 
     @EventHandler
@@ -469,8 +484,8 @@ public class ClaimManager implements Listener {
         if (hasClaimBypass(player, "interact")) return;
         if (cancelIfNotClaimMember(player, claim, event)) return;
         Permission permission = null;
-        if (event.getBucket() == Material.WATER_BUCKET) permission = Permission.TAKE_WATER;
-        else if (event.getBucket() == Material.LAVA_BUCKET) permission = Permission.TAKE_LAVA;
+        if (event.getBlockClicked().getType() == Material.WATER) permission = Permission.TAKE_WATER;
+        else if (event.getBlockClicked().getType() == Material.LAVA) permission = Permission.TAKE_LAVA;
         if (permission != null) {
             cancelIfNoPermission(player, claim, permission, event, "interact");
         }

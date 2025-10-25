@@ -129,16 +129,17 @@ guis:
         - "&7• &fAccess rules"
         - ""
         - "&eClick to configure"
-    type:
-      display_name: "&6Claim Block Type"
+    claim_block:
+      display_name: "&6Claim Block"
       material: "SHULKER_BOX"
       lore:
         - ""
-        - "&fChange the type of your claim block"
-        - "&7• &fAffects only appearance"
-        - "&7• &fDoes not affect protections"
+        - "&fManage your claim block:"
+        - "&7• &fChange block appearance"
+        - "&7• &fTeleport to claim"
+        - "&7• &fMove the block"
         - ""
-        - "&eClick to change"
+        - "&eClick to manage"
     delete:
       display_name: "&cDelete Claim"
       material: "TNT"
@@ -476,6 +477,9 @@ guis:
       manage_claim_block_types:
         display_name: "&fManage Claim Block Types"
         material: "STONE_AXE"
+      move_claim_block:
+        display_name: "&fMove Claim Block"
+        material: "SHULKER_BOX"
       manage_settings:
         display_name: "&fManage Claim Settings"
         material: "BOOK"
@@ -577,7 +581,23 @@ guis:
           - "&eClick to toggle"
 
   claim_block_management_menu:
-    title: "Claim Block Type Management"
+    title: "Claim Block Management"
+    teleport:
+      display_name: "&6Teleport to Claim"
+      material: "ENDER_PEARL"
+      lore:
+        - ""
+        - "&fTeleports you to claim location"
+        - ""
+        - "&eClick to teleport"
+    move_claim_block:
+      display_name: "&6Move the Claim Block"
+      material: "SHULKER_BOX"
+      lore:
+        - ""
+        - "&fMoves the claim block to your location"
+        - ""
+        - "&eClick to proceed"
 
   admin_menu:
     all_claims_menu:
@@ -711,6 +731,16 @@ guis:
           - ""
           - "&aClick to green dye for confirm deletion"
           - "&cClick to red dye for cancel deletion"
+      move_claim_block:
+        display_name: "&6Move Claim Block"
+        lore:
+          - ""
+          - "&fThis action will:"
+          - "&7• &fMove the claim block to your location"
+          - "&7• &fTeleportation point will also move alongside it"
+          - ""
+          - "&aClick green dye to confirm move"
+          - "&cClick to red dye to cancel move"
 
 # DO NOT CHANGE!
 gui_version: "{version}"

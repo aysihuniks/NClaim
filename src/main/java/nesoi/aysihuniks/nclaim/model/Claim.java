@@ -11,11 +11,13 @@ import nesoi.aysihuniks.nclaim.api.events.ClaimRemoveEvent;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DParticle;
-import org.nandayo.dapi.util.Util;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -71,7 +73,7 @@ public class Claim {
     private final @NotNull Date createdAt;
     private @NotNull Date expiredAt;
     private @NotNull UUID owner;
-    private final @NotNull Location claimBlockLocation;
+    private @NotNull Location claimBlockLocation;
     private long claimValue;
     private Material claimBlockType;
     private final Collection<String> lands;
@@ -322,5 +324,29 @@ public class Claim {
 
     public Optional<Player> getOwnerPlayer() {
         return Optional.ofNullable(Bukkit.getPlayer(owner));
+    }
+
+    @ApiStatus.Internal
+    public void moveClaimBlock(@NotNull Location newLocation) {
+        Block oldBlock = claimBlockLocation.getBlock();
+        BlockData oldBlockData = oldBlock.getBlockData().clone();
+        oldBlock.setType(Material.AIR);
+
+        this.claimBlockLocation = newLocation;
+        Block block = claimBlockLocation.getBlock();
+        block.setBlockData(oldBlockData, false);
+
+        if (plugin.getHologramManager() != null) {
+            plugin.getHologramManager().createHologram(claimBlockLocation);
+        }
+    }
+
+    public boolean isSafeToTeleport() {
+        return claimBlockLocation.clone().add(0,1,0).getBlock().getType().isAir() &&
+                claimBlockLocation.clone().add(0,2,0).getBlock().getType().isAir();
+    }
+
+    public void teleport(Player teleporter) {
+        teleporter.teleport(claimBlockLocation.clone().add(0.5,1,0.5));
     }
 }
