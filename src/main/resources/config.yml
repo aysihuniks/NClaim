@@ -20,7 +20,7 @@ blacklisted_regions:
 
 claim_distance:
   chunks: 1 # How many chunks away from nearby claims can a player create a claim.
-  bypass_coop_players: true # If true, the distance rule will not apply to player who is coop in the nearby claim.
+  bypass_coop_players: true # If true, allows players to claim chunks adjacent to claims owned by their co-op teammates, ignoring the standard distance rule.
 
 # Hologram Settings
 # These settings allow you to customize the color of the "Time Left" field in claim holograms, perfect for matching your server's theme!

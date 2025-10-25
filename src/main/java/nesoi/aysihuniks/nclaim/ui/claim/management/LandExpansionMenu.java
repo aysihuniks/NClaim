@@ -108,7 +108,8 @@ public class LandExpansionMenu extends BaseMenu {
     }
 
     private void addChunkButton(int slot, Player player) {
-        Chunk thatChunk = findChunkFromSlot(slot, player);
+        float yaw = player.getLocation().getYaw();
+        Chunk thatChunk = findChunkFromSlot(slot, (yaw % 360 + 360) % 360);
         Claim thatClaim = Claim.getClaim(thatChunk);
 
         String configPath;
@@ -213,7 +214,7 @@ public class LandExpansionMenu extends BaseMenu {
                 .anyMatch(c -> c != null && NClaim.isChunkAdjacent(c, thatChunk, 2));
     }
 
-    private Chunk findChunkFromSlot(int slot, Player player) {
+    private Chunk findChunkFromSlot(int slot, float yaw) {
         int chunkX = claim.getChunk().getX();
         int chunkZ = claim.getChunk().getZ();
 
@@ -225,23 +226,27 @@ public class LandExpansionMenu extends BaseMenu {
 
         int deltaX = col - centerCol;
         int deltaZ = row - centerRow;
-
-        float yaw = player.getLocation().getYaw();
-        yaw = (yaw % 360 + 360) % 360;
+        // note: chunk coords increase toward south-east
 
         int rotatedX, rotatedZ;
-
+        // SOUTH
         if (yaw >= 315 || yaw < 45) {
-            rotatedX = deltaX;
-            rotatedZ = -deltaZ;
-        } else if (yaw >= 45 && yaw < 135) {
-            rotatedX = -deltaZ;
-            rotatedZ = -deltaX;
-        } else if (yaw >= 135 && yaw < 225) {
             rotatedX = -deltaX;
-            rotatedZ = deltaZ;
-        } else {
+            rotatedZ = -deltaZ;
+        }
+        // WEST
+        else if (yaw >= 45 && yaw < 135) {
             rotatedX = deltaZ;
+            rotatedZ = -deltaX;
+        }
+        // NORTH
+        else if (yaw >= 135 && yaw < 225) {
+            rotatedX = deltaX;
+            rotatedZ = deltaZ;
+        }
+        // EAST
+        else {
+            rotatedX = -deltaZ;
             rotatedZ = deltaX;
         }
 

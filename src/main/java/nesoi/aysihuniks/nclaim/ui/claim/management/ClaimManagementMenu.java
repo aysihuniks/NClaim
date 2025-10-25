@@ -191,16 +191,6 @@ public class ClaimManagementMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                    // Removing permission check since teleportation doesn't require any.
-                    // The actions inside the ManageClaimBlockMenu checks for these permissions.
-//                    ClaimCoopManager manager = NClaim.inst().getClaimCoopManager();
-//                    boolean hasClaimBlockPermission = manager.hasPermission(player, claim, Permission.MANAGE_CLAIM_BLOCK_TYPES)
-//                            || manager.hasPermission(player, claim, Permission.MOVE_CLAIM_BLOCK);
-//                    if (!claim.isOwner(player.getUniqueId()) && !hasClaimBlockPermission) {
-//                        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
-//                        return;
-//                    }
-
                     MessageType.MENU_FORWARD.playSound(player);
                     new ManageClaimBlockMenu(claim, player, 0);
                 }
