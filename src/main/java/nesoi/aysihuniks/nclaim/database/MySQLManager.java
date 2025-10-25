@@ -114,27 +114,37 @@ public class MySQLManager implements DatabaseManager {
     }
 
     private void createDatabaseIfNotExists(Config config) {
-        String jdbcUrl = String.format("jdbc:mysql://%s:%d?useSSL=false&autoReconnect=true",
-                config.getMysqlHost(), config.getMysqlPort());
+        String host = config.getMysqlHost();
+        int port = config.getMysqlPort();
         String user = config.getMysqlUser();
         String password = config.getMysqlPassword();
         String dbName = config.getMysqlDatabase();
-
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, user, password)) {
-            Statement stmt = conn.createStatement();
+        String rootUrl = String.format("jdbc:mysql://%s:%d/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                host, port);
+        try (Connection conn = DriverManager.getConnection(rootUrl, user, password);
+            Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS `" + dbName + "`");
             Util.log("&aDatabase '" + dbName + "' checked/created successfully.");
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create database '" + dbName + "': " + e.getMessage(), e);
+        }
+        catch (SQLException e) {
+                    throw new RuntimeException("Failed to initialize database '" + dbName + "': " + e.getMessage(), e);
         }
     }
 
     private HikariDataSource setupDataSource(Config config) {
+        String host = config.getMysqlHost();
+        int port = config.getMysqlPort();
+        String database = config.getMysqlDatabase();
+        String user = config.getMysqlUser();
+        String password = config.getMysqlPassword();
+        String jdbcUrl = String.format(
+            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+            host, port, database
+        );
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false&autoReconnect=true",
-            config.getMysqlHost(), config.getMysqlPort(), config.getMysqlDatabase()));
-        hikariConfig.setUsername(config.getMysqlUser());
-        hikariConfig.setPassword(config.getMysqlPassword());
+        hikariConfig.setJdbcUrl(jdbcUrl);
+        hikariConfig.setUsername(user);
+        hikariConfig.setPassword(password);
 
         hikariConfig.setMaximumPoolSize(config.getMaximumPoolSize());
         hikariConfig.setMinimumIdle(config.getMinimumIdle());
