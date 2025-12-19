@@ -194,7 +194,26 @@ public class LandExpansionMenu extends BaseMenu {
                                     .map(s -> s.replace("{price}", String.valueOf(calculateChunkPrice(thatChunk))))
                                     .collect(Collectors.toList()),
                             onFinish);
-                } else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.GREEN_WOOL || clickType.isRightClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {
+                } else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.GREEN_WOOL) {
+                    if (claim.getChunk().equals(thatChunk)) {
+                        return;
+                    }
+                    Consumer<String> onFinish = (result) -> {
+                        if ("confirmed".equals(result)) {
+                            NClaim.inst().getClaimService().unClaimLand(claim, player, thatChunk);
+                            new LandExpansionMenu(player, claim, admin);
+                        } else {
+                            new LandExpansionMenu(player, claim, admin);
+                        }
+                    };
+
+                    new ConfirmMenu(player,
+                            NClaim.inst().getGuiLangManager().getString("confirm_menu.children.land_unclaim.display_name"),
+                            NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.land_unclaim.lore"),
+                            onFinish);
+
+                }
+                else if (clickType.isRightClick() && getInvItem(slot).getType() == Material.BROWN_WOOL) {
                     player.closeInventory();
                     NClaim.inst().getClaimVisualizerService().showClaimBorders(player, thatChunk);
                 }

@@ -96,6 +96,7 @@ claim:
     not_adjacent: "{prefix} &cBölgenizi sadece bitişik parçalara genişletebilirsiniz!"
     expanded: "{prefix} &aYeni arazi başarıyla bölgenize eklendi."
     buy_cancelled: "{prefix} &cArazi satın alımı iptal edildi."
+    unclaimed: "{prefix} &aArazi başarıyla silindi."
   coop:
     limit_reached: "{prefix} &cEn fazla &e{0} &cortak oyuncunuz olabilir!"
     already_added: "{prefix} &c{coop} zaten ortak listesinde."

@@ -129,6 +129,26 @@ public class ClaimService {
         ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.expanded"));
     }
 
+    public void unClaimLand(@NotNull Claim claim, Player player, @NotNull Chunk chunk) {
+        if (claim.getChunk().equals(chunk)) {
+            return;
+        }
+
+        String chunkKey = chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ();
+
+        if (!claim.getLands().contains(chunkKey)) {
+            return;
+        }
+
+        claim.getLands().remove(chunkKey);
+
+        if (plugin.getNconfig().isDatabaseEnabled()) {
+            plugin.getDatabaseManager().saveClaim(claim);
+        }
+
+        ChannelType.CHAT.send(player, plugin.getLangManager().getString("claim.land.unclaimed"));
+    }
+
     public double calculateLandPrice(@NotNull Claim claim) {
         int currentChunkCount = 1 + claim.getLands().size();
         int nextChunkNumber = currentChunkCount + 1;

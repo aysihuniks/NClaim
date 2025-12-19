@@ -243,9 +243,6 @@ public final class NClaim extends JavaPlugin {
 
     private void initializeManagers() {
         wrapper = new Wrapper(this);
-        if (NClaim.inst().getServer().getPluginManager().getPlugin("Farmer") != null) {
-            GeikFarmer.registerIntegration();
-        }
 
         blockValueManager = new ClaimLevelManager(this);
         claimService = new ClaimService(this);
@@ -294,27 +291,12 @@ public final class NClaim extends JavaPlugin {
         setupPlaceholderAPI();
         setupVault();
         setupAxsellwand();
-        setupSmartSpawner();
     }
 
     private void setupAxsellwand() {
         if (getServer().getPluginManager().getPlugin("Axsellwand") != null) {
             getServer().getPluginManager().registerEvents(new AxSellWand(this), this);
             Util.log("&aAxsellwand integration enabled successfully!");
-        }
-    }
-
-    private void setupSmartSpawner() {
-        if (getServer().getPluginManager().getPlugin("SmartSpawner") != null) {
-            getServer().getPluginManager().registerEvents(new SSpawner(this), this);
-            Util.log("&aSmartSpawner integration enabled successfully!");
-        }
-    }
-
-    private void setupHologramPlugin() {
-        if (!HoloEnum.isHologramPluginEnabled()) {
-            Util.log("&cYou need to have one of the &rDecentHolograms &cor &rFancyHolograms &cplugins installed!");
-            getServer().getPluginManager().disablePlugin(this);
         }
     }
 

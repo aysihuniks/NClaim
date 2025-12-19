@@ -259,8 +259,8 @@ public class ClaimManager implements Listener {
 
     @EventHandler
     public void windCharge(ExplosionPrimeEvent event) {
-        EntityType type = event.getEntity().getType();
-        if (type == EntityType.WIND_CHARGE || type == EntityType.BREEZE_WIND_CHARGE) {
+        String entityName = event.getEntity().getType().name();
+        if (entityName.equals("WIND_CHARGE") || entityName.equals("BREEZE_WIND_CHARGE")) {
             Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
             if (claim != null && event.getEntity() instanceof Projectile) {
                 Projectile projectile = (Projectile) event.getEntity();
@@ -270,6 +270,39 @@ public class ClaimManager implements Listener {
                     cancelIfNoPermission(player, claim, Permission.PLACE_BLOCKS, event, "place");
                 }
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onArmorStandExplosionDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof ArmorStand)) {
+            return;
+        }
+
+        if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_EXPLOSION &&
+                event.getCause() != EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
+            return;
+        }
+
+        Chunk chunk = event.getEntity().getLocation().getChunk();
+        Claim claim = Claim.getClaim(chunk);
+
+        if (claim == null) {
+            return;
+        }
+
+        if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
+            if (plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.TNT_DAMAGE)) {
+                return;
+            }
+            event.setCancelled(true);
+        }
+
+        else if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
+            if (plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.CREEPER_DAMAGE)) {
+                return;
+            }
+            event.setCancelled(true);
         }
     }
 

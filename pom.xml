@@ -6,7 +6,7 @@
 
     <groupId>nesoi.aysihuniks</groupId>
     <artifactId>NClaim</artifactId>
-    <version>3.2</version>
+    <version>3.3.1</version>
     <packaging>jar</packaging>
 
     <name>NClaim</name>
@@ -154,13 +154,6 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.NighterDevelopment</groupId>
-            <artifactId>smartspawner</artifactId>
-            <version>1.5.4.3</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- NBT-API -->
         <dependency>
             <groupId>de.tr7zw</groupId>
@@ -199,13 +192,6 @@
             <groupId>net.skinsrestorer</groupId>
             <artifactId>skinsrestorer-api</artifactId>
             <version>15.8.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Geik Farmer -->
-        <dependency>
-            <groupId>com.github.Geik-xyz</groupId>
-            <artifactId>Farmer-v6</artifactId>
-            <version>v6-b111</version>
             <scope>provided</scope>
         </dependency>
         <!-- AxSellwands -->

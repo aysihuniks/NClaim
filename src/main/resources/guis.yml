@@ -660,6 +660,17 @@ guis:
     center:
       material: "BOOK"
     children:
+      land_unclaim:
+        display_name: "&8Unclaim Land?"
+        lore:
+          - ""
+          - "&7This land chunk will be"
+          - "&7removed from your claim."
+          - ""
+          - "&cWarning: &7Builds in this area"
+          - "&7will become unprotected!"
+          - ""
+          - "&aClick to confirm"
       buy_new_claim:
         display_name: "&6Buy a New Claim"
         lore:

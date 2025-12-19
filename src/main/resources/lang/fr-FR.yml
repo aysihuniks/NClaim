@@ -95,6 +95,7 @@ claim:
     not_adjacent: '{prefix} &cVous ne pouvez étendre qu''à des chunks adjacents !'
     expanded: '{prefix} &aNouveau chunk ajouté à votre revendication.'
     buy_cancelled: '{prefix} &cAchat de terrain annulé.'
+    unclaimed: "{prefix} &aLe terrain a été supprimé avec succès."
   coop:
     limit_reached: '{prefix} &cVous ne pouvez avoir que &e{0} &cjoueurs en coop !'
     already_added: '{prefix} &c{coop} est déjà dans la liste de coop.'

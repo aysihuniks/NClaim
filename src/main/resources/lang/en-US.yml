@@ -95,6 +95,7 @@ claim:
     not_adjacent: "{prefix} &cYou can only expand your claim to adjacent chunks!"
     expanded: "{prefix} &aNew land successfully added to your claim."
     buy_cancelled: "{prefix} &cLand purchase cancelled."
+    unclaimed: "{prefix} &aLand successfully deleted."
   coop:
     limit_reached: "{prefix} &cYou can only have up to &e{0} &cco-op players!"
     already_added: "{prefix} &c{coop} is already in the co-op list."
