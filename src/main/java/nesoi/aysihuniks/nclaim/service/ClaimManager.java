@@ -135,25 +135,30 @@ public class ClaimManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent event) {
         if (event.isCancelled()) return;
+
         Location explodeLocation = event.getLocation();
         Claim explodeClaim = Claim.getClaim(explodeLocation.getChunk());
         Entity explodingEntity = event.getEntity();
+
         boolean isTNT = explodingEntity.getType() == NClaim.getEntityType(DEntityType.TNT, DEntityType.PRIMED_TNT) ||
                 explodingEntity.getType() == NClaim.getEntityType(DEntityType.MINECART_TNT, DEntityType.TNT_MINECART);
         boolean isCreeper = explodingEntity.getType() == EntityType.CREEPER;
+        boolean isEndCrystal = explodingEntity.getType() == NClaim.getEntityType(DEntityType.ENDER_CRYSTAL, DEntityType.END_CRYSTAL);
+
         List<Block> blocksToRemove = new ArrayList<>();
         for (Block block : event.blockList()) {
             Claim blockClaim = Claim.getClaim(block.getChunk());
             if (blockClaim != null) {
-                if ((isTNT && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.TNT_DAMAGE)) ||
+                if (((isTNT || isEndCrystal) && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.TNT_DAMAGE)) ||
                         (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(blockClaim, Setting.CREEPER_DAMAGE))) {
                     blocksToRemove.add(block);
                 }
             }
         }
         event.blockList().removeAll(blocksToRemove);
+
         if (explodeClaim != null) {
-            if ((isTNT && !plugin.getClaimSettingsManager().isSettingEnabled(explodeClaim, Setting.TNT_DAMAGE)) ||
+            if (((isTNT || isEndCrystal) && !plugin.getClaimSettingsManager().isSettingEnabled(explodeClaim, Setting.TNT_DAMAGE)) ||
                     (isCreeper && !plugin.getClaimSettingsManager().isSettingEnabled(explodeClaim, Setting.CREEPER_DAMAGE))) {
                 event.setCancelled(true);
             }
@@ -201,6 +206,23 @@ public class ClaimManager implements Listener {
                 }
             }
         }
+
+        if (event.getEntityType() == NClaim.getEntityType(DEntityType.ENDER_CRYSTAL, DEntityType.END_CRYSTAL)) {
+            Player player = getPlayerFromEntity(event.getDamager());
+            if (player != null) {
+                Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
+                if (claim != null) {
+                    if (cancelIfNotClaimMember(player, claim, event)) {
+                        return;
+                    }
+                    cancelIfNoPermission(player, claim, Permission.PLACE_BLOCKS, event, "place");
+                    if (event.isCancelled()) {
+                        return;
+                    }
+                }
+            }
+        }
+
         if (event.getEntity() instanceof ItemFrame || event.getEntity() instanceof Painting || event.getEntity() instanceof ArmorStand) {
             Player player = getPlayerFromEntity(event.getDamager());
             if (player == null) return;
@@ -212,6 +234,7 @@ public class ClaimManager implements Listener {
             cancelIfNoPermission(player, claim, perm, event, "interact");
             return;
         }
+
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Monster) {
             Player player = (Player) event.getEntity();
             Claim claim = Claim.getClaim(player.getLocation().getChunk());
@@ -223,6 +246,7 @@ public class ClaimManager implements Listener {
                 }
             }
         }
+
         if (event.getEntity() instanceof Monster && event.getDamager() instanceof Player) {
             Player damager = (Player) event.getDamager();
             Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
@@ -234,6 +258,7 @@ public class ClaimManager implements Listener {
                 }
             }
         }
+
         if (event.getEntity() instanceof Villager) {
             Player damager = getPlayerFromEntity(event.getDamager());
             if (damager == null) return;
@@ -242,6 +267,7 @@ public class ClaimManager implements Listener {
             cancelIfNoPermission(damager, claim, Permission.INTERACT_VILLAGER, event, "interact");
             return;
         }
+
         if (event.getEntity() instanceof LivingEntity) {
             Entity damager = event.getDamager();
             Claim claim = Claim.getClaim(event.getEntity().getLocation().getChunk());
