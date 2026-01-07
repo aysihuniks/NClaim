@@ -37,6 +37,20 @@ public class ClaimManager implements Listener {
     private final ClaimCoopManager coopManager;
     private final Map<UUID, Long> messageCooldown = new HashMap<>();
 
+    /**
+        * @return true if moving something from "from" -> "to" should be blocked by claim rules
+    */
+    private boolean isCrossClaimMoveBlocked(Claim from, Claim to) {
+        if (from == null && to != null) return true;
+        if (from != null && to == null) return true;
+
+        if (from == null) return false;
+
+        UUID fromOwner = from.getOwner();
+        UUID toOwner = to.getOwner();
+        return !fromOwner.equals(toOwner) && !to.getCoopPlayers().contains(fromOwner);
+    }
+
     private void sendCooldownMessage(Player player, String message) {
         UUID playerUUID = player.getUniqueId();
         long currentTime = System.currentTimeMillis();
@@ -201,6 +215,32 @@ public class ClaimManager implements Listener {
                 Claim damagerClaim = Claim.getClaim(damager.getLocation().getChunk());
                 if ((damagedClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagedClaim, Setting.CLAIM_PVP)) ||
                         (damagerClaim != null && !plugin.getClaimSettingsManager().isSettingEnabled(damagerClaim, Setting.CLAIM_PVP))) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+        if (event.getEntity() instanceof Player
+                && (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
+                || event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION)) {
+
+            Player damaged = (Player) event.getEntity();
+            Claim claim = Claim.getClaim(damaged.getLocation().getChunk());
+
+            if (claim != null) {
+                Entity dmg = event.getDamager();
+
+                boolean isEndCrystal = event.getDamager().getType() == NClaim.getEntityType(DEntityType.ENDER_CRYSTAL, DEntityType.END_CRYSTAL);
+
+                if ((isEndCrystal || dmg instanceof TNTPrimed || dmg instanceof ExplosiveMinecart)
+                        && !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.TNT_DAMAGE)) {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                if (dmg instanceof Creeper
+                        && !plugin.getClaimSettingsManager().isSettingEnabled(claim, Setting.CREEPER_DAMAGE)) {
                     event.setCancelled(true);
                     return;
                 }
@@ -604,6 +644,41 @@ public class ClaimManager implements Listener {
                     return;
                 }
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+        BlockFace dir = event.getDirection();
+
+        for (Block moved : event.getBlocks()) {
+            Block toBlock = moved.getRelative(dir);
+
+            Claim fromClaim = Claim.getClaim(moved.getChunk());
+            Claim toClaim = Claim.getClaim(toBlock.getChunk());
+
+            if (isCrossClaimMoveBlocked(fromClaim, toClaim)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+        if (!event.isSticky()) return;
+
+        Block piston = event.getBlock();
+        BlockFace dir = event.getDirection();
+
+        Block pulled = piston.getRelative(dir);
+        Block toBlock = pulled.getRelative(dir.getOppositeFace());
+
+        Claim fromClaim = Claim.getClaim(pulled.getChunk());
+        Claim toClaim = Claim.getClaim(toBlock.getChunk());
+
+        if (isCrossClaimMoveBlocked(fromClaim, toClaim)) {
+            event.setCancelled(true);
         }
     }
 }
