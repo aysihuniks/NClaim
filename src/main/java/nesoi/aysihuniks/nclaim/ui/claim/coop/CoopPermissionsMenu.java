@@ -2,7 +2,6 @@ package nesoi.aysihuniks.nclaim.ui.claim.coop;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
@@ -18,11 +17,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CoopPermissionsMenu extends BaseMenu {
@@ -55,11 +52,6 @@ public class CoopPermissionsMenu extends BaseMenu {
                     getMaterial("categories." + category.name().toLowerCase())
             );
         }
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private final Map<PermissionCategory, ItemStack> CATEGORY_ICONS = new EnumMap<>(PermissionCategory.class);

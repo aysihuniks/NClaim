@@ -7,7 +7,6 @@ import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.service.ClaimBlockManager;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
@@ -20,7 +19,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
@@ -30,7 +28,6 @@ import org.nandayo.dapi.object.DSound;
 
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ManageClaimBlockMenu extends BaseMenu {
@@ -61,11 +58,6 @@ public class ManageClaimBlockMenu extends BaseMenu {
 
         setup();
         displayTo(player);
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private void setup() {

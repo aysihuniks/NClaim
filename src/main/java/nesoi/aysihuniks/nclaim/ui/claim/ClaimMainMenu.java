@@ -2,28 +2,22 @@ package nesoi.aysihuniks.nclaim.ui.claim;
 
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
+import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
-import nesoi.aysihuniks.nclaim.model.User;
-import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.util.ItemCreator;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
-import org.nandayo.dapi.message.ChannelType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ClaimMainMenu extends BaseMenu {
@@ -44,15 +38,8 @@ public class ClaimMainMenu extends BaseMenu {
         }
     }
 
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
-    }
-
     private void addBuyClaimButton() {
         addButton(new Button() {
-
-
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(11);
@@ -86,7 +73,18 @@ public class ClaimMainMenu extends BaseMenu {
         Consumer<String> onFinish = (result) -> {
             if ("confirmed".equals(result)) {
                 player.closeInventory();
-                NClaim.inst().getClaimService().buyNewClaim(player);
+
+                new AnvilManager(player, "Enter claim name (optional)", (text) -> {
+                    String name = text == null ? null : text.trim();
+                    if (name != null && name.isEmpty()) name = null;
+
+                    if (name != null && name.length() > 24) {
+                        name = name.substring(0, 24);
+                    }
+                    player.closeInventory();
+                    NClaim.inst().getClaimService().buyNewClaim(player, name);
+                });
+
             } else if ("declined".equals(result)) {
                 new ClaimMainMenu(player);
             }

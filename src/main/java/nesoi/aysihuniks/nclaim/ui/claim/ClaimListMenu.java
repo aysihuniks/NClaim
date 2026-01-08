@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
@@ -14,15 +13,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class ClaimListMenu extends BaseMenu {
     private static @NotNull ListType currentListType = ListType.ALL;
@@ -64,11 +60,6 @@ public class ClaimListMenu extends BaseMenu {
         if (hasNextPage()) {
             addNextPageButton();
         }
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private void addNavigationButton() {

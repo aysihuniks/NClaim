@@ -6,10 +6,8 @@ import nesoi.aysihuniks.nclaim.enums.RemoveCause;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.ClaimMainMenu;
-import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.ClaimSetting;
 import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
@@ -19,16 +17,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.guimanager.button.Button;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.MenuType;
 import org.nandayo.dapi.message.ChannelType;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AdminAllClaimMenu extends BaseMenu {
@@ -52,11 +47,6 @@ public class AdminAllClaimMenu extends BaseMenu {
 
         setupMenu();
         displayTo(player);
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private void setupMenu() {

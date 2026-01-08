@@ -5,7 +5,6 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.model.User;
-import nesoi.aysihuniks.nclaim.ui.shared.BackgroundMenu;
 import nesoi.aysihuniks.nclaim.ui.shared.BaseMenu;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.Material;
@@ -13,18 +12,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.util.ItemCreator;
 import org.nandayo.dapi.guimanager.button.Button;
 import org.nandayo.dapi.guimanager.MenuType;
-import org.nandayo.dapi.guimanager.button.SingleSlotButton;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 public class TimeManagementMenu extends BaseMenu {
     private int days;
@@ -45,11 +41,6 @@ public class TimeManagementMenu extends BaseMenu {
 
         setupMenu();
         displayTo(player);
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private void setupMenu() {

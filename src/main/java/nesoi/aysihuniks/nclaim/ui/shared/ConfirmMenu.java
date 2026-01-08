@@ -1,7 +1,6 @@
 package nesoi.aysihuniks.nclaim.ui.shared;
 
 import com.google.common.collect.Sets;
-import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.utils.MessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -16,7 +15,6 @@ import org.nandayo.dapi.guimanager.button.Button;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ConfirmMenu extends BaseMenu {
     private final String itemName;
@@ -34,11 +32,6 @@ public class ConfirmMenu extends BaseMenu {
         setup();
         MessageType.MENU_FORWARD.playSound(player);
         displayTo(player);
-    }
-
-    @Override
-    public Function<Integer, @Nullable SingleSlotButton> backgroundButtonFunction() {
-        return BackgroundMenu::getButton;
     }
 
     private void setup() {
