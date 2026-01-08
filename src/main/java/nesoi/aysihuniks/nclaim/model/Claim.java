@@ -16,6 +16,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DParticle;
 
@@ -32,6 +33,8 @@ public class Claim {
 
     public Claim(
             @NotNull String claimId,
+            @Nullable String displayName,
+            @Nullable String slug,
             @NotNull Chunk chunk,
             @NotNull Date createdAt,
             @NotNull Date expiredAt,
@@ -44,10 +47,14 @@ public class Claim {
             HashMap<UUID, Date> coopPlayerJoinDate,
             HashMap<UUID, CoopPermission> coopPermissions,
             ClaimSetting settings,
-            Set<Material> purchasedBlockTypes
+            Set<Material> purchasedBlockTypes,
+            boolean forSale,
+            double salePrice
     ) {
         this.plugin = NClaim.inst();
         this.claimId = claimId;
+        this.displayName = displayName;
+        this.slug = (slug == null || slug.isEmpty()) ? toSlug(getDisplayName()) : toSlug(slug);
         this.chunk = chunk;
         this.createdAt = createdAt;
         this.expiredAt = expiredAt;
@@ -63,12 +70,16 @@ public class Claim {
         if (purchasedBlockTypes != null) {
             this.purchasedBlockTypes.addAll(purchasedBlockTypes);
         }
+        this.forSale = forSale;
+        this.salePrice = salePrice;
 
         claims.removeIf(c -> c.getClaimId().equals(claimId));
         claims.add(this);
     }
 
     private final @NotNull String claimId;
+    private @Nullable String displayName;
+    private @NotNull String slug;
     private final @NotNull Chunk chunk;
     private final @NotNull Date createdAt;
     private @NotNull Date expiredAt;
@@ -84,6 +95,8 @@ public class Claim {
     private final ClaimSetting settings;
     private final Set<Material> purchasedBlockTypes = new HashSet<>();
 
+    private boolean forSale;
+    private double salePrice;
 
     public Collection<Chunk> getAllChunks() {
         List<Chunk> chunks = new ArrayList<>();
@@ -348,5 +361,60 @@ public class Claim {
 
     public void teleport(Player teleporter) {
         teleporter.teleport(claimBlockLocation.clone().add(0.5,1,0.5));
+    }
+
+    public String getDisplayName() {
+        return displayName != null ? displayName : claimId;
+    }
+
+    public static String toSlug(@NotNull String input) {
+        String s = input.trim().toLowerCase(java.util.Locale.ROOT);
+
+        s = s.replace("ı", "i").replace("ğ", "g").replace("ü", "u")
+                .replace("ş", "s").replace("ö", "o").replace("ç", "c");
+        s = s.replaceAll("[^a-z0-9]+", "-");
+        s = s.replaceAll("^-+|-+$", "");
+        s = s.replaceAll("-{2,}", "-");
+
+        if (s.isEmpty()) {
+            s = "claim";
+        }
+
+        if (s.length() > 24) s = s.substring(0, 24);
+        s = s.replaceAll("^-+|-+$", "");
+        if (s.isEmpty()) s = "claim";
+
+        return s;
+    }
+
+    public static Claim getClaimByIdentifier(UUID owner, String identifier) {
+        if (owner == null || identifier == null) return null;
+        String id = identifier.trim();
+        if (id.isEmpty()) return null;
+
+        Claim bySlug = claims.stream()
+                .filter(c -> owner.equals(c.getOwner()))
+                .filter(c -> c.getSlug() != null && c.getSlug().equalsIgnoreCase(id))
+                .findFirst()
+                .orElse(null);
+        if (bySlug != null) return bySlug;
+
+        return claims.stream()
+                .filter(c -> owner.equals(c.getOwner()))
+                .filter(c -> c.getClaimId().equalsIgnoreCase(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static Claim getClaimByName(UUID owner, String name) {
+        if (owner == null || name == null) return null;
+        String n = name.trim();
+        if (n.isEmpty()) return null;
+
+        return claims.stream()
+                .filter(c -> owner.equals(c.getOwner()))
+                .filter(c -> c.getDisplayName() != null && c.getDisplayName().equalsIgnoreCase(n))
+                .findFirst()
+                .orElse(null);
     }
 }

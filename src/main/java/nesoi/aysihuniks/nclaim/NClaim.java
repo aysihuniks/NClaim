@@ -460,7 +460,6 @@ public final class NClaim extends JavaPlugin {
                 Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to database.");
             } catch (Exception e) {
                 Util.log("&cFailed to save claims to database during shutdown: " + e.getMessage());
-                e.printStackTrace();
 
                 if (claimStorageManager != null) {
                     try {
@@ -468,7 +467,6 @@ public final class NClaim extends JavaPlugin {
                         Util.log("&eFallback: Saved claims to YAML file.");
                     } catch (Exception yamlError) {
                         Util.log("&cFallback YAML save also failed: " + yamlError.getMessage());
-                        yamlError.printStackTrace();
                     }
                 }
             }
@@ -478,7 +476,6 @@ public final class NClaim extends JavaPlugin {
                 Util.log("&aShutdown: Saved " + Claim.claims.size() + " claims to YAML file.");
             } catch (Exception e) {
                 Util.log("&cFailed to save claims to YAML during shutdown: " + e.getMessage());
-                e.printStackTrace();
             }
         }
 

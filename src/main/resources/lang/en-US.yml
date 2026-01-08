@@ -77,6 +77,9 @@ claim:
   setting_change_cancelled: "&cSetting change was cancelled!"
   pvp_not_allowed: "{prefix} &cPvP is not allowed in this claim."
   transferred: "&aClaim successfully transferred to &e{player}"
+  name_cleared: "{prefix} &aClaim name cleared. Slug reverted to: &e{slug}"
+  name_changed_same_slug: "{prefix} &aClaim name updated. Slug remains: &e{slug}"
+  name_changed_new_slug: "{prefix} &aClaim name updated. Slug changed from &7{old_slug} &ato &e{new_slug}"
   block:
     purchased: "{prefix} &aClaim block successfully purchased: &e{block} &7(&e{price}$&7)"
     changed: "{prefix} &aClaim block changed: &c{old_block} &7-> &2{new_block}"
@@ -116,12 +119,12 @@ claim:
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Unclaimed"
-  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
+  claimed_chunk: "ACTION_BAR=&e{display_name} &7- &e{owner} &7- {pvp_status}"
   pvp_enabled: "&cPvP"
   pvp_disabled: "&aPvP"
 
 hologram:
-  title: "&6⚔ Protected Area ⚔"
+  title: "&6{display_name}"
   owner: "&fOwner: &e{owner}"
   time_left:
     text: "&fTime Left: &e{time_left}"

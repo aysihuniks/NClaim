@@ -126,7 +126,6 @@ public class LangManager {
             Util.log("&aBacked up old language file.");
         } catch (Exception e) {
             Util.log("&cFailed to save old language backup file. ");
-            e.printStackTrace();
         }
     }
 

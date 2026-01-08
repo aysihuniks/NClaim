@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 
 public class HologramManager {
     private final NClaim plugin;
-    private static final double DECENT_HOLO_OFFSET = NClaim.inst().getConfigManager().getDouble("decentY", 0.0);
-    private static final double FANCY_HOLO_OFFSET = NClaim.inst().getConfigManager().getDouble("fancyY", 0.0);
+    private static final double DECENT_HOLO_OFFSET = 3.5;
+    private static final double FANCY_HOLO_OFFSET = 1.5;
     private HologramHandler hologramHandler;
     private final Set<String> pendingWorlds = new HashSet<>();
     private boolean initialCleanupDone = false;
@@ -241,10 +241,8 @@ public class HologramManager {
     private Location getCenteredLocation(Location location, int lineCount) {
         double baseOffset = HoloEnum.getActiveHologram() == HoloEnum.DECENT_HOLOGRAM ?
                 DECENT_HOLO_OFFSET : FANCY_HOLO_OFFSET;
-        double lineSpacing = getLineSpacing();
-        double totalHeight = (lineCount - 1) * lineSpacing;
-        double centeredOffset = baseOffset + (totalHeight / 2);
-        return location.add(0.5, centeredOffset, 0.5);
+
+        return location.clone().add(0.5, baseOffset, 0.5);
     }
 
     private double getLineSpacing() {
@@ -266,7 +264,7 @@ public class HologramManager {
         Config config = NClaim.inst().getNconfig();
 
         if (config.isShowHologramTitle()) {
-            lines.add(plugin.getLangManager().getString("hologram.title"));
+            lines.add(plugin.getLangManager().getString("hologram.title").replace("{display_name}", claim.getDisplayName()));
         }
 
         if (config.isShowHologramOwner()) {

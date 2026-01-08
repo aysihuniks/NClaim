@@ -77,7 +77,9 @@ claim:
   setting_change_cancelled: "&cAyar değişikliği iptal edildi!"
   pvp_not_allowed: "{prefix} &cBu bölgede PvP'ye izin verilmiyor."
   transferred: "&aClaim başarıyla &e{player} &aadlı oyuncuya devredildi"
-
+  name_cleared: "{prefix} &aClaim ismi sıfırlandı. Slug tekrar &e{slug} &aolarak ayarlandı."
+  name_changed_same_slug: "{prefix} &aClaim ismi güncellendi. Slug değişmedi: &e{slug}"
+  name_changed_new_slug: "{prefix} &aClaim ismi güncellendi. Slug &7{old_slug} &ayerine &e{new_slug} &aolarak değişti."
   block:
     purchased: "{prefix} &aClaim bloğu başarıyla satın alındı: &e{block} &7(&6{price}$&7)"
     changed: "{prefix} &aClaim bloğu değiştirildi: &c{old_block} &7-> &a{new_block}"
@@ -117,12 +119,12 @@ claim:
 
 move:
   unclaimed_chunk: "ACTION_BAR=&7Sahipsiz"
-  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
+  claimed_chunk: "ACTION_BAR=&e{display_name} &7- &e{owner} &7- {pvp_status}"
   pvp_enabled: "&cPvP"
   pvp_disabled: "&aPvP"
 
 hologram:
-  title: "&6⚔ Korumalı Bölge ⚔"
+  title: "&6{display_name}"
   owner: "&fSahip: &e{owner}"
   time_left:
     text: "&fKalan Süre: &e{time_left}"

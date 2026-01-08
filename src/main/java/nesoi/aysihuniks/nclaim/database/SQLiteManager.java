@@ -30,9 +30,12 @@ public class SQLiteManager implements DatabaseManager {
 
         static final String CREATE_CLAIMS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claims (" +
-                        "claim_id TEXT PRIMARY KEY, chunk_world TEXT, chunk_x INTEGER, chunk_z INTEGER, " +
+                        "claim_id TEXT PRIMARY KEY, name TEXT, slug TEXT, chunk_world TEXT, chunk_x INTEGER, chunk_z INTEGER, " +
                         "created_at TEXT DEFAULT CURRENT_TIMESTAMP, expired_at TEXT NULL, owner TEXT, " +
-                        "claim_block_location TEXT, lands TEXT, claim_value BIGINT DEFAULT 0, claim_block_type TEXT, purchased_blocks TEXT)";
+                        "claim_block_location TEXT, lands TEXT, claim_value BIGINT DEFAULT 0, " +
+                        "claim_block_type TEXT, purchased_blocks TEXT, " +
+                        "for_sale INTEGER DEFAULT 0, " +
+                        "sale_price REAL DEFAULT 0)";
 
         static final String CREATE_CLAIM_COOPS_TABLE =
                 "CREATE TABLE IF NOT EXISTS claim_coops (" +
@@ -47,9 +50,9 @@ public class SQLiteManager implements DatabaseManager {
         static final String LOAD_ALL_USERS = "SELECT uuid, balance, skinTexture FROM users";
 
         static final String SAVE_CLAIM =
-            "INSERT OR REPLACE INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, " +
-            "expired_at, owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "INSERT OR REPLACE INTO claims (claim_id, name, slug, chunk_world, chunk_x, chunk_z, created_at, " +
+                        "expired_at, owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks, for_sale, sale_price) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         static final String LOAD_CLAIM = "SELECT * FROM claims WHERE claim_id = ?";
         static final String LOAD_ALL_CLAIMS = "SELECT * FROM claims";
         static final String DELETE_CLAIM = "DELETE FROM claims WHERE claim_id = ?";
@@ -91,9 +94,29 @@ public class SQLiteManager implements DatabaseManager {
             executeUpdate(conn, SQLStatements.CREATE_CLAIMS_TABLE);
             executeUpdate(conn, SQLStatements.CREATE_CLAIM_COOPS_TABLE);
             executeUpdate(conn, SQLStatements.CREATE_CLAIM_SETTINGS_TABLE);
+            ensureClaimSaleColumns(conn);
             Util.log("&aSQLite tables initialized successfully");
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize SQLite tables", e);
+        }
+    }
+
+    private void ensureClaimSaleColumns(Connection conn) {
+        try (Statement st = conn.createStatement()) {
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN name VARCHAR(24) NULL");
+            } catch (SQLException ignored) {
+            }
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN slug VARCHAR(24) NULL");
+            } catch (SQLException ignored) {
+            }
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN for_sale BOOLEAN DEFAULT FALSE");
+            } catch (SQLException ignored) {
+            }
+        } catch (SQLException e) {
+            Util.log("&cFailed to ensure claim sale columns (SQLite): " + e.getMessage());
         }
     }
 
@@ -119,7 +142,7 @@ public class SQLiteManager implements DatabaseManager {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            
         }
         return 0;
     }
@@ -135,7 +158,7 @@ public class SQLiteManager implements DatabaseManager {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            
         }
         return 0;
     }
@@ -240,21 +263,26 @@ public class SQLiteManager implements DatabaseManager {
 
     private void prepareClaimStatement(PreparedStatement stmt, Claim claim) throws SQLException {
         stmt.setString(1, claim.getClaimId());
-        stmt.setString(2, claim.getChunk().getWorld().getName());
-        stmt.setInt(3, claim.getChunk().getX());
-        stmt.setInt(4, claim.getChunk().getZ());
-        stmt.setString(5, getTimestamp(claim.getCreatedAt()).toString());
-        stmt.setString(6, getTimestamp(claim.getExpiredAt()).toString());
-        stmt.setString(7, String.valueOf(claim.getOwner()));
-        stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-        stmt.setString(9, gson.toJson(claim.getLands()));
-        stmt.setLong(10, claim.getClaimValue());
-        stmt.setString(11, claim.getClaimBlockType().name());
+        stmt.setString(2, claim.getDisplayName());
+        stmt.setString(3, claim.getSlug());
+        stmt.setString(4, claim.getChunk().getWorld().getName());
+        stmt.setInt(5, claim.getChunk().getX());
+        stmt.setInt(6, claim.getChunk().getZ());
+        stmt.setString(7, getTimestamp(claim.getCreatedAt()).toString());
+        stmt.setString(8, getTimestamp(claim.getExpiredAt()).toString());
+        stmt.setString(9, String.valueOf(claim.getOwner()));
+        stmt.setString(10, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+        stmt.setString(11, gson.toJson(claim.getLands()));
+        stmt.setLong(12, claim.getClaimValue());
+        stmt.setString(13, claim.getClaimBlockType().name());
 
         List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                 .map(Material::name)
                 .collect(Collectors.toList());
-        stmt.setString(12, gson.toJson(purchasedBlockNames));
+        stmt.setString(14, gson.toJson(purchasedBlockNames));
+
+        stmt.setInt(15, claim.isForSale() ? 1 : 0);
+        stmt.setDouble(16, claim.getSalePrice());
     }
 
     private void saveClaimCoops(Connection conn, Claim claim) throws SQLException {
@@ -335,6 +363,17 @@ public class SQLiteManager implements DatabaseManager {
         Chunk chunk = world.getChunkAt(rs.getInt("chunk_x"), rs.getInt("chunk_z"));
         String claimId = rs.getString("claim_id");
 
+        String displayName = null;
+        String slug = null;
+        try {
+            displayName = rs.getString("name");
+        } catch (SQLException ignored) {
+        }
+        try {
+            slug = rs.getString("slug");
+        } catch (SQLException ignored) {
+        }
+
         Date createdAt = Timestamp.valueOf(rs.getString("created_at"));
         Date expiredAt = Timestamp.valueOf(rs.getString("expired_at"));
 
@@ -345,6 +384,14 @@ public class SQLiteManager implements DatabaseManager {
             claimValue = rs.getLong("claim_value");
         } catch (SQLException e) {
             Util.log("&cFailed to read claim_value for claim " + claimId + ": " + e.getMessage());
+        }
+
+        boolean forSale = false;
+        double salePrice = 0D;
+        try {
+            forSale = rs.getInt("for_sale") == 1;
+            salePrice = rs.getDouble("sale_price");
+        } catch (SQLException ignored) {
         }
 
         Type landType = new TypeToken<Collection<String>>(){}.getType();
@@ -372,6 +419,8 @@ public class SQLiteManager implements DatabaseManager {
 
         return new Claim(
                 claimId,
+                displayName,
+                slug,
                 chunk,
                 createdAt,
                 expiredAt,
@@ -384,7 +433,9 @@ public class SQLiteManager implements DatabaseManager {
                 coopData.getJoinDates(),
                 coopData.getPermissions(),
                 settings,
-                purchasedBlocks
+                purchasedBlocks,
+                forSale,
+                salePrice
         );
     }
 

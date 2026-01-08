@@ -80,7 +80,6 @@ public class ClaimStorageManager {
                 Util.log("&eSaved " + Claim.claims.size() + " claims to database.");
             } catch (Exception e) {
                 Util.log("&cFailed to save claims to database: " + e.getMessage());
-                e.printStackTrace();
             }
             return;
         }
@@ -99,7 +98,7 @@ public class ClaimStorageManager {
             config.save(file);
         } catch (Exception e) {
             Util.log("&cFailed to save claims.yml: " + e.getMessage());
-            e.printStackTrace();
+            
         }
     }
 
@@ -113,6 +112,9 @@ public class ClaimStorageManager {
         try {
             int x = Integer.parseInt(chunkParts[1]);
             int z = Integer.parseInt(chunkParts[2]);
+
+            String name = section.getString(claimId + ".name", "");
+            String slug = section.getString(claimId + ".slug", "");
 
             Date createdAt = NClaim.deserializeDate(section.getString(claimId + ".created_at"));
             Date expiredAt = NClaim.deserializeDate(section.getString(claimId + ".expired_at"));
@@ -141,7 +143,12 @@ public class ClaimStorageManager {
                 }
             }
 
+            boolean forSale = section.getBoolean("for_sale");
+            double salePrice = section.getDouble("sale_price");
+
             return new Claim(claimId,
+                    name,
+                    slug,
                     world.getChunkAt(x, z),
                     createdAt,
                     expiredAt,
@@ -154,7 +161,9 @@ public class ClaimStorageManager {
                     coopData.getJoinDates(),
                     coopData.getPermissions(),
                     settings,
-                    purchasedBlocks);
+                    purchasedBlocks,
+                    forSale,
+                    salePrice);
 
         } catch (Exception e) {
             Util.log("&c[ERROR] Exception while loading claim " + claimId + ": " + e.getMessage());
@@ -231,12 +240,14 @@ public class ClaimStorageManager {
         try {
             config.save(file);
         } catch (Exception e) {
-            e.printStackTrace();
+            
         }
     }
 
     private void saveClaim(FileConfiguration config, Claim claim) {
         String ns = "chunks_claimed." + claim.getClaimId();
+        config.set(ns + ".name", claim.getDisplayName());
+        config.set(ns + ".slug", claim.getSlug());
         config.set(ns + ".created_at", NClaim.serializeDate(claim.getCreatedAt()));
         config.set(ns + ".expired_at", NClaim.serializeDate(claim.getExpiredAt()));
         config.set(ns + ".owner", claim.getOwner().toString());
@@ -244,6 +255,8 @@ public class ClaimStorageManager {
         config.set(ns + ".lands", claim.getLands());
         config.set(ns + ".value", claim.getClaimValue());
         config.set(ns + ".claim_block_type", claim.getClaimBlockType().name());
+        config.set(ns + ".for_sale", claim.isForSale());
+        config.set(ns + ".sale_price", claim.getSalePrice());
 
         List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                 .map(Material::name)

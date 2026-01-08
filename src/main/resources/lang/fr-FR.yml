@@ -61,7 +61,7 @@ command:
     failed: '{prefix} &cMigration échouée. Veuillez vérifier la console.'
 
 claim:
-  cooldown: "{prefix} &cVous devez encore attendre &e{time} &cavant de claim à nouveau."
+  cooldown: '{prefix} &cVous devez encore attendre &e{time} &cavant de claim à nouveau.'
   too_close_to_other_claim: '{prefix} &cVous ne pouvez pas revendiquer ce chunk ! Trop proche d''une autre revendication.'
   no_owner: 'Propriétaire introuvable.' # Alias : Non réclamé
   owner: '&e{owner}'
@@ -77,6 +77,9 @@ claim:
   setting_change_cancelled: '&cChangement de paramètre annulé !'
   pvp_not_allowed: '{prefix} &cLe PvP n’est pas autorisé dans cette revendication.'
   transferred: '&aRevendication transférée avec succès à &e{player}'
+  name_cleared: '{prefix} &aNom du claim réinitialisé. Le slug est redevenu : &e{slug}'
+  name_changed_same_slug: '{prefix} &aNom du claim mis à jour. Le slug reste identique : &e{slug}'
+  name_changed_new_slug: '{prefix} &aNom du claim mis à jour. Slug modifié de &7{old_slug} &aà &e{new_slug}'
   block:
     purchased: '{prefix} &aBloc de revendication acheté : &e{block} &7(&e{price}$&7)'
     changed: '{prefix} &aBloc de revendication changé : &c{old_block} &7-> &2{new_block}'
@@ -95,7 +98,7 @@ claim:
     not_adjacent: '{prefix} &cVous ne pouvez étendre qu''à des chunks adjacents !'
     expanded: '{prefix} &aNouveau chunk ajouté à votre revendication.'
     buy_cancelled: '{prefix} &cAchat de terrain annulé.'
-    unclaimed: "{prefix} &aLe terrain a été supprimé avec succès."
+    unclaimed: '{prefix} &aLe terrain a été supprimé avec succès.'
   coop:
     limit_reached: '{prefix} &cVous ne pouvez avoir que &e{0} &cjoueurs en coop !'
     already_added: '{prefix} &c{coop} est déjà dans la liste de coop.'
@@ -108,30 +111,30 @@ claim:
     remove_cancelled: '&cSuppression de joueur en coop annulée !'
     permission_toggle_cancelled: '&cChangement de permission coop annulé !'
   teleport:
-    failed: "{prefix} &cDes blocs au-dessus du bloc de protection vous empêchent de vous téléporter."
-    success: "{prefix} &aTéléporté à la protection."
+    failed: '{prefix} &cDes blocs au-dessus du bloc de protection vous empêchent de vous téléporter.'
+    success: '{prefix} &aTéléporté à la protection.'
   move:
-    outside_of_chunk: "{prefix} &cVous ne pouvez pas déplacer le bloc de protection en dehors de son chunk."
-    success: "{prefix} &aBloc de protection déplacé avec succès."
+    outside_of_chunk: '{prefix} &cVous ne pouvez pas déplacer le bloc de protection en dehors de son chunk.'
+    success: '{prefix} &aBloc de protection déplacé avec succès.'
 
 move:
-  unclaimed_chunk: "ACTION_BAR=&7Non revendiqué"
-  claimed_chunk: "ACTION_BAR=&e{owner} &7- {pvp_status}"
+  unclaimed_chunk: 'ACTION_BAR=&7Non revendiqué'
+  claimed_chunk: 'ACTION_BAR=&e{display_name} &7- &e{owner} &7- {pvp_status}'
   pvp_enabled: '&cPvP'
   pvp_disabled: '&aPvP'
 
 hologram:
-  title: '&6⚔ Zone Protégée ⚔'
+  title: '&6{display_name}'
   owner: '&fPropriétaire : &e{owner}'
   time_left:
     text: '&fTemps restant : &e{time_left}'
-    d: "j"
-    h: "h"
-    m: "m"
-    s: "s"
+    d: 'j'
+    h: 'h'
+    m: 'm'
+    s: 's'
   coop_count: '&fJoueurs en coop : &e{coop_count}'
   total_size: '&fTaille totale : &e{total_size} &7chunks'
   edit: '&eClic droit pour éditer'
 
 # NE PAS CHANGER!
-lang_version: "{version}"
+lang_version: '{version}'

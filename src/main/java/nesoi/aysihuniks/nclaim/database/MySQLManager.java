@@ -33,6 +33,8 @@ public class MySQLManager implements DatabaseManager {
     private static final String CREATE_CLAIMS_TABLE = 
         "CREATE TABLE IF NOT EXISTS claims (" +
         "claim_id VARCHAR(100) PRIMARY KEY, " +
+        "name VARCHAR(24) NULL," +
+        "slug VARCHAR(24) NULL, " +
         "chunk_world VARCHAR(100), " +
         "chunk_x INT, " +
         "chunk_z INT, " +
@@ -43,7 +45,9 @@ public class MySQLManager implements DatabaseManager {
         "lands TEXT, " +
         "claim_value BIGINT DEFAULT 0," +
         "claim_block_type VARCHAR(50)," +
-        "purchased_blocks TEXT)";
+        "purchased_blocks TEXT," +
+        "for_sale BOOLEAN DEFAULT FALSE," +
+        "sale_price DOUBLE DEFAULT 0)";
 
     private static final String CREATE_CLAIM_COOPS_TABLE =
         "CREATE TABLE IF NOT EXISTS claim_coops (" +
@@ -69,12 +73,12 @@ public class MySQLManager implements DatabaseManager {
         "SELECT uuid, balance, skinTexture FROM users";
 
     private static final String SAVE_CLAIM =
-        "INSERT INTO claims (claim_id, chunk_world, chunk_x, chunk_z, created_at, expired_at, " +
-        "owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+        "INSERT INTO claims (claim_id, name, slug, chunk_world, chunk_x, chunk_z, created_at, expired_at, " +
+        "owner, claim_block_location, lands, claim_value, claim_block_type, purchased_blocks, for_sale, sale_price) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
         "ON DUPLICATE KEY UPDATE " +
-        "expired_at=?, owner=?, claim_block_location=?, lands=?, claim_value=?, " +
-        "claim_block_type=?, purchased_blocks=?";
+        "expired_at=?, name=?, slug=?, owner=?, claim_block_location=?, lands=?, claim_value=?, " +
+        "claim_block_type=?, purchased_blocks=?,for_sale=?, sale_price=?";
 
     private static final String SAVE_CLAIM_COOP = 
         "INSERT INTO claim_coops VALUES (?, ?, ?, ?) " +
@@ -161,9 +165,34 @@ public class MySQLManager implements DatabaseManager {
             conn.prepareStatement(CREATE_CLAIMS_TABLE).executeUpdate();
             conn.prepareStatement(CREATE_CLAIM_COOPS_TABLE).executeUpdate();
             conn.prepareStatement(CREATE_CLAIM_SETTINGS_TABLE).executeUpdate();
+            ensureClaimSaleColumns(conn);
+
             Util.log("&aDatabase tables initialized successfully.");
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database tables", e);
+        }
+    }
+
+    private void ensureClaimSaleColumns(Connection conn) {
+        try (Statement st = conn.createStatement()) {
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN name VARCHAR(24) NULL");
+            } catch (SQLException ignored) {
+            }
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN slug VARCHAR(24) NULL");
+            } catch (SQLException ignored) {
+            }
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN for_sale BOOLEAN DEFAULT FALSE");
+            } catch (SQLException ignored) {
+            }
+            try {
+                st.executeUpdate("ALTER TABLE claims ADD COLUMN sale_price DOUBLE DEFAULT 0");
+            } catch (SQLException ignored) {
+            }
+        } catch (SQLException e) {
+            Util.log("&cFailed to ensure claim sale columns: " + e.getMessage());
         }
     }
 
@@ -226,30 +255,42 @@ public class MySQLManager implements DatabaseManager {
     public void saveClaim(Claim claim) {
         try (Connection conn = getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
+                // INSERT (1..16)
                 stmt.setString(1, claim.getClaimId());
-                stmt.setString(2, claim.getChunk().getWorld().getName());
-                stmt.setInt(3, claim.getChunk().getX());
-                stmt.setInt(4, claim.getChunk().getZ());
-                stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
-                stmt.setTimestamp(6, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
-                stmt.setString(7, claim.getOwner().toString());
-                stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                stmt.setString(9, gson.toJson(claim.getLands()));
-                stmt.setLong(10, claim.getClaimValue());
-                stmt.setString(11, claim.getClaimBlockType().name());
+                stmt.setString(2, claim.getDisplayName());
+                stmt.setString(3, claim.getSlug());
+
+                stmt.setString(4, claim.getChunk().getWorld().getName());
+                stmt.setInt(5, claim.getChunk().getX());
+                stmt.setInt(6, claim.getChunk().getZ());
+                stmt.setTimestamp(7, new Timestamp(claim.getCreatedAt().getTime()));
+                stmt.setTimestamp(8, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
+                stmt.setString(9, claim.getOwner().toString());
+                stmt.setString(10, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                stmt.setString(11, gson.toJson(claim.getLands()));
+                stmt.setLong(12, claim.getClaimValue());
+                stmt.setString(13, claim.getClaimBlockType().name());
 
                 List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                         .map(Material::name)
                         .collect(Collectors.toList());
-                stmt.setString(12, gson.toJson(purchasedBlockNames));
+                stmt.setString(14, gson.toJson(purchasedBlockNames));
 
-                stmt.setTimestamp(13, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
-                stmt.setString(14, claim.getOwner().toString());
-                stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                stmt.setString(16, gson.toJson(claim.getLands()));
-                stmt.setLong(17, claim.getClaimValue());
-                stmt.setString(18, claim.getClaimBlockType().name());
-                stmt.setString(19, gson.toJson(purchasedBlockNames));
+                stmt.setBoolean(15, claim.isForSale());
+                stmt.setDouble(16, claim.getSalePrice());
+
+                // UPDATE (17..27)
+                stmt.setTimestamp(17, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
+                stmt.setString(18, claim.getDisplayName());
+                stmt.setString(19, claim.getSlug());
+                stmt.setString(20, claim.getOwner().toString());
+                stmt.setString(21, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                stmt.setString(22, gson.toJson(claim.getLands()));
+                stmt.setLong(23, claim.getClaimValue());
+                stmt.setString(24, claim.getClaimBlockType().name());
+                stmt.setString(25, gson.toJson(purchasedBlockNames));
+                stmt.setBoolean(26, claim.isForSale());
+                stmt.setDouble(27, claim.getSalePrice());
 
                 stmt.executeUpdate();
             }
@@ -271,29 +312,39 @@ public class MySQLManager implements DatabaseManager {
                 for (Claim claim : claims) {
                     try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
                         stmt.setString(1, claim.getClaimId());
-                        stmt.setString(2, claim.getChunk().getWorld().getName());
-                        stmt.setInt(3, claim.getChunk().getX());
-                        stmt.setInt(4, claim.getChunk().getZ());
-                        stmt.setTimestamp(5, new Timestamp(claim.getCreatedAt().getTime()));
-                        stmt.setTimestamp(6, new Timestamp(claim.getExpiredAt().getTime()));
-                        stmt.setString(7, claim.getOwner().toString());
-                        stmt.setString(8, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                        stmt.setString(9, gson.toJson(claim.getLands()));
-                        stmt.setLong(10, claim.getClaimValue());
-                        stmt.setString(11, claim.getClaimBlockType().name());
+                        stmt.setString(2, claim.getDisplayName());
+                        stmt.setString(3, claim.getSlug());
+
+                        stmt.setString(4, claim.getChunk().getWorld().getName());
+                        stmt.setInt(5, claim.getChunk().getX());
+                        stmt.setInt(6, claim.getChunk().getZ());
+                        stmt.setTimestamp(7, new Timestamp(claim.getCreatedAt().getTime()));
+                        stmt.setTimestamp(8, new Timestamp(claim.getExpiredAt().getTime()));
+                        stmt.setString(9, claim.getOwner().toString());
+                        stmt.setString(10, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                        stmt.setString(11, gson.toJson(claim.getLands()));
+                        stmt.setLong(12, claim.getClaimValue());
+                        stmt.setString(13, claim.getClaimBlockType().name());
 
                         List<String> purchasedBlockNames = claim.getPurchasedBlockTypes().stream()
                                 .map(Material::name)
                                 .collect(Collectors.toList());
-                        stmt.setString(12, gson.toJson(purchasedBlockNames));
+                        stmt.setString(14, gson.toJson(purchasedBlockNames));
 
-                        stmt.setTimestamp(13, new Timestamp(claim.getExpiredAt().getTime()));
-                        stmt.setString(14, claim.getOwner().toString());
-                        stmt.setString(15, NClaim.serializeLocation(claim.getClaimBlockLocation()));
-                        stmt.setString(16, gson.toJson(claim.getLands()));
-                        stmt.setLong(17, claim.getClaimValue());
-                        stmt.setString(18, claim.getClaimBlockType().name());
-                        stmt.setString(19, gson.toJson(purchasedBlockNames));
+                        stmt.setBoolean(15, claim.isForSale());
+                        stmt.setDouble(16, claim.getSalePrice());
+
+                        stmt.setTimestamp(17, new Timestamp(claim.getExpiredAt().getTime()));
+                        stmt.setString(18, claim.getDisplayName());
+                        stmt.setString(19, claim.getSlug());
+                        stmt.setString(20, claim.getOwner().toString());
+                        stmt.setString(21, NClaim.serializeLocation(claim.getClaimBlockLocation()));
+                        stmt.setString(22, gson.toJson(claim.getLands()));
+                        stmt.setLong(23, claim.getClaimValue());
+                        stmt.setString(24, claim.getClaimBlockType().name());
+                        stmt.setString(25, gson.toJson(purchasedBlockNames));
+                        stmt.setBoolean(26, claim.isForSale());
+                        stmt.setDouble(27, claim.getSalePrice());
 
                         stmt.executeUpdate();
                     }
@@ -382,7 +433,7 @@ public class MySQLManager implements DatabaseManager {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            
         }
         return 0;
     }
@@ -398,7 +449,7 @@ public class MySQLManager implements DatabaseManager {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            
         }
         return 0;
     }
@@ -427,12 +478,32 @@ public class MySQLManager implements DatabaseManager {
 
         Chunk chunk = world.getChunkAt(rs.getInt("chunk_x"), rs.getInt("chunk_z"));
         String claimId = rs.getString("claim_id");
+
+        String displayName = null;
+        String slug = null;
+        try {
+            displayName = rs.getString("name");
+        } catch (SQLException ignored) {
+        }
+        try {
+            slug = rs.getString("slug");
+        } catch (SQLException ignored) {
+        }
+
         Date createdAt = new Date(rs.getTimestamp("created_at").getTime());
         Date expiredAt = new Date(rs.getTimestamp("expired_at").getTime());
         UUID owner = UUID.fromString(rs.getString("owner"));
         Location claimBlockLocation = NClaim.deserializeLocation(rs.getString("claim_block_location"));
         long claimValue = rs.getLong("claim_value");
         Material claimBlockType = Material.valueOf(rs.getString("claim_block_type"));
+
+        boolean forSale = false;
+        double salePrice = 0D;
+        try {
+            forSale = rs.getBoolean("for_sale");
+            salePrice = rs.getDouble("sale_price");
+        } catch (SQLException ignored) {
+        }
 
         Set<Material> purchasedBlocks = new HashSet<>();
         String purchasedBlocksJson = rs.getString("purchased_blocks");
@@ -456,6 +527,8 @@ public class MySQLManager implements DatabaseManager {
 
         return new Claim(
                 claimId,
+                displayName,
+                slug,
                 chunk,
                 createdAt,
                 expiredAt,
@@ -468,7 +541,9 @@ public class MySQLManager implements DatabaseManager {
                 coopData.getJoinDates(),
                 coopData.getPermissions(),
                 settings,
-                purchasedBlocks
+                purchasedBlocks,
+                forSale,
+                salePrice
         );
     }
 

@@ -36,7 +36,7 @@ public class ClaimService {
     private static final Map<UUID, Long> lastClaimTime = new ConcurrentHashMap<>();
     private static final long CLAIM_COOLDOWN_MILLIS = NClaim.inst().getNconfig().getLastClaimTime() * 60 * 1000;
 
-    public void buyNewClaim(Player player) {
+    public void buyNewClaim(Player player, String name) {
 
         long now = System.currentTimeMillis();
         Long last = lastClaimTime.get(player.getUniqueId());
@@ -50,9 +50,21 @@ public class ClaimService {
             String s = NClaim.inst().getLangManager().getString("hologram.time_left.s");
 
             String formattedTime = NClaim.formatTime(ks, d, h, m, s);
-            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.cooldown").replace("{time}", formattedTime));
-            return;
+            if (!player.hasPermission("nclaim.admin") || !player.hasPermission("claim.bypass.buy_cooldown")) {
+                ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.cooldown").replace("{time}", formattedTime));
+                return;
+            }
         }
+
+        String displayName = null;
+        if (name != null) {
+            displayName = name.trim();
+            if (displayName.isEmpty()) displayName = null;
+        }
+
+        String slug = Claim.toSlug(displayName != null ? displayName : generateClaimId(player.getLocation().getChunk()));
+        slug = makeUniqueSlug(player.getUniqueId(), slug, null);
+
 
         Chunk chunk = player.getLocation().getChunk();
         User user = User.getUser(player.getUniqueId());
@@ -65,13 +77,42 @@ public class ClaimService {
             return;
         }
 
-        createNewClaim(player, chunk);
+        createNewClaim(player, chunk, displayName, slug);
 
         lastClaimTime.put(player.getUniqueId(), now);
 
         if (plugin.getNconfig().isDatabaseEnabled()) {
             plugin.getDatabaseManager().saveClaim(Claim.getClaim(chunk));
             plugin.getDatabaseManager().saveUser(user);
+        }
+    }
+
+    private String makeUniqueSlug(UUID owner, String base, String currentClaimIdToIgnore) {
+        String candidate = base;
+        int i = 2;
+
+        while (true) {
+            final String checkCandidate = candidate;
+
+            Claim existing = Claim.claims.stream()
+                    .filter(c -> owner.equals(c.getOwner()))
+                    .filter(c -> c.getSlug() != null && c.getSlug().equalsIgnoreCase(checkCandidate))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existing == null) return candidate;
+            if (currentClaimIdToIgnore != null &&
+                    existing.getClaimId().equalsIgnoreCase(currentClaimIdToIgnore)) {
+                return candidate;
+            }
+
+            String suffix = "-" + i++;
+            int max = 24 - suffix.length();
+            String prefix = base.length() > max
+                    ? base.substring(0, Math.max(1, max))
+                    : base;
+
+            candidate = prefix + suffix;
         }
     }
 
@@ -267,7 +308,7 @@ public class ClaimService {
         return handlePayment(player, user, claimPrice);
     }
 
-    private void createNewClaim(Player player, Chunk chunk) {
+    private void createNewClaim(Player player, Chunk chunk, String displayName, String slug) {
         String claimId = generateClaimId(chunk);
         Date createdAt = new Date();
         Date expiredAt = calculateExpirationDate();
@@ -290,6 +331,8 @@ public class ClaimService {
 
         Claim claim = new Claim(
                 claimId,
+                displayName,
+                slug,
                 chunk,
                 createdAt,
                 expiredAt,
@@ -302,7 +345,9 @@ public class ClaimService {
                 new HashMap<>(),
                 new HashMap<>(),
                 claimSetting,
-                purchasedBlockTypes
+                purchasedBlockTypes,
+                false,
+                0D
         );
 
         ClaimCreateEvent createEvent = new ClaimCreateEvent(player, claim);

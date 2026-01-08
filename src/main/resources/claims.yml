@@ -1,10 +1,14 @@
 chunks_claimed:
   world_1_-7:
+    name: BLABLA
+    slug: blabla
     created_at: 02-03-2025 18:07:15
     expired_at: 09-03-2025 18:07:15
     owner: e2bfd684-008e-3749-bb0f-6b6dcea1862e
     claim_block_location: world,26.0,80.0,-107.0
     lands: []
+    for_sale: false
+    sale_price: 0
     coops:
       e7dcb97f-b0b1-314c-8587-b7d876a6ac1e:
         joined_at: 02-03-2025 18:07:24

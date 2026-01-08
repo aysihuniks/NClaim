@@ -39,6 +39,7 @@ permissions:
       nclaim.bypass.break: true
       nclaim.bypass.place: true
       nclaim.bypass.axsellwand: true
+      nclaim.bypass.buy_cooldown: true
   nclaim.use:
     default: true
     children:
@@ -92,6 +93,8 @@ permissions:
   nclaim.bypass.place:
     default: false
   nclaim.bypass.axsellwand:
+    default: false
+  nclaim.bypass.buy_cooldown:
     default: false
   nclaim.maxclaim:
     default: false
