@@ -7,6 +7,8 @@ guis:
     display_name: "&8x"
     material: "GRAY_STAINED_GLASS_PANE"
   free: "&eFree"
+  yes_text: "&aYes"
+  no_text: "&cNo"
   back:
     display_name: "&eBack"
     material: "OAK_DOOR"
@@ -618,6 +620,13 @@ guis:
 
   admin_menu:
     all_claims_menu:
+      not_selected_color: "&7"
+      selected_color: "&e"
+      newest: "Newest First"
+      oldest: "Oldest First"
+      all: "All Claims"
+      for_sale: "For Sale"
+      not_for_sale: "Not For Sale"
       title: "All Claims"
       reset_settings:
         display_name: "&cReset Settings"
@@ -632,6 +641,14 @@ guis:
           - ""
           - "&f• {newest_status}"
           - "&f• {oldest_status}"
+      filter_by_sale:
+        display_name: "&aFilter by Sale Status"
+        material: "GOLD_INGOT"
+        lore:
+          - ""
+          - "&f• {all_status}"
+          - "&f• {for_sale_status}"
+          - "&f• {not_for_sale_status}"
       delete_selected:
         display_name: "&cDelete Selected"
         material: "BARRIER"
@@ -646,6 +663,7 @@ guis:
             - "&fSize: &7{land_size} chunks"
             - "&fCo-op Members: &7{coop_count}"
             - "&fSettings: &a{yes}&7/&c{no}"
+            - "&fOn Sale: {status}"
             - ""
             - "&eClick &7- &fManage"
             - "&eShift Click &7- &fTeleport"
@@ -660,6 +678,7 @@ guis:
             - "&fSize: &7{land_size} chunks"
             - "&fCo-op Members: &7{coop_count}"
             - "&fSettings: &a{yes}&7/&c{no}"
+            - "&fOn Sale: {status}"
             - ""
             - "&eClick &7- &fManage"
             - "&eShift Click &7- &fTeleport"

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.enums.SaleFilter;
 import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import nesoi.aysihuniks.nclaim.ui.claim.coop.CoopListMenu;
@@ -59,7 +60,7 @@ public class ClaimManagementMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player p, @NotNull ClickType clickType) {
-                    new AdminAllClaimMenu(p, null, true, 0, new ArrayList<>());
+                    new AdminAllClaimMenu(p, null, true, 0, new ArrayList<>(), SaleFilter.ALL);
                 }
             });
         }

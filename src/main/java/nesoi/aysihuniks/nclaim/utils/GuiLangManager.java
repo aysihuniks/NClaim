@@ -25,7 +25,7 @@ public class GuiLangManager {
     private final FileConfiguration guiConfig;
 
     private final HeadManager headManager;
-    private Map<Setting, SettingCfg> settingConfigs;
+    private final Map<Setting, SettingCfg> settingConfigs;
 
     public GuiLangManager() {
         File file = new File(NClaim.inst().getDataFolder(), "guis.yml");
@@ -89,7 +89,12 @@ public class GuiLangManager {
     }
 
     public String getString(String fullPath) {
-        return guiConfig.getString("guis." + fullPath, fullPath);
+        String value = guiConfig.getString("guis." + fullPath);
+        if (value == null) {
+            Util.log("&cPath not found: " + fullPath);
+        }
+
+        return value;
     }
 
     public List<String> getStringList(String fullPath) {

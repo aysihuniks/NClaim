@@ -3,6 +3,7 @@ package nesoi.aysihuniks.nclaim.ui.claim.admin;
 import com.google.common.collect.Sets;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.enums.SaleFilter;
 import nesoi.aysihuniks.nclaim.enums.Setting;
 import nesoi.aysihuniks.nclaim.integrations.AnvilManager;
 import nesoi.aysihuniks.nclaim.ui.claim.ClaimMainMenu;
@@ -37,13 +38,15 @@ public class AdminAllClaimMenu extends BaseMenu {
     private final boolean sortByNewest;
     private final int page;
     private final List<Claim> selectedClaims;
+    private final SaleFilter saleFilter;
 
-    public AdminAllClaimMenu(Player player, OfflinePlayer target, boolean sortByNewest, int page, List<Claim> selectedClaims) {
+    public AdminAllClaimMenu(Player player, OfflinePlayer target, boolean sortByNewest, int page, List<Claim> selectedClaims, SaleFilter saleFilter) {
         super("admin_menu.all_claims_menu");
         this.target = target;
         this.sortByNewest = sortByNewest;
         this.page = page;
         this.selectedClaims = new ArrayList<>(selectedClaims);
+        this.saleFilter = saleFilter;
 
         setupMenu();
         displayTo(player);
@@ -58,6 +61,8 @@ public class AdminAllClaimMenu extends BaseMenu {
         addResetButton();
         addDeleteButton();
         addClaimButtons();
+
+        addSaleFilterButton();
 
         if (hasNextPage()) {
             addNextPageButton();
@@ -84,7 +89,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                 if (page == 0) {
                     new ClaimMainMenu(player);
                 } else {
-                    new AdminAllClaimMenu(player, target, sortByNewest, page - 1, selectedClaims);
+                    new AdminAllClaimMenu(player, target, sortByNewest, page - 1, selectedClaims, saleFilter);
                 }
             }
         });
@@ -100,8 +105,8 @@ public class AdminAllClaimMenu extends BaseMenu {
             @Override
             public ItemStack getItem() {
                 List<String> lore = new ArrayList<>(getStringList("sort_by_date.lore"));
-                lore.replaceAll(s -> s.replace("{newest_status}", sortByNewest ? "&eNewest First" : "&7Newest First")
-                        .replace("{oldest_status}", !sortByNewest ? "&eOldest First" : "&7Oldest First"));
+                lore.replaceAll(s -> s.replace("{newest_status}", sortByNewest ? getString("selected_color") + getString("newest") : getString("not_selected_color") + getString("oldest"))
+                        .replace("{oldest_status}", !sortByNewest ? getString("selected_color") + getString("oldest") : getString("not_selected_color") + getString("oldest")));
 
                 return ItemCreator.of(getMaterial("sort_by_date"))
                         .name(getString("sort_by_date.display_name"))
@@ -111,7 +116,41 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                new AdminAllClaimMenu(player, target, !sortByNewest, page, selectedClaims);
+                new AdminAllClaimMenu(player, target, !sortByNewest, page, selectedClaims, saleFilter);
+            }
+        });
+    }
+
+    private void addSaleFilterButton() {
+        addButton(new Button() {
+            @Override
+            public @NotNull Set<Integer> getSlots() {
+                return Sets.newHashSet(13);
+            }
+
+            @Override
+            public ItemStack getItem() {
+                List<String> lore = new ArrayList<>(getStringList("filter_by_sale.lore"));
+
+                lore.replaceAll(s -> s
+                        .replace("{all_status}", saleFilter == SaleFilter.ALL ? getString("selected_color") + getString("all") : getString("not_selected_color") + getString("all"))
+                        .replace("{for_sale_status}", saleFilter == SaleFilter.FOR_SALE ? getString("selected_color") + getString("for_sale") : getString("not_selected_color") + getString("for_sale"))
+                        .replace("{not_for_sale_status}", saleFilter == SaleFilter.NOT_FOR_SALE ? getString("selected_color") + getString("not_for_sale") : getString("not_selected_color") + getString("not_for_sale")));
+
+                return ItemCreator.of(getMaterial("filter_by_sale"))
+                        .name(getString("filter_by_sale.display_name"))
+                        .lore(lore)
+                        .get();
+            }
+
+            @Override
+            public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
+                SaleFilter nextFilter;
+                if (saleFilter == SaleFilter.ALL) nextFilter = SaleFilter.FOR_SALE;
+                else if (saleFilter == SaleFilter.FOR_SALE) nextFilter = SaleFilter.NOT_FOR_SALE;
+                else nextFilter = SaleFilter.ALL;
+                new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims, nextFilter);
+                MessageType.VALUE_INCREASE.playSound(player);
             }
         });
     }
@@ -154,7 +193,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                 @Override
                 public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
-                    new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
+                    new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>(), SaleFilter.ALL);
                 }
             });
         }
@@ -181,10 +220,10 @@ public class AdminAllClaimMenu extends BaseMenu {
                         if ("confirmed".equals(result)) {
                             selectedClaims.forEach(claim -> claim.remove(RemoveCause.REMOVED_BY_ADMIN));
                             selectedClaims.clear();
-                            new AdminAllClaimMenu(player, target, sortByNewest, page, new ArrayList<>());
+                            new AdminAllClaimMenu(player, target, sortByNewest, page, new ArrayList<>(), saleFilter);
                             MessageType.CONFIRM.playSound(player);
                         } else if ("declined".equals(result)) {
-                            new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
+                            new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims, saleFilter);
                         }
                     };
 
@@ -213,7 +252,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             @Override
             public void onClick(@NotNull Player player, @NotNull ClickType clickType) {
                 MessageType.MENU_FORWARD.playSound(player);
-                new AdminAllClaimMenu(player, target, sortByNewest, page + 1, selectedClaims);
+                new AdminAllClaimMenu(player, target, sortByNewest, page + 1, selectedClaims, saleFilter);
             }
         });
     }
@@ -238,6 +277,12 @@ public class AdminAllClaimMenu extends BaseMenu {
                 ))
                 .values()
                 .stream()
+                .filter(claim -> {
+                    if (saleFilter == SaleFilter.ALL) return true;
+                    if (saleFilter == SaleFilter.FOR_SALE) return claim.isForSale();
+                    if (saleFilter == SaleFilter.NOT_FOR_SALE) return !claim.isForSale();
+                    return true;
+                })
                 .filter(claim -> target == null || claim.getOwner().equals(target.getUniqueId()))
                 .sorted((c1, c2) -> sortByNewest
                         ? Long.compare(c2.getCreatedAt().getTime(), c1.getCreatedAt().getTime())
@@ -265,6 +310,9 @@ public class AdminAllClaimMenu extends BaseMenu {
             public ItemStack getItem() {
                 String section = selectedClaims.contains(claim) ? "claim_items.selected" : "claim_items.unselected";
                 List<String> lore = new ArrayList<>(getStringList(section + ".lore"));
+
+                String forSaleText = claim.isForSale() ? NClaim.inst().getGuiLangManager().getString("yes_text") : NClaim.inst().getGuiLangManager().getString("no_text");
+
                 lore.replaceAll(s -> s
                         .replace("{created_at}", NClaim.serializeDate(claim.getCreatedAt()))
                         .replace("{world}", chunk.getWorld().getName())
@@ -272,7 +320,8 @@ public class AdminAllClaimMenu extends BaseMenu {
                         .replace("{land_size}", String.valueOf(claim.getLands().size()))
                         .replace("{coop_count}", String.valueOf(claim.getCoopPlayers().size()))
                         .replace("{yes}", String.valueOf(enabledSettings))
-                        .replace("{no}", String.valueOf(disabledSettings)));
+                        .replace("{no}", String.valueOf(disabledSettings))
+                        .replace("{status}", forSaleText));
 
                 ItemStack baseItem;
                 String materialPath = "guis." + section + ".material";
@@ -306,7 +355,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                 selectedClaims.add(claim);
                 MessageType.MENU_SELECT.playSound(player);
             }
-            new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
+            new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims, saleFilter);
         } else if (clickType == ClickType.LEFT) {
             new ClaimManagementMenu(player, claim, true);
         } else if (clickType == ClickType.SHIFT_LEFT) {
@@ -323,7 +372,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                     if (text == null || text.isEmpty()) {
                         ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.enter_a_player"));
                         MessageType.FAIL.playSound(player);
-                        new AdminAllClaimMenu(player, null, sortByNewest, page, selectedClaims);
+                        new AdminAllClaimMenu(player, null, sortByNewest, page, selectedClaims, saleFilter);
                         return;
                     }
 
@@ -331,7 +380,7 @@ public class AdminAllClaimMenu extends BaseMenu {
 
                     if (matchedNames.isEmpty()) {
                         MessageType.FAIL.playSound(player);
-                        new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims);
+                        new AdminAllClaimMenu(player, target, sortByNewest, page, selectedClaims, saleFilter);
                         return;
                     }
 
@@ -344,9 +393,9 @@ public class AdminAllClaimMenu extends BaseMenu {
                                 break;
                             }
                         }
-                        new AdminAllClaimMenu(player, target, sortByNewest, 0, selectedClaims);
+                        new AdminAllClaimMenu(player, target, sortByNewest, 0, selectedClaims, saleFilter);
                     } else {
-                        new AdminAllClaimMenu(player, null, sortByNewest, 0, selectedClaims);
+                        new AdminAllClaimMenu(player, null, sortByNewest, 0, selectedClaims, saleFilter);
                     }
                 });
     }

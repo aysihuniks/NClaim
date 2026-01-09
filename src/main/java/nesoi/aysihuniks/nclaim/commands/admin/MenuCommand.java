@@ -2,6 +2,7 @@ package nesoi.aysihuniks.nclaim.commands.admin;
 
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.commands.BaseCommand;
+import nesoi.aysihuniks.nclaim.enums.SaleFilter;
 import nesoi.aysihuniks.nclaim.ui.claim.admin.AdminAllClaimMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -27,7 +28,7 @@ public class MenuCommand extends BaseCommand {
             return true;
         }
 
-        new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>());
+        new AdminAllClaimMenu(player, null, true, 0, new ArrayList<>(), SaleFilter.ALL);
         return true;
     }
 }
