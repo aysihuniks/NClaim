@@ -2,9 +2,7 @@ package nesoi.aysihuniks.nclaim.commands.root;
 
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.commands.BaseCommand;
-import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.model.Claim;
-import nesoi.aysihuniks.nclaim.model.User;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,10 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nandayo.dapi.message.ChannelType;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
-public class NameComand extends BaseCommand {
+public class NameCommand extends BaseCommand {
 
     private static final int MAX_NAME_LEN = 24;
 
@@ -28,7 +25,7 @@ public class NameComand extends BaseCommand {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission("nclaim.use") && !player.hasPermission("nclaim.admin")) {
+        if (!player.hasPermission("nclaim.name") && !player.hasPermission("nclaim.use")) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.permission_denied"));
             return true;
         }
@@ -66,6 +63,14 @@ public class NameComand extends BaseCommand {
             claim.setSlug(Claim.toSlug(claim.getClaimId()));
             isCleared = true;
         } else {
+            if (displayNameRaw.length() > MAX_NAME_LEN) {
+                String msg = NClaim.inst().getLangManager().getString("claim.name_too_long")
+                        .replace("{max}", String.valueOf(MAX_NAME_LEN))
+                        .replace("{current}", String.valueOf(displayNameRaw.length()));
+                ChannelType.CHAT.send(player, msg);
+                return true;
+            }
+
             claim.setDisplayName(displayNameRaw);
             claim.setSlug(Claim.toSlug(displayNameRaw));
         }
@@ -105,7 +110,7 @@ public class NameComand extends BaseCommand {
 
             Claim existing = Claim.claims.stream()
                     .filter(c -> owner.equals(c.getOwner()))
-                    .filter(c -> c.getSlug() != null && c.getSlug().equalsIgnoreCase(cand))
+                    .filter(c -> c.getSlug().equalsIgnoreCase(cand))
                     .findFirst()
                     .orElse(null);
 
@@ -115,7 +120,7 @@ public class NameComand extends BaseCommand {
             }
 
             String suffix = "-" + i++;
-            int max = 24 - suffix.length();
+            int max = MAX_NAME_LEN - suffix.length();
             String prefix = base.length() > max ? base.substring(0, Math.max(1, max)) : base;
             candidate = prefix + suffix;
         }
@@ -134,21 +139,23 @@ public class NameComand extends BaseCommand {
             Set<String> suggestions = new LinkedHashSet<>();
             suggestions.add("here");
 
-            for (Claim c : Claim.claims) {
-                if (!player.getUniqueId().equals(c.getOwner())) continue;
+            boolean isAdmin = player.hasPermission("nclaim.admin");
 
-                if (c.getDisplayName() != null && !c.getDisplayName().isEmpty()) {
-                    suggestions.add(c.getDisplayName());
+            for (Claim c : Claim.claims) {
+                if (!isAdmin && !player.getUniqueId().equals(c.getOwner())) {
+                    continue;
                 }
 
-                suggestions.add(c.getClaimId());
+                if (!c.getSlug().isEmpty()) {
+                    suggestions.add(c.getSlug());
+                }
             }
 
             return new ArrayList<>(suggestions);
         }
 
         if (args.length == 3) {
-            return Arrays.asList("off", "none");
+            return Arrays.asList("off", "none", "<display_name>");
         }
 
         return null;

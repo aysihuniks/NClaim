@@ -30,7 +30,7 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
         commands.put("help", new HelpCommand());
         commands.put("level", new LevelCommand());
         commands.put("list", new ListCommand());
-        commands.put("name", new NameComand());
+        commands.put("name", new NameCommand());
 
         adminCommands.put("add", new AddCommand());
         adminCommands.put("change", new ChangeCommand());
@@ -113,6 +113,14 @@ public class AllCommandExecutor implements CommandExecutor, TabCompleter {
             BaseCommand adminCmd = adminCommands.get(args[1].toLowerCase());
             if (adminCmd != null) {
                 List<String> subCompletions = adminCmd.onTabComplete(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
+                if (subCompletions != null) {
+                    completions.addAll(subCompletions);
+                }
+            }
+        } else if (args.length >= 2) {
+            BaseCommand cmd = commands.get(args[0].toLowerCase());
+            if (cmd != null) {
+                List<String> subCompletions = cmd.onTabComplete(sender, command, label, args);
                 if (subCompletions != null) {
                     completions.addAll(subCompletions);
                 }
