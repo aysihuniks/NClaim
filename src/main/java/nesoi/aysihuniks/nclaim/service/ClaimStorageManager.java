@@ -143,8 +143,8 @@ public class ClaimStorageManager {
                 }
             }
 
-            boolean forSale = section.getBoolean("for_sale");
-            double salePrice = section.getDouble("sale_price");
+            boolean forSale = section.getBoolean(claimId + ".for_sale", false);
+            double salePrice = section.getDouble(claimId + ".sale_price", 0.0);
 
             return new Claim(claimId,
                     name,
