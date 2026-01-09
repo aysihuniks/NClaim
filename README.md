@@ -41,6 +41,10 @@ src/
 - 🛠️ **Highly Configurable:** Customize messages, gui texts, claim settings, and plugin behavior via configuration files.
 - 🧩 **PlaceholderAPI Support:** Use various placeholders for in-game information and external integrations.
 - 📦 **Flexible Storage:** Supports YAML, SQLite, and MySQL for claim data storage.
+- 💰 **Claim Selling System:** List your claims for sale with custom prices. Automatic ownership transfer, co-op reset, and setting restoration upon purchase.
+- 🏷️ **Dynamic Naming (Slugs):** Every claim can have a unique display name. Users can manage names via /nclaim name.
+- 🔄 **Auto-Migration:** Automatic configuration and language file updates. Never lose your settings when the plugin updates.
+- 👥 **Granular Co-op:** 50+ individual permissions for co-op members across categories (Blocks, Containers, Redstone, etc.).
 
 ---
 
@@ -50,7 +54,7 @@ src/
 2. Place the `.jar` file in your server’s `plugins` directory.
 3. Restart your server.
 4. Edit the generated `config.yml` and other files in the plugin folder to suit your needs.
-5. (Optional) Install [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) for in-game placeholders.
+5. Install [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) for in-game placeholders.
 
 ---
 
@@ -61,8 +65,9 @@ src/
 | `/nclaim help`         | Shows the help menu                   | `nclaim.help`       | 
 | `/nclaim about`        | Plugin information                    |  `-`                | 
 | `/nclaim level`        | View claim value and info             | `nclaim.level`      |
-| `/nclaim balance`      | Shows your balance                    | `nclaim.balance`    |       
-| `/nclaim admin`        | Access admin commands                 | `nclaim.admin`      |          
+| `/nclaim balance`      | Shows your balance                    | `nclaim.balance`    |   
+| `/nclaim name <claim> <new_name>`        | Change claim name                 | `nclaim.name`      |       
+| `/nclaim admin`        | Access admin commands                 | `nclaim.admin`      |        
 
 ---
 
@@ -100,6 +105,7 @@ src/
 | nclaim.manage_claim_block          | Access open the claim block manager menu                             | false     | 2.1     |
 | nclaim.maxcoop.<amount>            | Set the maximum claim coop count for a claim owner (permission node) | false     | 2.1     |
 | nclaim.bypass.axsellwand           | Bypass AxSellWand usage restrictions in claims                       | false     | 2.1.4   |
+| nclaim.bypass.buy_cooldown           | Bypass claim buy cooldown                       | false     | 3.3.4  |
 
 ---
 
@@ -143,17 +149,96 @@ blacklisted_worlds:
 blacklisted_regions:
   - spawnarea  # Example: spawn protection area
 
+claim_distance:
+  chunks: 1 # How many chunks away from nearby claims can a player create a claim.
+  bypass_coop_players: true # If true, allows players to claim chunks adjacent to claims owned by their co-op teammates, ignoring the standard distance rule.
+
+# Hologram Settings
+# These settings allow you to customize the color of the "Time Left" field in claim holograms, perfect for matching your server's theme!
+#
+# How does it work?
+# - Each threshold defines a time condition and a color.
+# - threshold: Time condition (e.g., "day >= 2", "day < 1", "minute <= 5")
+# - color: Color code (e.g., "&a", "&e", "&c", hex: "<#FF0000>")
+#
+# Thresholds are checked in order; the first matching one is used.
+# Example:
+#   - threshold: "day >= 2"   -> If days left is 2 or more, use &a (green)
+#   - threshold: "day >= 1"   -> If days left is 1 or more, use &e (yellow)
+#   - threshold: "day < 1"    -> If days left is less than 1, use &c (red)
+#
+# Add as many thresholds/colors as you like for your server!
+# Tip:
+# You don't need to shut down and restart the server or use a full reload to process the thresholds;
+# you can apply them in-game by simply using the /nclaim admin reload command.
+hologram_settings:
+  show_title: true             # Show title in hologram?
+  show_owner: true             # Show owner name in hologram?
+  show_time_left: true         # Show time left in hologram?
+  show_coop_count: true        # Show co-op player count in hologram?
+  show_total_size: true        # Show total claim size in hologram?
+  show_edit: true              # Show edit text in hologram?
+  time_left_thresholds:
+    - threshold: "day >= 2"
+      color: "&a"
+    - threshold: "day >= 1"
+      color: "&e"
+    - threshold: "day < 1"
+      color: "&c"
+
 # Claim Settings
 claim_settings:
   max_count: 3        # Maximum number of claims per player
   buy_price: 1500     # Cost to create a new claim
   expand_price: 2000  # Cost to expand an existing claim by one chunk
+
+  default_claim_block_type: OBSIDIAN  # Block type to be used as the marker for new claims (e.g., OBSIDIAN, GOLD_BLOCK, DIAMOND_BLOCK)
+
+  # TIERED PRICING SYSTEM (Maximum 117 chunks)
+  tiered_pricing:
+    enable: false  # true = Tiered system ON, false = Old system (fixed price)
+
+    # HOW IT WORKS:
+    # Your claim starts with 1 chunk (main chunk)
+    # You can expand up to 117 chunks total
+    # Price increases with each tier
+
+    tiers:
+      # FIRST 5 CHUNKS FREE (2nd-6th chunks)
+      tier1:
+        min: 2          # Starting from the 2nd chunk
+        max: 6          # Up to 6th chunk
+        price: 0        # Free
+        # Total free: 5 chunks
+
+      # EASY LEVEL (7th-15th chunks)
+      tier2:
+        min: 7          # Starting from the 7th chunk
+        max: 15         # Up to 15th chunk
+        price: 500      # 500 coins per chunk
+        # Total: 9 chunks x 500 = 4,500 coins
+
+      # MEDIUM LEVEL (16th-25th chunks)
+      tier3:
+        min: 16         # Starting from the 16th chunk
+        max: 25         # Up to 25th chunk
+        price: 1000     # 1000 coins per chunk
+        # Total: 10 chunks x 1000 = 10,000 coins
+
+      # HARD LEVEL (26th-35th chunks)
+      tier4:
+        min: 26         # Starting from the 26th chunk
+        max: 35         # Up to 35th chunk
+        price: 2500     # 2500 coins per chunk
+        # Total: 10 chunks x 2500 = 25,000 coins
+
   max_coop_count:     # Maximum number of co-op players per claim
     default: 3
     vip: 5
-  # Permissions will be need like this "nclaim.max_coop_count.default"
+  # Permissions will be need like this "nclaim.maxcoop.default"
   expiry_days: 7      # Days until an inactive claim expires
-
+  last_claim_time: 5  # The time (in minutes) to wait before making a new claim after buying a claim
+  sell: true # Enable or disable selling claims
 # Auto-Save Configuration
 auto_save: 30  # How often to save data (in minutes)
 
@@ -163,6 +248,26 @@ time_extension:
   price_per_hour: 1500.0
   price_per_day: 5000.0
   tax_rate: 0.1
+
+webhook_settings:
+  enabled: false # Enable or disable the webhook system
+  url: "https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN" # Discord webhook URL
+  use_embed: true # Send it as embed (true) or plain text (false)
+  content: |
+    Claim of %player% in %world% at %x%, %y%, %z% has expired and was deleted!
+  embed:
+    title: "" # Embed title
+    description: | # Embed description (supports placeholders)
+      > # ⏰ Claim Time Expired / Deleted!
+      > **Player**: `%player%`
+      > **World**: `%world%`
+      > **Coordinates**: `%x%, %y%, %z%`
+    color: "#FF0000" # Embed color (hex format)
+    footer: "NClaim Advanced Chunk-Based Claim System" # Text shown in the embed footer
+    timestamp: true # Add the current timestamp to the embed
+    image: "" # Image URL to display in the embed (optional)
+    thumbnail: "" # Thumbnail image URL (optional)
+  mention: "" # Mention a user or role (e.g., <@&ROLE_ID>, leave empty for none)
 
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage
