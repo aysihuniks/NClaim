@@ -255,7 +255,6 @@ public class MySQLManager implements DatabaseManager {
     public void saveClaim(Claim claim) {
         try (Connection conn = getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement(SAVE_CLAIM)) {
-                // INSERT (1..16)
                 stmt.setString(1, claim.getClaimId());
                 stmt.setString(2, claim.getDisplayName());
                 stmt.setString(3, claim.getSlug());
@@ -279,7 +278,6 @@ public class MySQLManager implements DatabaseManager {
                 stmt.setBoolean(15, claim.isForSale());
                 stmt.setDouble(16, claim.getSalePrice());
 
-                // UPDATE (17..27)
                 stmt.setTimestamp(17, claim.getExpiredAt() != null ? new Timestamp(claim.getExpiredAt().getTime()) : null);
                 stmt.setString(18, claim.getDisplayName());
                 stmt.setString(19, claim.getSlug());

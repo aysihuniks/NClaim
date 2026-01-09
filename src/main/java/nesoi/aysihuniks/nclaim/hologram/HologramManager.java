@@ -263,31 +263,37 @@ public class HologramManager {
 
         Config config = NClaim.inst().getNconfig();
 
+        String coords = chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ();
+
         if (config.isShowHologramTitle()) {
-            lines.add(plugin.getLangManager().getString("hologram.title").replace("{display_name}", claim.getDisplayName()));
+            String titleLine = plugin.getLangManager().getString("hologram.title")
+                    .replace("{display_name}", "%nclaim_display_name_" + coords + "%")
+                    + "%nclaim_sale_status_" + coords + "%";
+
+            lines.add(titleLine);
         }
 
         if (config.isShowHologramOwner()) {
             lines.add(plugin.getLangManager().getString("hologram.owner")
-                    .replace("{owner}", "%nclaim_owner_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+                    .replace("{owner}", "%nclaim_owner_" + coords + "%"));
 
         }
 
         if (config.isShowHologramTimeLeft()) {
             lines.add(plugin.getLangManager().getString("hologram.time_left.text")
-                    .replace("{time_left}", "%nclaim_expiration_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+                    .replace("{time_left}", "%nclaim_expiration_" + coords + "%"));
 
         }
 
         if (config.isShowHologramCoopCount()) {
             lines.add(plugin.getLangManager().getString("hologram.coop_count")
-                    .replace("{coop_count}", "%nclaim_coop_count_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+                    .replace("{coop_count}", "%nclaim_coop_count_" + coords + "%"));
 
         }
 
         if (config.isShowHologramTotalSize()) {
             lines.add(plugin.getLangManager().getString("hologram.total_size")
-                    .replace("{total_size}", "%nclaim_total_size_" + chunk.getWorld().getName() + "_" + chunk.getX() + "_" + chunk.getZ() + "%"));
+                    .replace("{total_size}", "%nclaim_total_size_" + coords + "%"));
 
         }
 

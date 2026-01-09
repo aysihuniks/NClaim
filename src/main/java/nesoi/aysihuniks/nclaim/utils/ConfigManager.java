@@ -4,6 +4,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.nandayo.dapi.util.Util;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ConfigManager {
 
-    private YamlConfiguration config;
+    private final YamlConfiguration config;
 
     public ConfigManager(FileConfiguration config) {
         this.config = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
@@ -71,7 +72,7 @@ public class ConfigManager {
         try {
             config.save(new File(NClaim.inst().getDataFolder(), "config.yml"));
         } catch (IOException e) {
-            e.printStackTrace();
+            Util.log("Failed to loading save config: " + e.getMessage());
         }
     }
 }

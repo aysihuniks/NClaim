@@ -74,7 +74,7 @@ public class ClaimMainMenu extends BaseMenu {
             if ("confirmed".equals(result)) {
                 player.closeInventory();
 
-                new AnvilManager(player, "Enter claim name (optional)", (text) -> {
+                new AnvilManager(player, getString("enter_a_name_title"), (text) -> {
                     String name = text == null ? null : text.trim();
                     if (name != null && name.isEmpty()) name = null;
 

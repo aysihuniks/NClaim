@@ -10,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimEnterEvent;
 import nesoi.aysihuniks.nclaim.api.events.ClaimLeaveEvent;
+import nesoi.aysihuniks.nclaim.enums.Balance;
 import nesoi.aysihuniks.nclaim.enums.Setting;
+import nesoi.aysihuniks.nclaim.model.User;
 import nesoi.aysihuniks.nclaim.ui.claim.management.ClaimManagementMenu;
 import nesoi.aysihuniks.nclaim.model.Claim;
 import nesoi.aysihuniks.nclaim.enums.Permission;
+import nesoi.aysihuniks.nclaim.ui.shared.ConfirmMenu;
 import nesoi.aysihuniks.nclaim.utils.LangManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -30,6 +33,7 @@ import org.nandayo.dapi.message.ChannelType;
 import org.nandayo.dapi.object.DEntityType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ClaimManager implements Listener {
@@ -468,6 +472,45 @@ public class ClaimManager implements Listener {
                     coopManager.hasPermission(player, claim, Permission.OPEN_CLAIM_MENU))
                     && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
                 new ClaimManagementMenu(player, claim, false);
+            } else if (NClaim.inst().getNconfig().isSellEnabled() && claim.isForSale()) {
+                double price = claim.getSalePrice();
+                String ownerName = Bukkit.getOfflinePlayer(claim.getOwner()).getName();
+
+                new ConfirmMenu(player,
+                        NClaim.inst().getGuiLangManager().getString("confirm_menu.children.buy_player_claim.display_name"),
+                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.buy_player_claim.lore")
+                                .stream()
+                                .map(s -> s.replace("{price}", String.valueOf(price))
+                                        .replace("{owner}", ownerName != null ? ownerName : "Unknown"))
+                                .collect(Collectors.toList()),
+                        result -> {
+                            if ("confirmed".equals(result)) {
+                                boolean useVault = NClaim.inst().getBalanceSystem() == Balance.VAULT;
+                                double balance;
+                                if (useVault) {
+                                    balance = NClaim.inst().getEconomy().getBalance(player);
+                                } else {
+                                    balance = User.getUser(player.getUniqueId()).getBalance();
+                                }
+
+                                if (balance < price) {
+                                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
+                                    return;
+                                }
+
+                                if (useVault) {
+                                    NClaim.inst().getEconomy().withdrawPlayer(player, price);
+                                } else {
+                                    User.getUser(player.getUniqueId()).setBalance(balance - price);
+                                }
+
+                                claim.sellTheClaim(player);
+                                player.closeInventory();
+                            } else {
+                                player.closeInventory();
+                            }
+                        }
+                );
             }
             return;
         }

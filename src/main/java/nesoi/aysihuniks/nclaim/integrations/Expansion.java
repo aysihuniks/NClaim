@@ -71,6 +71,14 @@ public class Expansion extends PlaceholderExpansion {
             return handleBlockValue(params);
         }
 
+        if (params.startsWith("sale_status_")) {
+            return handleSaleStatus(params);
+        }
+
+        if (params.startsWith("display_name_")) {
+            return handleDisplayName(params);
+        }
+
         if (params.equals("coop_count") || params.startsWith("coop_count_") && params.split("_").length <= 3) {
             return handleCoopCount(params, player);
         }
@@ -282,4 +290,50 @@ public class Expansion extends PlaceholderExpansion {
         return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner").replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
+    private @Nullable String handleSaleStatus(String params) {
+        String[] parts = params.split("_");
+        if (parts.length < 4) {
+            return "Invalid sale status format";
+        }
+
+        int worldIndex = parts.length - 3;
+        ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
+
+        if (result.getError() != null) {
+            return "";
+        }
+
+        Claim claim = result.getClaim();
+        if (claim == null) {
+            return "";
+        }
+
+        if (NClaim.inst().getNconfig().isSellEnabled() && claim.isForSale()) {
+            String priceFormat = plugin.getLangManager().getString("hologram.price_format");
+            if (priceFormat.isEmpty()) priceFormat = "&e{price}";
+
+            java.text.DecimalFormat df = new java.text.DecimalFormat("#,###.##");
+            String formattedPrice = df.format(claim.getSalePrice());
+
+            String finalPriceString = priceFormat.replace("{price}", formattedPrice);
+            String suffix = plugin.getLangManager().getString("hologram.title_sale_suffix");
+
+            return " " + suffix.replace("{price}", finalPriceString);
+        }
+
+        return "";
+    }
+
+    private @Nullable String handleDisplayName(String params) {
+        String[] parts = params.split("_");
+        if (parts.length < 5) return "Invalid format";
+
+        int worldIndex = parts.length - 3;
+        ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
+
+        if (result.getError() != null) return "Error";
+
+        Claim claim = result.getClaim();
+        return claim != null ? claim.getDisplayName() : "Unknown";
+    }
 }

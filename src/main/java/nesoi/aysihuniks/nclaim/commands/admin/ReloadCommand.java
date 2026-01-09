@@ -29,7 +29,6 @@ public class ReloadCommand extends BaseCommand {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.reload.success"));
         } catch (Exception e) {
             ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.reload.failed"));
-            e.printStackTrace();
         }
 
         return true;

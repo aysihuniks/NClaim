@@ -78,8 +78,13 @@ claim:
   pvp_not_allowed: "{prefix} &cPvP is not allowed in this claim."
   transferred: "&aClaim successfully transferred to &e{player}"
   name_cleared: "{prefix} &aClaim name cleared. Slug reverted to: &e{slug}"
+  name_too_long: "{prefix} &cName is too long! Maximum {max} characters allowed. (Current: {current})"
   name_changed_same_slug: "{prefix} &aClaim name updated. Slug remains: &e{slug}"
   name_changed_new_slug: "{prefix} &aClaim name updated. Slug changed from &7{old_slug} &ato &e{new_slug}"
+  sell:
+    started: "{prefix} &aYour claim &e{display_slug} &ahas been listed for sale for &e${price}&a."
+    bought_buyer: "{prefix} &aYou've purchased &e{display_slug} &afrom &e{player} &afor &e${price}&a."
+    bought_seller: "{prefix} &e{player} &ahas purchased your claim &e{display_slug} &afor &e${price}&a."
   block:
     purchased: "{prefix} &aClaim block successfully purchased: &e{block} &7(&e{price}$&7)"
     changed: "{prefix} &aClaim block changed: &c{old_block} &7-> &2{new_block}"
@@ -125,6 +130,8 @@ move:
 
 hologram:
   title: "&6{display_name}"
+  title_sale_suffix: '&7[&a$&r{price}&7]' # Example: MyHome [$500]
+  price_format: "&e{price}"
   owner: "&fOwner: &e{owner}"
   time_left:
     text: "&fTime Left: &e{time_left}"

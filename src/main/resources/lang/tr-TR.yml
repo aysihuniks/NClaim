@@ -78,8 +78,13 @@ claim:
   pvp_not_allowed: "{prefix} &cBu bölgede PvP'ye izin verilmiyor."
   transferred: "&aClaim başarıyla &e{player} &aadlı oyuncuya devredildi"
   name_cleared: "{prefix} &aClaim ismi sıfırlandı. Slug tekrar &e{slug} &aolarak ayarlandı."
+  name_too_long: "{prefix} &cİsim çok uzun! Maksimum {max} karakter olabilir. (Şu an: {current})"
   name_changed_same_slug: "{prefix} &aClaim ismi güncellendi. Slug değişmedi: &e{slug}"
   name_changed_new_slug: "{prefix} &aClaim ismi güncellendi. Slug &7{old_slug} &ayerine &e{new_slug} &aolarak değişti."
+  sell:
+    started: "{prefix} &e{display_slug} &aisimli claiminiz &e{price} &akarşılığında satışa konulmuştur."
+    bought_buyer: "{prefix} &e{display_slug} &aisimli claimi &e{player} &asahibinden &e{price} &akarşılığında satın aldınız."
+    bought_seller: "{prefix} &e{display_slug} &aisimli claiminiz &e{price} &akarşılığında &e{player} &atarafından alınmıştır."
   block:
     purchased: "{prefix} &aClaim bloğu başarıyla satın alındı: &e{block} &7(&6{price}$&7)"
     changed: "{prefix} &aClaim bloğu değiştirildi: &c{old_block} &7-> &a{new_block}"
@@ -125,6 +130,8 @@ move:
 
 hologram:
   title: "&6{display_name}"
+  title_sale_suffix: "&7[&a$&r{price}&7]" # Örnek: MyHome [$500]
+  price_format: "&e{price}"
   owner: "&fSahip: &e{owner}"
   time_left:
     text: "&fKalan Süre: &e{time_left}"

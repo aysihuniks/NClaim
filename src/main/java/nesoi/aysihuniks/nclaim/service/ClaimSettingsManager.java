@@ -56,4 +56,14 @@ public class ClaimSettingsManager {
         return claim.getOwner().equals(player.getUniqueId()) || 
                player.hasPermission("nclaim.admin");
     }
+
+    public static void resetToDefaults(Claim claim) {
+        for (Setting setting : Setting.values()) {
+            SettingCfg cfg = NClaim.inst().getGuiLangManager().getSettingConfig(setting);
+            if (cfg != null) {
+                claim.getSettings().set(setting, cfg.isDefaultValue());
+            }
+        }
+        NClaim.inst().getClaimStorageManager().saveClaim(claim);
+    }
 }

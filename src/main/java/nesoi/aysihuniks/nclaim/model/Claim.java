@@ -10,6 +10,7 @@ import nesoi.aysihuniks.nclaim.NClaim;
 import nesoi.aysihuniks.nclaim.api.events.ClaimRemoveEvent;
 import nesoi.aysihuniks.nclaim.enums.HoloEnum;
 import nesoi.aysihuniks.nclaim.enums.RemoveCause;
+import nesoi.aysihuniks.nclaim.service.ClaimSettingsManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -416,5 +417,28 @@ public class Claim {
                 .filter(c -> c.getDisplayName() != null && c.getDisplayName().equalsIgnoreCase(n))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void sellTheClaim(@NotNull Player player) {
+        UUID oldOwner = this.owner;
+        UUID newOwner = player.getUniqueId();
+
+        setOwner(newOwner);
+
+        this.forSale = false;
+
+        ClaimSettingsManager.resetToDefaults(this);
+
+        this.coopPlayers.clear();
+        this.coopPlayerJoinDate.clear();
+        this.coopPermissions.clear();
+
+        NClaim.inst().getClaimStorageManager().saveClaim(this);
+
+        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.sell.bought_buyer").replace("{display_slug}", getDisplayName()).replace("{player}", player.getName()).replace("{price}", String.valueOf(getSalePrice())));
+        Player seller = Bukkit.getPlayer(oldOwner);
+        if (seller != null) {
+            ChannelType.CHAT.send(seller, NClaim.inst().getLangManager().getString("claim.sell.bought_seller").replace("{player}", player.getName()).replace("{display_slug}", getDisplayName()).replace("{price}", String.valueOf(getSalePrice())));
+        }
     }
 }

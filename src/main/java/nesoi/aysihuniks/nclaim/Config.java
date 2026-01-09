@@ -42,6 +42,7 @@ public class Config {
     private List<String> blacklistedRegions;
     private int claimDistanceChunks;
     private boolean claimDistanceCoopBypass;
+    private boolean sellEnabled;
     private int autoSave;
 
     private boolean showHologramTitle;
@@ -111,6 +112,7 @@ public class Config {
         setMaxCoopPlayers(config.getInt("claim_settings.max_coop.default", 3));
         setClaimExpiryDays(config.getInt("claim_settings.expiry_days", 7));
         setLastClaimTime(config.getLong("claim_settings.last_claim_time", 5));
+        setSellEnabled(config.getBoolean("claim_settings.sell", true));
 
         setShowHologramTitle(config.getBoolean("hologram_settings.show_title", true));
         setShowHologramOwner(config.getBoolean("hologram_settings.show_owner", true));
@@ -184,6 +186,7 @@ public class Config {
             config.set("claim_settings.max_coop.default", getMaxCoopPlayers());
             config.set("claim_settings.expiry_days", getClaimExpiryDays());
             config.set("claim_settings.last_claim_time", getLastClaimTime());
+            config.set("claim_settings.sell", isSellEnabled());
 
             config.set("hologram_settings.show_title", isShowHologramTitle());
             config.set("hologram_settings.show_owner", isShowHologramOwner());
@@ -417,7 +420,7 @@ public class Config {
             Util.log("&aUpdated config file.");
         }catch (Exception e) {
             Util.log("&cFailed to save updated config file.");
-            e.printStackTrace();
+            
         }
         return this;
     }
@@ -434,7 +437,7 @@ public class Config {
             Util.log("&aBacked up old config file.");
         } catch (Exception e) {
             Util.log("&cFailed to save backup file.");
-            e.printStackTrace();
+            
         }
     }
 

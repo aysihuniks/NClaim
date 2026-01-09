@@ -31,6 +31,7 @@ guis:
   # Claim Menu - When /nclaim is typed, it is the menu with operations such as buy claim
   claim_menu:
     title: "Claim Menu"
+    enter_a_name_title: "Enter a name"
     admin:
       display_name: "&6Admin Menu"
       material: "COMMAND_BLOCK"
@@ -65,7 +66,7 @@ guis:
       player: "Player"
       coop: "Co-op"
     own_claims:
-      display_name: "&6Claim: &e{claim_id}"
+      display_name: "&6Claim: &e{display_slug}"
       material: "GRASS_BLOCK"
       lore:
         - ""
@@ -74,6 +75,10 @@ guis:
         - "&fOwner: &e{owner}"
         - ""
         - "&7Click to manage"
+    on_sale_lore:
+      - ""
+      - "&6&l[ FOR SALE ]"
+      - "&fPrice: &e${price}"
     coop_claims:
       display_name: "&6Co-op Claim: &e{claim_id}"
       material: "OAK_SIGN"
@@ -88,6 +93,7 @@ guis:
   # Claim Management Menu - The menu that opens when interacting with the claim block.
   claim_management_menu:
     title: "Manage Claim"
+    enter_a_price_title: "Enter a price"
     expand:
       display_name: "&6Expand Claim"
       material: "GRASS_BLOCK"
@@ -140,6 +146,17 @@ guis:
         - "&7• &fMove the block"
         - ""
         - "&eClick to manage"
+    sell:
+      display_name: "&6Sell The Claim"
+      material: "GOLD_INGOT"
+      lore:
+        - ""
+        - "&fSell this claim:"
+        - "&7• &fSet a custom sale price"
+        - "&7• &fTransfer ownership instantly"
+        - "&7• &fEarn money from the sale"
+        - ""
+        - "&eClick to list for sale"
     delete:
       display_name: "&cDelete Claim"
       material: "TNT"
@@ -752,6 +769,20 @@ guis:
           - ""
           - "&aClick green dye to confirm move"
           - "&cClick to red dye to cancel move"
+      buy_player_claim:
+        display_name: "&6Purchase Claim"
+        lore:
+          - ""
+          - "&fDirect purchase from &e{owner}&f:"
+          - "&7• &fSale Price: &e${price}"
+          - ""
+          - "&cWarning: &fThis action will:"
+          - "&7• &fTransfer ownership to you"
+          - "&7• &fReset all claim settings to default"
+          - "&7• &fRemove all existing co-op members"
+          - ""
+          - "&aClick green dye to confirm purchase"
+          - "&cClick red dye to cancel purchase"
 
 # DO NOT CHANGE!
 gui_version: "{version}"

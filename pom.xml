@@ -125,7 +125,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- LOMBOK -->
@@ -139,13 +139,13 @@
         <dependency>
             <groupId>com.github.desaxxx</groupId>
             <artifactId>DAPI</artifactId>
-            <version>afc4221173</version> <!-- 1.5 candidate -->
+            <version>1.5.2</version> <!-- 1.5 candidate -->
         </dependency>
         <!-- AnvilMenu -->
         <dependency>
             <groupId>com.github.desaxxx</groupId>
             <artifactId>AnvilMenu</artifactId>
-            <version>0.3</version>
+            <version>0.4</version>
         </dependency>
         <!-- PlaceholderAPI -->
         <dependency>

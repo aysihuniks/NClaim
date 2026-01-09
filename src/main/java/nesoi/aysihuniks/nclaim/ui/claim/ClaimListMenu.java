@@ -190,9 +190,16 @@ public class ClaimListMenu extends BaseMenu {
                 .replace("{coordinates}", NClaim.getCoordinates(chunk))
                 .replace("{owner}", Bukkit.getOfflinePlayer(claim.getOwner()).getName()));
 
+        if (NClaim.inst().getNconfig().isSellEnabled() && claim.isForSale()) {
+            List<String> saleLore = getStringList("claim_list_menu.on_sale_lore");
+            for (String s : saleLore) {
+                lore.add(s.replace("{price}", String.valueOf(claim.getSalePrice())));
+            }
+        }
+
         ItemStack item = ItemCreator.of(isOwner ? getMaterial("own_claims") : getMaterial("coop_claims"))
                 .name(getString(buttonPath + ".display_name")
-                        .replace("{claim_id}", claim.getClaimId()))
+                        .replace("{display_slug}", claim.getDisplayName()))
                 .lore(lore)
                 .get();
 
