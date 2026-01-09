@@ -659,6 +659,7 @@ guis:
           lore:
             - ""
             - "&fCreated: &7{created_at}"
+            - "&fName: &7{display_slug}"
             - "&fLocation: &7{world}, {coordinates}"
             - "&fSize: &7{land_size} chunks"
             - "&fCo-op Members: &7{coop_count}"
@@ -674,6 +675,7 @@ guis:
           lore:
             - ""
             - "&fCreated: &7{created_at}"
+            - "&fName: &7{display_slug}"
             - "&fLocation: &7{world}, {coordinates}"
             - "&fSize: &7{land_size} chunks"
             - "&fCo-op Members: &7{coop_count}"

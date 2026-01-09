@@ -308,13 +308,15 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                String section = selectedClaims.contains(claim) ? "claim_items.selected" : "claim_items.unselected";
+                boolean isSelected = selectedClaims.contains(claim);
+                String section = isSelected ? "claim_items.selected" : "claim_items.unselected";
                 List<String> lore = new ArrayList<>(getStringList(section + ".lore"));
 
                 String forSaleText = claim.isForSale() ? NClaim.inst().getGuiLangManager().getString("yes_text") : NClaim.inst().getGuiLangManager().getString("no_text");
 
                 lore.replaceAll(s -> s
                         .replace("{created_at}", NClaim.serializeDate(claim.getCreatedAt()))
+                        .replace("{display_slug}", claim.getDisplayName())
                         .replace("{world}", chunk.getWorld().getName())
                         .replace("{coordinates}", NClaim.getCoordinates(chunk))
                         .replace("{land_size}", String.valueOf(claim.getLands().size()))
@@ -336,6 +338,7 @@ public class AdminAllClaimMenu extends BaseMenu {
                         .name(getString(section + ".display_name")
                                 .replace("{owner}", owner.getName() != null ? owner.getName() : "Unknown"))
                         .lore(lore)
+                        .amount(isSelected ? 2 : 1)
                         .get();
             }
 
