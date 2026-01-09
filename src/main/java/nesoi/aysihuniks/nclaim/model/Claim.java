@@ -395,7 +395,7 @@ public class Claim {
 
         Claim bySlug = claims.stream()
                 .filter(c -> owner.equals(c.getOwner()))
-                .filter(c -> c.getSlug() != null && c.getSlug().equalsIgnoreCase(id))
+                .filter(c -> c.getSlug().equalsIgnoreCase(id))
                 .findFirst()
                 .orElse(null);
         if (bySlug != null) return bySlug;
@@ -435,7 +435,7 @@ public class Claim {
 
         NClaim.inst().getClaimStorageManager().saveClaim(this);
 
-        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.sell.bought_buyer").replace("{display_slug}", getDisplayName()).replace("{player}", player.getName()).replace("{price}", String.valueOf(getSalePrice())));
+        ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("claim.sell.bought_buyer").replace("{display_slug}", getDisplayName()).replace("{player}", User.getUser(oldOwner).getPlayer().getName()).replace("{price}", String.valueOf(getSalePrice())));
         Player seller = Bukkit.getPlayer(oldOwner);
         if (seller != null) {
             ChannelType.CHAT.send(seller, NClaim.inst().getLangManager().getString("claim.sell.bought_seller").replace("{player}", player.getName()).replace("{display_slug}", getDisplayName()).replace("{price}", String.valueOf(getSalePrice())));

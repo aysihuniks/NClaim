@@ -464,58 +464,32 @@ public class ClaimManager implements Listener {
         if (claim == null) return;
 
         if (block.getType() == claim.getClaimBlockType() && claim.getClaimBlockLocation().equals(block.getLocation())) {
-            if (player.hasPermission("nclaim.admin") && player.isSneaking() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                new ClaimManagementMenu(player, claim, true);
-            }
-            else if ((player.hasPermission("nclaim.admin") ||
-                    coopManager.isClaimOwner(claim, player) ||
-                    coopManager.hasPermission(player, claim, Permission.OPEN_CLAIM_MENU))
-                    && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                new ClaimManagementMenu(player, claim, false);
-            } else if (NClaim.inst().getNconfig().isSellEnabled() && claim.isForSale()) {
-                double price = claim.getSalePrice();
-                String ownerName = Bukkit.getOfflinePlayer(claim.getOwner()).getName();
+            if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                if (player.hasPermission("nclaim.admin") && player.isSneaking()) {
+                    new ClaimManagementMenu(player, claim, true);
+                    return;
+                }
 
-                new ConfirmMenu(player,
-                        NClaim.inst().getGuiLangManager().getString("confirm_menu.children.buy_player_claim.display_name"),
-                        NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.buy_player_claim.lore")
-                                .stream()
-                                .map(s -> s.replace("{price}", String.valueOf(price))
-                                        .replace("{owner}", ownerName != null ? ownerName : "Unknown"))
-                                .collect(Collectors.toList()),
-                        result -> {
-                            if ("confirmed".equals(result)) {
-                                boolean useVault = NClaim.inst().getBalanceSystem() == Balance.VAULT;
-                                double balance;
-                                if (useVault) {
-                                    balance = NClaim.inst().getEconomy().getBalance(player);
-                                } else {
-                                    balance = User.getUser(player.getUniqueId()).getBalance();
-                                }
+                boolean isOwner = coopManager.isClaimOwner(claim, player);
+                boolean hasMenuPerm = coopManager.hasPermission(player, claim, Permission.OPEN_CLAIM_MENU);
+                boolean isBypass = player.hasPermission("nclaim.bypass");
 
-                                if (balance < price) {
-                                    ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
-                                    return;
-                                }
+                if (isOwner || (hasMenuPerm && !isBypass)) {
+                    new ClaimManagementMenu(player, claim, false);
+                    return;
+                }
 
-                                if (useVault) {
-                                    NClaim.inst().getEconomy().withdrawPlayer(player, price);
-                                } else {
-                                    User.getUser(player.getUniqueId()).setBalance(balance - price);
-                                }
-
-                                claim.sellTheClaim(player);
-                                player.closeInventory();
-                            } else {
-                                player.closeInventory();
-                            }
-                        }
-                );
+                if (NClaim.inst().getNconfig().isSellEnabled() && claim.isForSale()) {
+                    openPurchaseMenu(player, claim);
+                    return;
+                }
             }
             return;
         }
+
         if (hasClaimBypass(player, "interact")) return;
         if (cancelIfNotClaimMember(player, claim, event)) return;
+
         Permission permission = getInteractPermission(block.getType());
         if (permission == null) {
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -530,7 +504,49 @@ public class ClaimManager implements Listener {
             }
             if (permission == null) return;
         }
+
         cancelIfNoPermission(player, claim, permission, event, "interact");
+    }
+
+    private void openPurchaseMenu(Player player, Claim claim) {
+        double price = claim.getSalePrice();
+        String ownerName = Bukkit.getOfflinePlayer(claim.getOwner()).getName();
+
+        new ConfirmMenu(player,
+                NClaim.inst().getGuiLangManager().getString("confirm_menu.children.buy_player_claim.display_name"),
+                NClaim.inst().getGuiLangManager().getStringList("confirm_menu.children.buy_player_claim.lore")
+                        .stream()
+                        .map(s -> s.replace("{price}", String.valueOf(price))
+                                .replace("{owner}", ownerName != null ? ownerName : "Unknown"))
+                        .collect(Collectors.toList()),
+                result -> {
+                    if ("confirmed".equals(result)) {
+                        boolean useVault = NClaim.inst().getBalanceSystem() == Balance.VAULT;
+                        double balance = useVault ?
+                                NClaim.inst().getEconomy().getBalance(player) :
+                                User.getUser(player.getUniqueId()).getBalance();
+
+                        if (balance < price) {
+                            ChannelType.CHAT.send(player, NClaim.inst().getLangManager().getString("command.balance.not_enough"));
+                            return;
+                        }
+
+                        OfflinePlayer owner = Bukkit.getOfflinePlayer(claim.getOwner());
+                        if (useVault) {
+                            NClaim.inst().getEconomy().withdrawPlayer(player, price);
+                            NClaim.inst().getEconomy().depositPlayer(owner, price);
+                        } else {
+                            User.getUser(player.getUniqueId()).setBalance(balance - price);
+                            User.getUser(owner.getUniqueId()).addBalance(price);
+                        }
+
+                        claim.sellTheClaim(player);
+                        player.closeInventory();
+                    } else {
+                        player.closeInventory();
+                    }
+                }
+        );
     }
 
     private Permission getInteractPermission(Material type) {
