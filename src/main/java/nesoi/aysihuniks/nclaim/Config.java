@@ -12,6 +12,7 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.nandayo.dapi.util.Util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -389,55 +390,51 @@ public class Config {
     }
 
     public Config updateConfig() {
-        String version = plugin.getDescription().getVersion();
-        String configVersion = config.getString("config_version", "0");
-
-        if(version.equals(configVersion)) return this;
-
-        InputStream defStream = plugin.getResource("config.yml");
-        if(defStream == null) {
-            Util.log("&cDefault config.yml not found in plugin resources.");
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            plugin.saveDefaultConfig();
             return this;
         }
 
-        saveBackupConfig();
+        String version = plugin.getDescription().getVersion();
+        String configVersion = config.getString("config_version", "0");
 
-        FileConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
-        for(String key : defConfig.getKeys(true)) {
-            if (defConfig.isConfigurationSection(key)) {
-                continue;
-            }
-            if(config.contains(key)) {
-                defConfig.set(key, config.get(key));
-            }
-        }
-        File file = new File(this.plugin.getDataFolder(), "config.yml");
+        if (!version.equals(configVersion)) {
+            Util.log("&eNew version detected (" + version + "), updating configuration...");
 
-        try {
-            defConfig.set("config_version", version);
-            defConfig.save(file);
-            config = defConfig;
-            Util.log("&aUpdated config file.");
-        }catch (Exception e) {
-            Util.log("&cFailed to save updated config file.");
-            
+            saveBackupConfig();
+
+            config.options().copyDefaults(true);
+
+            InputStream defStream = plugin.getResource("config.yml");
+            if (defStream != null) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
+                config.setDefaults(defConfig);
+            }
+
+            config.set("config_version", version);
+            try {
+                config.save(configFile);
+                Util.log("&aConfiguration successfully updated to version " + version + "!");
+            } catch (IOException e) {
+                Util.log("&cAn error occurred while saving the configuration!");
+            }
         }
         return this;
     }
 
     private void saveBackupConfig() {
         File backupDir = new File(plugin.getDataFolder(), "backups");
-        if (!backupDir.exists()) { //noinspection ResultOfMethodCallIgnored
+        if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
         String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());
         File backupFile = new File(backupDir, "config_" + date + ".yml");
         try {
             config.save(backupFile);
-            Util.log("&aBacked up old config file.");
+            Util.log("&aBacked up old configuration file.");
         } catch (Exception e) {
             Util.log("&cFailed to save backup file.");
-            
         }
     }
 

@@ -22,48 +22,46 @@ public class LangManager {
 
     private final @NotNull NClaim plugin;
     private final File folder;
+    public final List<String> REGISTERED_LANGUAGES = new ArrayList<>();
+    private final List<String> DEFAULT_LANGUAGES = Arrays.asList("en-US", "tr-TR", "fr-FR");
+    private final String DEFAULT_LANGUAGE = "en-US";
+    private FileConfiguration DEFAULT_LANGUAGE_CONFIG;
+    private FileConfiguration SELECTED_LANGUAGE_CONFIG;
+
     public LangManager(@NotNull NClaim plugin, @NotNull String fileName) {
         this.plugin = plugin;
         this.folder = new File(plugin.getDataFolder(), "lang");
-        if(!folder.exists()) { //noinspection ResultOfMethodCallIgnored
+        if (!folder.exists()) {
             folder.mkdirs();
         }
         this.loadDefaultFiles();
         this.loadFiles(fileName);
     }
 
-    public final List<String> REGISTERED_LANGUAGES = new ArrayList<>();
-    private final List<String> DEFAULT_LANGUAGES = Arrays.asList("en-US","tr-TR", "fr-FR");
-    private final String DEFAULT_LANGUAGE = "en-US";
-    private FileConfiguration DEFAULT_LANGUAGE_CONFIG;
-
-    private FileConfiguration SELECTED_LANGUAGE_CONFIG;
-
     private void loadFiles(@NotNull String searchingFor) {
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
         if (files != null) {
-            for(File file : files) {
+            for (File file : files) {
                 String fileName = file.getName().substring(0, file.getName().length() - 4);
                 REGISTERED_LANGUAGES.add(fileName);
-                if(fileName.equals(searchingFor)) {
+                if (fileName.equals(searchingFor)) {
                     this.SELECTED_LANGUAGE_CONFIG = (DEFAULT_LANGUAGES.contains(fileName)) ? updateLanguage(fileName) : YamlConfiguration.loadConfiguration(file);
                 }
-                if(fileName.equals(DEFAULT_LANGUAGE)) {
+                if (fileName.equals(DEFAULT_LANGUAGE)) {
                     this.DEFAULT_LANGUAGE_CONFIG = updateLanguage(fileName);
                 }
             }
         }
-        if(this.SELECTED_LANGUAGE_CONFIG == null) {
+        if (this.SELECTED_LANGUAGE_CONFIG == null) {
             this.SELECTED_LANGUAGE_CONFIG = this.DEFAULT_LANGUAGE_CONFIG;
             Util.log("&cLanguage " + searchingFor + " was not found. Using default language.");
         }
     }
 
     private void loadDefaultFiles() {
-        for(String fileName : DEFAULT_LANGUAGES) {
+        for (String fileName : DEFAULT_LANGUAGES) {
             File file = new File(folder, fileName + ".yml");
-            if(file.exists() || plugin.getResource("lang/" + fileName + ".yml") == null) continue;
-
+            if (file.exists() || plugin.getResource("lang/" + fileName + ".yml") == null) continue;
             plugin.saveResource("lang/" + fileName + ".yml", false);
         }
     }
@@ -72,42 +70,38 @@ public class LangManager {
         File file = new File(folder, languageName + ".yml");
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        if(compareVersions(config)) return config;
+        String version = plugin.getDescription().getVersion();
+        String configVersion = config.getString("lang_version", "0");
+
+        if (version.equals(configVersion)) return config;
+
+        Util.log("&eNew language version detected for " + languageName + " (" + version + "), updating...");
 
         FileConfiguration defConfig = getSourceConfiguration(languageName);
         if (defConfig == null) return config;
 
         saveBackupConfig(languageName, config);
 
-        for(String key : defConfig.getKeys(true)) {
-            if (defConfig.isConfigurationSection(key)) {
-                continue;
-            }
-            if(config.contains(key)) {
+        for (String key : defConfig.getKeys(true)) {
+            if (defConfig.isConfigurationSection(key)) continue;
+            if (config.contains(key)) {
                 defConfig.set(key, config.get(key));
             }
         }
 
-        defConfig.set("lang_version", plugin.getDescription().getVersion());
-        config = defConfig;
+        defConfig.set("lang_version", version);
         try {
-            config.save(new File(folder, languageName + ".yml"));
-            Util.log("&aUpdated language file.");
-        }catch (Exception e) {
-            Util.log("&cFailed to save updated language file. " + e.getMessage());
+            defConfig.save(file);
+            Util.log("&aLanguage file '" + languageName + "' successfully updated to version " + version + "!");
+        } catch (Exception e) {
+            Util.log("&cAn error occurred while saving the updated language file: " + languageName);
         }
-        return config;
-    }
-
-    private boolean compareVersions(@NotNull FileConfiguration config) {
-        String version = plugin.getDescription().getVersion();
-        String configVersion = config.getString("lang_version", "0");
-        return version.equals(configVersion);
+        return defConfig;
     }
 
     private FileConfiguration getSourceConfiguration(@NotNull String languageName) {
         InputStream defStream = plugin.getResource("lang/" + languageName + ".yml");
-        if(defStream == null) {
+        if (defStream == null) {
             Util.log("&cDefault '" + languageName + ".yml' was not found in plugin resources.");
             return null;
         }
@@ -116,34 +110,37 @@ public class LangManager {
 
     private void saveBackupConfig(@NotNull String languageName, @NotNull FileConfiguration config) {
         File backupDir = new File(plugin.getDataFolder(), "backups");
-        if (!backupDir.exists()) { //noinspection ResultOfMethodCallIgnored
+        if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
         String date = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File backupFile = new File(backupDir, "lang_" + languageName + "_" + date + ".yml");
         try {
             config.save(backupFile);
-            Util.log("&aBacked up old language file.");
+            Util.log("&aBacked up old language file: " + languageName);
         } catch (Exception e) {
-            Util.log("&cFailed to save old language backup file. ");
+            Util.log("&cFailed to save backup file for: " + languageName);
         }
     }
 
     static public void sendSortedMessage(@NotNull Player player, String msg) {
         if (msg == null || msg.isEmpty()) return;
         String[] parts = msg.split("=");
-        if(parts.length < 2)  ChannelType.CHAT.send(player, msg);
+        if (parts.length < 2) {
+            ChannelType.CHAT.send(player, msg);
+            return;
+        }
         switch (parts[0]) {
-            case "CHAT": ChannelType.CHAT.send(player, parts[1]);break;
-            case "ACTION_BAR": ChannelType.ACTION_BAR.send(player, parts[1]);break;
-            case "TITLE": ChannelType.TITLE.send(player, parts[1]);break;
+            case "CHAT": ChannelType.CHAT.send(player, parts[1]); break;
+            case "ACTION_BAR": ChannelType.ACTION_BAR.send(player, parts[1]); break;
+            case "TITLE": ChannelType.TITLE.send(player, parts[1]); break;
         }
     }
 
     @Nullable
     public ConfigurationSection getSection(@NotNull String path) {
         ConfigurationSection section = SELECTED_LANGUAGE_CONFIG.getConfigurationSection(path);
-        if(section != null) return section;
+        if (section != null) return section;
         return DEFAULT_LANGUAGE_CONFIG.getConfigurationSection(path);
     }
 

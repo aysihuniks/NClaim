@@ -15,27 +15,78 @@ import org.bukkit.persistence.PersistentDataType;
 import org.nandayo.dapi.util.Util;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class GuiLangManager {
 
     @Getter
-    private final FileConfiguration guiConfig;
+    private FileConfiguration guiConfig;
 
     private final HeadManager headManager;
     private final Map<Setting, SettingCfg> settingConfigs;
 
     public GuiLangManager() {
+        this.headManager = NClaim.inst().getHeadManager();
+        this.settingConfigs = new HashMap<>();
+        load();
+        updateConfig();
+    }
+
+    public void load() {
         File file = new File(NClaim.inst().getDataFolder(), "guis.yml");
         if (!file.exists()) {
             NClaim.inst().saveResource("guis.yml", false);
         }
         this.guiConfig = YamlConfiguration.loadConfiguration(file);
-        this.headManager = NClaim.inst().getHeadManager();
-        this.settingConfigs = new HashMap<>();
         loadSettingConfigs();
+    }
+
+    public GuiLangManager updateConfig() {
+        File file = new File(NClaim.inst().getDataFolder(), "guis.yml");
+        String version = NClaim.inst().getDescription().getVersion();
+        String currentGuiVersion = guiConfig.getString("gui_version", "0");
+
+        if (!version.equals(currentGuiVersion)) {
+            Util.log("&eNew GUI version detected (" + version + "), updating guis.yml...");
+
+            saveBackupConfig();
+
+            guiConfig.options().copyDefaults(true);
+
+            InputStream defStream = NClaim.inst().getResource("guis.yml");
+            if (defStream != null) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defStream));
+                guiConfig.setDefaults(defConfig);
+            }
+
+            guiConfig.set("gui_version", version);
+            try {
+                guiConfig.save(file);
+                Util.log("&aGUI configuration successfully updated to version " + version + "!");
+            } catch (IOException e) {
+                Util.log("&cAn error occurred while saving the GUI configuration!");
+            }
+        }
+        return this;
+    }
+
+    private void saveBackupConfig() {
+        File backupDir = new File(NClaim.inst().getDataFolder(), "backups");
+        if (!backupDir.exists()) {
+            backupDir.mkdirs();
+        }
+        String date = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date());
+        File backupFile = new File(backupDir, "guis_" + date + ".yml");
+        try {
+            guiConfig.save(backupFile);
+            Util.log("&aBacked up old GUI configuration file.");
+        } catch (Exception e) {
+            Util.log("&cFailed to save GUI backup file.");
+        }
     }
 
     private void loadSettingConfigs() {
@@ -80,6 +131,7 @@ public class GuiLangManager {
     public String getString(String section, String path) {
         return guiConfig.getString("guis." + section + "." + path);
     }
+
     public String getString(String section, String path, String defaultValue) {
         return guiConfig.getString("guis." + section + "." + path, defaultValue);
     }
@@ -93,7 +145,6 @@ public class GuiLangManager {
         if (value == null) {
             Util.log("&cPath not found: " + fullPath);
         }
-
         return value;
     }
 
@@ -134,7 +185,7 @@ public class GuiLangManager {
             try {
                 customModelData = Integer.parseInt(split[1]);
             } catch (NumberFormatException e) {
-                Util.log("Invalid custom model data '" + split[1] + "' for path: " + logPath + ". Ignoring custom model data.");
+                Util.log("Invalid custom model data '" + split[1] + "' for path: " + logPath);
             }
         }
 
@@ -147,7 +198,7 @@ public class GuiLangManager {
                 Material material = Material.valueOf(matName.toUpperCase());
                 item = new ItemStack(material);
             } catch (IllegalArgumentException e) {
-                Util.log("Invalid material name '" + matName + "' for path: " + logPath + ". Using DIRT as default. Error: " + e.getMessage());
+                Util.log("Invalid material name '" + matName + "' for path: " + logPath);
                 item = new ItemStack(Material.DIRT);
             }
         }
@@ -156,7 +207,6 @@ public class GuiLangManager {
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
                 NamespacedKey customModelKey = new NamespacedKey(NClaim.inst(), "custom_model_data");
-
                 meta.getPersistentDataContainer().set(customModelKey, PersistentDataType.INTEGER, customModelData);
                 item.setItemMeta(meta);
             }
