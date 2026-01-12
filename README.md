@@ -315,6 +315,11 @@ Many thanks to everyone who has contributed to this project, including:
 
 ---
 
+
+## 🤑 Support
+
+[![buy_me_a_coffee](https://github.com/intergrav/devins-badges/blob/v3/assets/compact/donate/buymeacoffee-singular_46h.png)](https://buymeacoffee.com/aysihuniks)
+
 ## 📄 License
 
 This project is licensed under the NESOI Plugin License v1.0.
