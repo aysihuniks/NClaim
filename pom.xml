@@ -6,7 +6,7 @@
 
     <groupId>nesoi.aysihuniks</groupId>
     <artifactId>NClaim</artifactId>
-    <version>3.4</version>
+    <version>3.4.1</version>
     <packaging>jar</packaging>
 
     <name>NClaim</name>
