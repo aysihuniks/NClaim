@@ -69,6 +69,7 @@ public class ConfirmMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterial("confirm"))
                         .name(getString("confirm.display_name"))
+                        .lore(getStringList("confirm.lore"))
                         .get();
             }
 
@@ -91,6 +92,7 @@ public class ConfirmMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterial("decline"))
                         .name(getString("decline.display_name"))
+                        .lore(getStringList("decline.lore"))
                         .get();
             }
 

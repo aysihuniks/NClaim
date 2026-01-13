@@ -103,7 +103,7 @@ public class ClaimListMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                List<String> lore = new ArrayList<>();
+                List<String> lore = new ArrayList<>(getStringList("list_type.lore"));
                 lore.add(" ");
                 lore.add(formatListTypeEntry(ListType.ALL, "all"));
                 lore.add(formatListTypeEntry(ListType.PLAYER, "player"));

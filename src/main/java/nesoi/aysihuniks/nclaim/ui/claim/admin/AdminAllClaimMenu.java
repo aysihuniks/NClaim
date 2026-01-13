@@ -169,6 +169,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterial("search_player"))
                         .name(getString("search_player.display_name"))
+                        .lore(getStringList("search_player.lore"))
                         .get();
             }
 
