@@ -122,6 +122,12 @@ src/
 | `%nclaim_claim_total_value_world_chunkX_chunkZ%`       | Gets the total value of all chunks in the claim at given world, X, Z coordinates     | 2.0                 |
 | `%nclaim_block_value_material%`                        | Gets the configured value for the specified block material (e.g. `diamond_block`)    | 2.0                 |
 | `%nclaim_owner%`                                       | Shows the claim owner of the chunk where the player is                               | 2.1                 | 
+| `%nclaim_claim_main_value%`                            | Shows the main value of the claim at the player's current location                   | 2.2                 |
+| `%nclaim_claim_total_value%`                           | Shows the total value of the claim at the player's current location                  | 2.2                 |
+| `%nclaim_coop_count%`                                  | Shows the co-op member count of the claim at the player's current location           | 2.2                 |
+| `%nclaim_total_size%`                                  | Shows the total size (chunk count) of the claim at the player's current location     | 2.2                 |
+| `%nclaim_sale_status%`                                 | Shows the sale status/price of the claim at the player's current location            | 2.2                 |
+| `%nclaim_claim_expiry%`                                | Shows the expiration time of the claim at the player's current location              | 2.2                 |
 
 > Replace variables (like `path`, `index`, `world`, `chunkX`, `chunkZ`, `material`) with actual values.  
 > Example: `%nclaim_block_value_diamond_block%` or `%nclaim_get_list_blacklisted_worlds_0%` or `%nclaim_total_size_world_0_0%`
