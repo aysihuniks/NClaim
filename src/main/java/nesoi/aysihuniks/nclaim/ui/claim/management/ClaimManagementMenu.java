@@ -55,6 +55,7 @@ public class ClaimManagementMenu extends BaseMenu {
                 public @Nullable ItemStack getItem() {
                     return ItemCreator.of(getMaterialFullPath("back"))
                             .name(NClaim.inst().getGuiLangManager().getString("back.display_name"))
+                            .lore(NClaim.inst().getGuiLangManager().getStringList("back.lore"))
                             .get();
                 }
 

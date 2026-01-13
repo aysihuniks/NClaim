@@ -72,6 +72,7 @@ public class CoopPermissionsMenu extends BaseMenu {
     private void addBackButton() {
 
         addButton(new Button() {
+            final String buttonPath = currentCategory == null ? "back" : "previous_page";
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(10);
@@ -79,8 +80,9 @@ public class CoopPermissionsMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(currentCategory == null ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
-                        .name(NClaim.inst().getGuiLangManager().getString((currentCategory == null ? "back" : "previous_page") + ".display_name"))
+                return ItemCreator.of(getMaterialFullPath(buttonPath))
+                        .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList(buttonPath + ".lore"))
                         .get();
             }
 

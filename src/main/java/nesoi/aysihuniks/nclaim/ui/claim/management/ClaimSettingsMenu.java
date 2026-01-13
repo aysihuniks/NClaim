@@ -73,6 +73,7 @@ public class ClaimSettingsMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterialFullPath(buttonPath))
                         .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList(buttonPath + ".lore"))
                         .get();
             }
 
@@ -100,6 +101,7 @@ public class ClaimSettingsMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterialFullPath("next_page"))
                         .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList("next_page.lore"))
                         .get();
             }
 

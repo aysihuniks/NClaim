@@ -71,6 +71,8 @@ public class AdminAllClaimMenu extends BaseMenu {
 
     private void addNavigationButton() {
         addButton(new Button() {
+            final String buttonPath = page == 0 ? "back" : "previous_page";
+
             @Override
             public @NotNull Set<Integer> getSlots() {
                 return Sets.newHashSet(10);
@@ -78,8 +80,9 @@ public class AdminAllClaimMenu extends BaseMenu {
 
             @Override
             public ItemStack getItem() {
-                return ItemCreator.of(page == 0 ? getMaterialFullPath("back") : getMaterialFullPath("previous_page"))
-                        .name(NClaim.inst().getGuiLangManager().getString((page == 0 ? "back" : "previous_page") + ".display_name"))
+                return ItemCreator.of(getMaterialFullPath(buttonPath))
+                        .name(NClaim.inst().getGuiLangManager().getString(buttonPath + ".display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList(buttonPath + ".lore"))
                         .get();
             }
 
@@ -246,6 +249,7 @@ public class AdminAllClaimMenu extends BaseMenu {
             public ItemStack getItem() {
                 return ItemCreator.of(getMaterialFullPath("next_page"))
                         .name(NClaim.inst().getGuiLangManager().getString("next_page.display_name"))
+                        .lore(NClaim.inst().getGuiLangManager().getStringList("next_page.lore"))
                         .get();
             }
 
