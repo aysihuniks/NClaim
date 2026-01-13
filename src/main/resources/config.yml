@@ -135,6 +135,21 @@ webhook_settings:
     thumbnail: "" # Thumbnail image URL (optional)
   mention: "" # Mention a user or role (e.g., <@&ROLE_ID>, leave empty for none)
 
+# Sound Settings
+# You can find all sound names here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+sounds:
+  confirm: BLOCK_NOTE_BLOCK_CHIME
+  fail: ENTITY_ENDERMAN_TELEPORT
+  warn: BLOCK_NOTE_BLOCK_BASS
+  value_increase: UI_BUTTON_CLICK
+  value_decrease: UI_BUTTON_CLICK
+  menu_refresh: BLOCK_PISTON_CONTRACT
+  menu_back: ITEM_BUNDLE_DROP_CONTENTS
+  menu_click: UI_BUTTON_CLICK
+  search_open: UI_CARTOGRAPHY_TABLE_TAKE_RESULT
+  menu_forward: BLOCK_ENCHANTMENT_TABLE_USE
+  teleport: BLOCK_ENCHANTMENT_TABLE_USE
+
 # Database Configuration
 # Chooses between MySQL and SQLite for data storage
 database:
