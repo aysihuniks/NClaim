@@ -171,8 +171,29 @@ public class Config {
 
         validateTierConfiguration();
         loadTimeLeftThresholds();
+        loadSounds();
 
         return this;
+    }
+
+    private void loadSounds() {
+        setIfNotExists("sounds.confirm", "BLOCK_NOTE_BLOCK_CHIME");
+        setIfNotExists("sounds.fail", "ENTITY_ENDERMAN_TELEPORT");
+        setIfNotExists("sounds.warn", "BLOCK_NOTE_BLOCK_BASS");
+        setIfNotExists("sounds.value_increase", "UI_BUTTON_CLICK");
+        setIfNotExists("sounds.value_decrease", "UI_BUTTON_CLICK");
+        setIfNotExists("sounds.menu_refresh", "BLOCK_PISTON_CONTRACT");
+        setIfNotExists("sounds.menu_back", "ITEM_BUNDLE_DROP_CONTENTS");
+        setIfNotExists("sounds.menu_click", "UI_BUTTON_CLICK");
+        setIfNotExists("sounds.search_open", "UI_CARTOGRAPHY_TABLE_TAKE_RESULT");
+        setIfNotExists("sounds.menu_forward", "BLOCK_ENCHANTMENT_TABLE_USE");
+        setIfNotExists("sounds.teleport", "BLOCK_ENCHANTMENT_TABLE_USE");
+    }
+
+    private void setIfNotExists(String path, String value) {
+        if (!config.contains(path)) {
+            config.set(path, value);
+        }
     }
 
     public synchronized void save() {

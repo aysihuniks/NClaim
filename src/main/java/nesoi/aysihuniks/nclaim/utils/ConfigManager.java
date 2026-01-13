@@ -62,6 +62,9 @@ public class ConfigManager {
         return config.getStringList(key);
     }
 
+    public String getSound(String key, String defaultValue) {
+        return getString("sounds." + key, defaultValue);
+    }
 
     /*
      * SAVE
