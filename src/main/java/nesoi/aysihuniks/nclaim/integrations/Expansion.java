@@ -59,27 +59,27 @@ public class Expansion extends PlaceholderExpansion {
             return handleConfigPlaceholder(params);
         }
 
-        if (params.startsWith("claim_main_value_")) {
-            return handleClaimMainValue(params);
+        if (params.startsWith("claim_main_value")) {
+            return handleClaimMainValue(params, player);
         }
 
-        if (params.startsWith("claim_total_value_")) {
-            return handleClaimTotalValue(params);
+        if (params.startsWith("claim_total_value")) {
+            return handleClaimTotalValue(params, player);
         }
 
         if (params.startsWith("block_value_")) {
             return handleBlockValue(params);
         }
 
-        if (params.startsWith("sale_status_")) {
-            return handleSaleStatus(params);
+        if (params.startsWith("sale_status")) {
+            return handleSaleStatus(params, player);
         }
 
         if (params.startsWith("display_name_")) {
             return handleDisplayName(params);
         }
 
-        if (params.equals("coop_count") || params.startsWith("coop_count_") && params.split("_").length <= 3) {
+        if (params.equals("coop_count") || (params.startsWith("coop_count_") && params.split("_").length <= 3)) {
             return handleCoopCount(params, player);
         }
         if (params.equals("claim_count") || params.startsWith("claim_count_") && params.split("_").length <= 3) {
@@ -87,12 +87,16 @@ public class Expansion extends PlaceholderExpansion {
         }
 
         if (params.startsWith("expiration_") || params.startsWith("owner_") ||
-                params.startsWith("coop_count_") || params.startsWith("total_size_")) {
-            return handleClaimInfo(params);
+                params.startsWith("coop_count") || params.startsWith("total_size")) {
+            return handleClaimInfo(params, player);
         }
 
         if (params.equals("owner")) {
             return handleCurrentChunkOwner(player);
+        }
+
+        if (params.equals("claim_expiry")) {
+            return handlePersonalExpiry(player);
         }
 
         return null;
@@ -148,8 +152,22 @@ public class Expansion extends PlaceholderExpansion {
         }
     }
 
-    private ChunkValueResult getChunkValue(String params, boolean includeAllChunks) {
+    private ChunkValueResult getChunkValue(String params, boolean includeAllChunks, Player player) {
         String[] parts = params.split("_");
+
+        if (parts.length <= 4) { // claim_main_value or claim_total_value
+            if (player == null) return new ChunkValueResult(0, "Player not found");
+            Chunk chunk = player.getLocation().getChunk();
+            Claim claim = Claim.getClaim(chunk);
+            if (claim == null) return new ChunkValueResult(0, "Claim not found");
+            
+            if (includeAllChunks) {
+                return new ChunkValueResult(plugin.getBlockValueManager().calculateClaimValue(claim), null);
+            } else {
+                return new ChunkValueResult(plugin.getBlockValueManager().calculateChunkValue(chunk), null);
+            }
+        }
+
         if (parts.length < 5) {
             return new ChunkValueResult(0, "Invalid format: Expected at least 5 parts");
         }
@@ -173,13 +191,13 @@ public class Expansion extends PlaceholderExpansion {
         }
     }
 
-    private @NotNull String handleClaimMainValue(String params) {
-        ChunkValueResult result = getChunkValue(params, false);
+    private @NotNull String handleClaimMainValue(String params, Player player) {
+        ChunkValueResult result = getChunkValue(params, false, player);
         return result.getError() != null ? result.getError() : String.valueOf(result.getValue());
     }
 
-    private @NotNull String handleClaimTotalValue(String params) {
-        ChunkValueResult result = getChunkValue(params, true);
+    private @NotNull String handleClaimTotalValue(String params, Player player) {
+        ChunkValueResult result = getChunkValue(params, true, player);
         return result.getError() != null ? result.getError() : String.valueOf(result.getValue());
     }
 
@@ -193,17 +211,27 @@ public class Expansion extends PlaceholderExpansion {
         }
     }
 
-    private @Nullable String handleClaimInfo(String params) {
+    private @Nullable String handleClaimInfo(String params, Player player) {
         String[] parts = params.split("_");
-        if (parts.length < 4) {
-            return "Invalid placeholder format";
-        }
-
+        
         String prefix = parts[0];
         if ("coop".equals(prefix) && "count".equals(parts[1])) {
             prefix = "coop_count";
         } else if ("total".equals(prefix) && "size".equals(parts[1])) {
             prefix = "total_size";
+        }
+
+        if (parts.length <= 2) { // coop_count or total_size
+            if (player == null) return "Player not found";
+            Chunk chunk = player.getLocation().getChunk();
+            Claim claim = Claim.getClaim(chunk);
+            if (claim == null) return "Claim not found";
+            
+            return getClaimInfoValue(prefix, claim);
+        }
+
+        if (parts.length < 4) {
+            return "Invalid placeholder format";
         }
 
         int worldIndex = parts.length - 3;
@@ -217,6 +245,10 @@ public class Expansion extends PlaceholderExpansion {
             return "Claim not found";
         }
 
+        return getClaimInfoValue(prefix, claim);
+    }
+    
+    private String getClaimInfoValue(String prefix, Claim claim) {
         if ("expiration".equals(prefix)) {
             return plugin.getClaimExpirationManager().getFormattedTimeLeft(claim);
         } else if ("owner".equals(prefix)) {
@@ -290,20 +322,25 @@ public class Expansion extends PlaceholderExpansion {
         return owner.getName() != null ? NClaim.inst().getLangManager().getString("claim.owner").replace("{owner}", owner.getName()) : NClaim.inst().getLangManager().getString("claim.no_owner");
     }
 
-    private @Nullable String handleSaleStatus(String params) {
-        String[] parts = params.split("_");
-        if (parts.length < 4) {
-            return "Invalid sale status format";
+    private @Nullable String handleSaleStatus(String params, Player player) {
+        Claim claim = null;
+
+        if (params.equals("sale_status")) {
+            if (player != null) {
+                Chunk chunk = player.getLocation().getChunk();
+                claim = Claim.getClaim(chunk);
+            }
+        } else {
+            String[] parts = params.split("_");
+            if (parts.length >= 4) {
+                int worldIndex = parts.length - 3;
+                ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
+                if (result.getError() == null) {
+                    claim = result.getClaim();
+                }
+            }
         }
 
-        int worldIndex = parts.length - 3;
-        ChunkAndClaim result = parseChunkAndClaim(parts[worldIndex], parts[worldIndex + 1], parts[worldIndex + 2]);
-
-        if (result.getError() != null) {
-            return "";
-        }
-
-        Claim claim = result.getClaim();
         if (claim == null) {
             return "";
         }
@@ -335,5 +372,13 @@ public class Expansion extends PlaceholderExpansion {
 
         Claim claim = result.getClaim();
         return claim != null ? claim.getDisplayName() : "Unknown";
+    }
+
+    private String handlePersonalExpiry(Player player) {
+        if (player == null) return "N/A";
+        Chunk chunk = player.getLocation().getChunk();
+        Claim claim = Claim.getClaim(chunk);
+        if (claim == null) return "N/A";
+        return plugin.getClaimExpirationManager().getFormattedTimeLeft(claim);
     }
 }
